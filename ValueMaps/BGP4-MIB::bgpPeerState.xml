@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-12-18T12:35:04Z</date>
+    <value_maps>
+        <value_map>
+            <name>BGP4-MIB::bgpPeerState</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>idle</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>connect</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>active</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>opensent</newvalue>
+                </mapping>
+                <mapping>
+                    <value>5</value>
+                    <newvalue>openconfirm</newvalue>
+                </mapping>
+                <mapping>
+                    <value>6</value>
+                    <newvalue>established</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
