@@ -1,9 +1,0 @@
-#!/bin/bash
-
-IP=$1
-ASN=$2
-
-whois -h whois.cymru.com " -f as$ASN "
-
-exit 0
-
