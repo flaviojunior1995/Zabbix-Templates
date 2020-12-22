@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2020-12-18T13:02:39Z</date>
+    <date>2020-12-22T17:46:58Z</date>
     <groups>
         <group>
             <name>Templates_Created</name>
@@ -30,7 +30,10 @@ ExternalScript&#13;
 &#13;
 Base: &#13;
 BGP4-MIB.mib&#13;
-https://www.iana.org/assignments/bgp-parameters/bgp-parameters.xhtml</description>
+https://www.iana.org/assignments/bgp-parameters/bgp-parameters.xhtml&#13;
+&#13;
+External Scripts and Value Mapping on my Github:&#13;
+https://github.com/flaviojunior1995/Zabbix-Templates</description>
             <groups>
                 <group>
                     <name>Templates_Created</name>
