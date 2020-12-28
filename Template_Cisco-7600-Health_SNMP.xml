@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2020-12-28T14:07:12Z</date>
+    <date>2020-12-28T14:27:46Z</date>
     <groups>
         <group>
             <name>Templates_Created</name>
@@ -949,7 +949,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                     </screen_items>
                 </screen>
                 <screen>
-                    <name>Screen Power</name>
+                    <name>Screen Power Supply</name>
                     <hsize>1</hsize>
                     <vsize>1</vsize>
                     <screen_items>
