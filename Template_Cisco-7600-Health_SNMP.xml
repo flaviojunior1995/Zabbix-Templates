@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2020-12-28T14:27:46Z</date>
+    <date>2020-12-29T18:39:16Z</date>
     <groups>
         <group>
             <name>Templates_Created</name>
@@ -456,6 +456,12 @@ Indicates the number of bytes from the memory pool that are currently in use by 
                             <expression>({Template Cisco 7600 Health SNMP:ciscoMemoryPoolUsed[&quot;{#SNMPVALUE}&quot;].last()}*100 ) / {Template Cisco 7600 Health SNMP:ciscoMemoryPoolTotal[&quot;{#SNMPVALUE}&quot;].last()} &gt; {$MEMORY_HIGH_WARNING}</expression>
                             <name>High memory utilizarion warning on Pool &quot;{#SNMPVALUE}&quot;</name>
                             <priority>AVERAGE</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>High memory utilizarion alarm on Pool &quot;{#SNMPVALUE}&quot;</name>
+                                    <expression>({Template Cisco 7600 Health SNMP:ciscoMemoryPoolUsed[&quot;{#SNMPVALUE}&quot;].last()}*100 ) / {Template Cisco 7600 Health SNMP:ciscoMemoryPoolTotal[&quot;{#SNMPVALUE}&quot;].last()} &gt; {$MEMORY_HIGH_ALARM}</expression>
+                                </dependency>
+                            </dependencies>
                         </trigger_prototype>
                     </trigger_prototypes>
                     <graph_prototypes>
@@ -521,6 +527,12 @@ The overall CPU busy percentage in the last 1 minute period. This object depreca
                                     <expression>{last()}&gt;{$CPU_HIGH_WARNING}</expression>
                                     <name>High CPU Warning #&quot;{#SNMPINDEX}&quot; 1min Usage</name>
                                     <priority>AVERAGE</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>High CPU Alarm #&quot;{#SNMPINDEX}&quot; 1min Usage</name>
+                                            <expression>{Template Cisco 7600 Health SNMP:cpmCPUTotal1minRev[&quot;{#SNMPINDEX}&quot;].last()}&gt;{$CPU_HIGH_ALARM}</expression>
+                                        </dependency>
+                                    </dependencies>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
@@ -550,6 +562,12 @@ The overall CPU busy percentage in the last 5 minute period. This object depreca
                                     <expression>{last()}&gt;{$CPU_HIGH_WARNING}</expression>
                                     <name>High CPU Warning #&quot;{#SNMPINDEX}&quot; 5min Usage</name>
                                     <priority>AVERAGE</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>High CPU Alarm #&quot;{#SNMPINDEX}&quot; 5min Usage</name>
+                                            <expression>{Template Cisco 7600 Health SNMP:cpmCPUTotal5minRev[&quot;{#SNMPINDEX}&quot;].last()}&gt;{$CPU_HIGH_ALARM}</expression>
+                                        </dependency>
+                                    </dependencies>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
@@ -818,35 +836,6 @@ This variable reports the most recent measurement seen by the sensor.</descripti
             </macros>
             <screens>
                 <screen>
-                    <name>Screem Power Comsumption</name>
-                    <hsize>1</hsize>
-                    <vsize>1</vsize>
-                    <screen_items>
-                        <screen_item>
-                            <resourcetype>20</resourcetype>
-                            <style>0</style>
-                            <resource>
-                                <name>Module {#SNMPINDEX} Power (W)</name>
-                                <host>Template Cisco 7600 Health SNMP</host>
-                            </resource>
-                            <width>500</width>
-                            <height>100</height>
-                            <x>0</x>
-                            <y>0</y>
-                            <colspan>1</colspan>
-                            <rowspan>1</rowspan>
-                            <elements>0</elements>
-                            <valign>0</valign>
-                            <halign>0</halign>
-                            <dynamic>0</dynamic>
-                            <sort_triggers>0</sort_triggers>
-                            <url/>
-                            <application/>
-                            <max_columns>3</max_columns>
-                        </screen_item>
-                    </screen_items>
-                </screen>
-                <screen>
                     <name>Screen CPU</name>
                     <hsize>1</hsize>
                     <vsize>2</vsize>
@@ -949,7 +938,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                     </screen_items>
                 </screen>
                 <screen>
-                    <name>Screen Power Supply</name>
+                    <name>Screen Power</name>
                     <hsize>1</hsize>
                     <vsize>1</vsize>
                     <screen_items>
