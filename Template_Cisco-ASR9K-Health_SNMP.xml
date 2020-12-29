@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2020-12-29T17:19:19Z</date>
+    <date>2020-12-29T18:44:16Z</date>
     <groups>
         <group>
             <name>Templates_Created</name>
@@ -9,8 +9,8 @@
     </groups>
     <templates>
         <template>
-            <template>Template Cisco ASR 9K Health SNMP</template>
-            <name>Template Cisco ASR 9K Health SNMP</name>
+            <template>Template Cisco ASR9K Health SNMP</template>
+            <name>Template Cisco ASR9K Health SNMP</name>
             <description>Template Cisco ASR 9k Health&#13;
 -CPU&#13;
 -Memory&#13;
@@ -27,9 +27,9 @@ Firmware / Software&#13;
 .IOS XR 5.3.4&#13;
 ValueMap&#13;
 .CISCO-ENTITY-FRU-CONTROL-MIB::PowerOperType&#13;
-.ENTITY-SENSORS-MIB::EntitySensorStatus&#13;
 .CISCO-ENTITY-FRU-CONTROL-MIB::CefcFanTrayStatusEntry&#13;
 .CISCO-ENTITY-SENSOR-MIB::SensorStatus&#13;
+.ENTITY-SENSORS-MIB::EntitySensorStatus&#13;
 &#13;
 Base:&#13;
 CISCO-MEMORY-POOL-MIB.mib &#13;
@@ -212,13 +212,19 @@ This is the memory pool utilization for 5 minutes.</description>
                                     <expression>{last()} &gt; {$MEMORY_HIGH_WARNING}</expression>
                                     <name>High utilization of Memory Pool &quot;{#SNMPVALUE}&quot;</name>
                                     <priority>AVERAGE</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>High memory utilizarion alarm on Pool &quot;{#SNMPVALUE}&quot;</name>
+                                            <expression>( {Template Cisco ASR9K Health SNMP:ciscoMemoryPoolUsed[&quot;{#SNMPVALUE}&quot;].last()} * 100 ) / {Template Cisco ASR9K Health SNMP:ciscoMemoryPoolTotal[&quot;{#SNMPVALUE}&quot;].last()} &gt; {$MEMORY_HIGH_ALARM}</expression>
+                                        </dependency>
+                                    </dependencies>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>( {Template Cisco ASR 9K Health SNMP:ciscoMemoryPoolUsed[&quot;{#SNMPVALUE}&quot;].last()} * 100 ) / {Template Cisco ASR 9K Health SNMP:ciscoMemoryPoolTotal[&quot;{#SNMPVALUE}&quot;].last()} &gt; {$MEMORY_HIGH_ALARM}</expression>
+                            <expression>( {Template Cisco ASR9K Health SNMP:ciscoMemoryPoolUsed[&quot;{#SNMPVALUE}&quot;].last()} * 100 ) / {Template Cisco ASR9K Health SNMP:ciscoMemoryPoolTotal[&quot;{#SNMPVALUE}&quot;].last()} &gt; {$MEMORY_HIGH_ALARM}</expression>
                             <name>High memory utilizarion alarm on Pool &quot;{#SNMPVALUE}&quot;</name>
                             <priority>HIGH</priority>
                         </trigger_prototype>
@@ -231,7 +237,7 @@ This is the memory pool utilization for 5 minutes.</description>
                                     <drawtype>GRADIENT_LINE</drawtype>
                                     <color>00FF00</color>
                                     <item>
-                                        <host>Template Cisco ASR 9K Health SNMP</host>
+                                        <host>Template Cisco ASR9K Health SNMP</host>
                                         <key>ciscoMemoryPoolUtilization5Min[&quot;{#SNMPVALUE}&quot;]</key>
                                     </item>
                                 </graph_item>
@@ -244,7 +250,7 @@ This is the memory pool utilization for 5 minutes.</description>
                                     <drawtype>BOLD_LINE</drawtype>
                                     <color>00FF00</color>
                                     <item>
-                                        <host>Template Cisco ASR 9K Health SNMP</host>
+                                        <host>Template Cisco ASR9K Health SNMP</host>
                                         <key>ciscoMemoryPoolTotal[&quot;{#SNMPVALUE}&quot;]</key>
                                     </item>
                                 </graph_item>
@@ -253,7 +259,7 @@ This is the memory pool utilization for 5 minutes.</description>
                                     <drawtype>GRADIENT_LINE</drawtype>
                                     <color>FF0000</color>
                                     <item>
-                                        <host>Template Cisco ASR 9K Health SNMP</host>
+                                        <host>Template Cisco ASR9K Health SNMP</host>
                                         <key>ciscoMemoryPoolUsed[&quot;{#SNMPVALUE}&quot;]</key>
                                     </item>
                                 </graph_item>
@@ -338,7 +344,7 @@ The overall CPU busy percentage in the last 5 minute period. This object depreca
                                     <drawtype>GRADIENT_LINE</drawtype>
                                     <color>00FF00</color>
                                     <item>
-                                        <host>Template Cisco ASR 9K Health SNMP</host>
+                                        <host>Template Cisco ASR9K Health SNMP</host>
                                         <key>cpmCPUTotal1minRev[&quot;{#SNMPINDEX}&quot;]</key>
                                     </item>
                                 </graph_item>
@@ -351,7 +357,7 @@ The overall CPU busy percentage in the last 5 minute period. This object depreca
                                     <drawtype>GRADIENT_LINE</drawtype>
                                     <color>00FF00</color>
                                     <item>
-                                        <host>Template Cisco ASR 9K Health SNMP</host>
+                                        <host>Template Cisco ASR9K Health SNMP</host>
                                         <key>cpmCPUTotal5minRev[&quot;{#SNMPINDEX}&quot;]</key>
                                     </item>
                                 </graph_item>
@@ -436,7 +442,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                                 <graph_item>
                                     <color>199C0D</color>
                                     <item>
-                                        <host>Template Cisco ASR 9K Health SNMP</host>
+                                        <host>Template Cisco ASR9K Health SNMP</host>
                                         <key>entSensorValue[&quot;{#SNMPVALUE}&quot;,FAN,{#SNMPINDEX}]</key>
                                     </item>
                                 </graph_item>
@@ -620,7 +626,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{Template Cisco ASR 9K Health SNMP:entSensorValue[&quot;{#SNMPVALUE}&quot;,&quot;Temperature LC&quot;].last()}&gt;{Template Cisco ASR 9K Health SNMP:entSensorThresholdValue[&quot;{#SNMPVALUE}&quot;,&quot;Temperature LC&quot;,&quot;Alarm&quot;].last()}</expression>
+                            <expression>{Template Cisco ASR9K Health SNMP:entSensorValue[&quot;{#SNMPVALUE}&quot;,&quot;Temperature LC&quot;].last()}&gt;{Template Cisco ASR9K Health SNMP:entSensorThresholdValue[&quot;{#SNMPVALUE}&quot;,&quot;Temperature LC&quot;,&quot;Alarm&quot;].last()}</expression>
                             <name>High Temperature Alarm &quot;{#SNMPVALUE}&quot;</name>
                             <priority>HIGH</priority>
                         </trigger_prototype>
@@ -633,7 +639,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                                     <drawtype>GRADIENT_LINE</drawtype>
                                     <color>00FF00</color>
                                     <item>
-                                        <host>Template Cisco ASR 9K Health SNMP</host>
+                                        <host>Template Cisco ASR9K Health SNMP</host>
                                         <key>entSensorValue[&quot;{#SNMPVALUE}&quot;,&quot;Temperature LC&quot;]</key>
                                     </item>
                                 </graph_item>
@@ -642,7 +648,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                                     <drawtype>BOLD_LINE</drawtype>
                                     <color>FF0000</color>
                                     <item>
-                                        <host>Template Cisco ASR 9K Health SNMP</host>
+                                        <host>Template Cisco ASR9K Health SNMP</host>
                                         <key>entSensorThresholdValue[&quot;{#SNMPVALUE}&quot;,&quot;Temperature LC&quot;,&quot;Alarm&quot;]</key>
                                     </item>
                                 </graph_item>
@@ -805,7 +811,7 @@ Operational FRU power state.</description>
                                     <drawtype>BOLD_LINE</drawtype>
                                     <color>FFFF00</color>
                                     <item>
-                                        <host>Template Cisco ASR 9K Health SNMP</host>
+                                        <host>Template Cisco ASR9K Health SNMP</host>
                                         <key>entPhysicalContainedInCurrent[&quot;{#SNMPVALUE}&quot;]</key>
                                     </item>
                                 </graph_item>
@@ -860,7 +866,7 @@ Operational FRU power state.</description>
                                     <drawtype>BOLD_LINE</drawtype>
                                     <color>00FF00</color>
                                     <item>
-                                        <host>Template Cisco ASR 9K Health SNMP</host>
+                                        <host>Template Cisco ASR9K Health SNMP</host>
                                         <key>entPhysicalContainedInVoltage[&quot;{#SNMPVALUE}&quot;]</key>
                                     </item>
                                 </graph_item>
@@ -987,7 +993,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{Template Cisco ASR 9K Health SNMP:entSensorValue[&quot;{#SNMPVALUE}&quot;,&quot;Temperature RSP&quot;].last()}&gt;{Template Cisco ASR 9K Health SNMP:entSensorThresholdValue[&quot;{#SNMPVALUE}&quot;,&quot;Temperature RSP&quot;,&quot;Alarm&quot;].last()}</expression>
+                            <expression>{Template Cisco ASR9K Health SNMP:entSensorValue[&quot;{#SNMPVALUE}&quot;,&quot;Temperature RSP&quot;].last()}&gt;{Template Cisco ASR9K Health SNMP:entSensorThresholdValue[&quot;{#SNMPVALUE}&quot;,&quot;Temperature RSP&quot;,&quot;Alarm&quot;].last()}</expression>
                             <name>High Temperature Alarm &quot;{#SNMPVALUE}&quot;</name>
                             <priority>HIGH</priority>
                         </trigger_prototype>
@@ -1000,7 +1006,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                                     <drawtype>GRADIENT_LINE</drawtype>
                                     <color>00FF00</color>
                                     <item>
-                                        <host>Template Cisco ASR 9K Health SNMP</host>
+                                        <host>Template Cisco ASR9K Health SNMP</host>
                                         <key>entSensorValue[&quot;{#SNMPVALUE}&quot;,&quot;Temperature RSP&quot;]</key>
                                     </item>
                                 </graph_item>
@@ -1008,7 +1014,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                                     <sortorder>1</sortorder>
                                     <color>FF0000</color>
                                     <item>
-                                        <host>Template Cisco ASR 9K Health SNMP</host>
+                                        <host>Template Cisco ASR9K Health SNMP</host>
                                         <key>entSensorThresholdValue[&quot;{#SNMPVALUE}&quot;,&quot;Temperature RSP&quot;,&quot;Alarm&quot;]</key>
                                     </item>
                                 </graph_item>
@@ -1050,7 +1056,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                             <style>0</style>
                             <resource>
                                 <name>CPU #&quot;{#SNMPINDEX}&quot; 1min Usage</name>
-                                <host>Template Cisco ASR 9K Health SNMP</host>
+                                <host>Template Cisco ASR9K Health SNMP</host>
                             </resource>
                             <width>500</width>
                             <height>100</height>
@@ -1072,7 +1078,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                             <style>0</style>
                             <resource>
                                 <name>CPU #&quot;{#SNMPINDEX}&quot; 5min Usage</name>
-                                <host>Template Cisco ASR 9K Health SNMP</host>
+                                <host>Template Cisco ASR9K Health SNMP</host>
                             </resource>
                             <width>500</width>
                             <height>100</height>
@@ -1101,7 +1107,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                             <style>0</style>
                             <resource>
                                 <name>FAN speed &quot;{#SNMPVALUE}&quot;/{#SNMPINDEX}</name>
-                                <host>Template Cisco ASR 9K Health SNMP</host>
+                                <host>Template Cisco ASR9K Health SNMP</host>
                             </resource>
                             <width>500</width>
                             <height>100</height>
@@ -1130,7 +1136,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                             <style>0</style>
                             <resource>
                                 <name>Memory {#SNMPVALUE}</name>
-                                <host>Template Cisco ASR 9K Health SNMP</host>
+                                <host>Template Cisco ASR9K Health SNMP</host>
                             </resource>
                             <width>500</width>
                             <height>100</height>
@@ -1152,7 +1158,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                             <style>0</style>
                             <resource>
                                 <name>Memory Utilization Pool &quot;{#SNMPVALUE}&quot;</name>
-                                <host>Template Cisco ASR 9K Health SNMP</host>
+                                <host>Template Cisco ASR9K Health SNMP</host>
                             </resource>
                             <width>500</width>
                             <height>100</height>
@@ -1181,7 +1187,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                             <style>0</style>
                             <resource>
                                 <name>Power Consumption</name>
-                                <host>Template Cisco ASR 9K Health SNMP</host>
+                                <host>Template Cisco ASR9K Health SNMP</host>
                             </resource>
                             <width>500</width>
                             <height>100</height>
@@ -1203,7 +1209,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                             <style>0</style>
                             <resource>
                                 <name>Current &quot;{#SNMPVALUE}&quot;</name>
-                                <host>Template Cisco ASR 9K Health SNMP</host>
+                                <host>Template Cisco ASR9K Health SNMP</host>
                             </resource>
                             <width>500</width>
                             <height>100</height>
@@ -1225,7 +1231,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                             <style>0</style>
                             <resource>
                                 <name>Voltage &quot;{#SNMPVALUE}&quot;</name>
-                                <host>Template Cisco ASR 9K Health SNMP</host>
+                                <host>Template Cisco ASR9K Health SNMP</host>
                             </resource>
                             <width>500</width>
                             <height>100</height>
@@ -1254,7 +1260,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                             <style>0</style>
                             <resource>
                                 <name>Temperature RSP &quot;{#SNMPVALUE}&quot;</name>
-                                <host>Template Cisco ASR 9K Health SNMP</host>
+                                <host>Template Cisco ASR9K Health SNMP</host>
                             </resource>
                             <width>500</width>
                             <height>100</height>
@@ -1276,7 +1282,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                             <style>0</style>
                             <resource>
                                 <name>Temperature LC &quot;{#SNMPVALUE}&quot;</name>
-                                <host>Template Cisco ASR 9K Health SNMP</host>
+                                <host>Template Cisco ASR9K Health SNMP</host>
                             </resource>
                             <width>500</width>
                             <height>100</height>
@@ -1306,7 +1312,7 @@ This variable reports the most recent measurement seen by the sensor.</descripti
                     <drawtype>GRADIENT_LINE</drawtype>
                     <color>FF0000</color>
                     <item>
-                        <host>Template Cisco ASR 9K Health SNMP</host>
+                        <host>Template Cisco ASR9K Health SNMP</host>
                         <key>powerConsumption</key>
                     </item>
                 </graph_item>
