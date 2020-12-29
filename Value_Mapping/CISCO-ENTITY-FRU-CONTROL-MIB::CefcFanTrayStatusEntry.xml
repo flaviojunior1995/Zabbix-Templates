@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-12-29T17:21:47Z</date>
+    <value_maps>
+        <value_map>
+            <name>CISCO-ENTITY-FRU-CONTROL-MIB::CefcFanTrayStatusEntry</name>
+            <mappings>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>unknown</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>up</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>warning</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
