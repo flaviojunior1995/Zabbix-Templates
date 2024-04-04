@@ -1,207 +1,223 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
-    <version>4.4</version>
-    <date>2020-12-29T17:57:24Z</date>
+    <version>6.0</version>
+    <date>2024-04-04T12:05:06Z</date>
     <groups>
         <group>
+            <uuid>e0242822f07b4633a283b8dc935d3dd9</uuid>
             <name>Templates_Created</name>
         </group>
     </groups>
     <templates>
         <template>
+            <uuid>6f2a17c843dc48ad9b8ec77f187e57d0</uuid>
             <template>Template Cisco BGP SNMP</template>
             <name>Template Cisco BGP SNMP</name>
-            <description>Template Cisco BGP Sessions &#13;
--AdminStatus&#13;
--Established Time&#13;
--OperationStatus&#13;
--AS Name&#13;
--Maximum Prefix&#13;
--Accepted Prefix&#13;
--BGP last Error&#13;
-&#13;
-By: Flavio Gomes Figueira Camacho Junior&#13;
-&#13;
-Require:&#13;
-ValueMaps&#13;
-.BGP4-MIB::bgpPeerAdminStatus&#13;
-.BGP4-MIB::bgpPeerState&#13;
-&#13;
-ExternalScript&#13;
-.as.name&#13;
-.oid_to_ipv6&#13;
-&#13;
-Base: &#13;
-CISCO-BGP4-MIB.mib&#13;
-http://www.circitor.fr/Mibs/Html/C/CISCO-BGP4-MIB.php#cbgpPeer2RemoteAs&#13;
-&#13;
-External Scripts and Value Mapping on my Github:&#13;
-https://github.com/flaviojunior1995/Zabbix-Templates</description>
+            <description>Original by: Flavio Gomes Figueira Camacho Junior
+Improvements by: Johan Gunnarsson
+
+--------
+
+Template Cisco BGP Sessions 
+-AdminStatus
+-Established Time
+-OperationStatus
+-AS Name
+-Maximum Prefix
+-Accepted Prefix
+-BGP last Error
+
+--------
+
+Improvements include the following:
+* Fixing IPv6 address printing
+* Use max-prefix configured on router to determine when to raise an alarm instead of fixed value as macro
+
+--------
+
+Require:
+ValueMaps
+.BGP4-MIB::bgpPeerAdminStatus
+.BGP4-MIB::bgpPeerState
+
+ExternalScript
+as_name
+oid_to_ipv6
+
+(You can find these on any of the below Github links)
+
+--------
+
+Base: 
+CISCO-BGP4-MIB.mib
+http://www.circitor.fr/Mibs/Html/C/CISCO-BGP4-MIB.php#cbgpPeer2RemoteAs
+
+--------
+
+Most of the credit goes to the original author, their Github:
+https://github.com/flaviojunior1995/Zabbix-Templates
+
+My Github with changes I've made:
+https://github.com/johangunnarn/Zabbix
+My Discord if you have questions or something on your mind: stickan
+
+--------</description>
             <groups>
                 <group>
                     <name>Templates_Created</name>
                 </group>
             </groups>
-            <applications>
-                <application>
-                    <name>BGPv4</name>
-                </application>
-                <application>
-                    <name>BGPv6</name>
-                </application>
-            </applications>
             <discovery_rules>
                 <discovery_rule>
+                    <uuid>0dfc3f64fc23479ba9166edecbee9761</uuid>
                     <name>BGPv6 Peers Discovery</name>
-                    <type>SNMPV2</type>
-                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <type>SNMP_AGENT</type>
                     <snmp_oid>discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.187.1.2.5.1.6.2.16,{#SNMPASN},.1.3.6.1.4.1.9.9.187.1.2.5.1.11.2.16]</snmp_oid>
                     <key>cbgpPeer2LocalAddr[&quot;BGPv6&quot;]</key>
                     <delay>1h</delay>
                     <lifetime>7d</lifetime>
                     <item_prototypes>
                         <item_prototype>
+                            <uuid>02c83df4affb41beb363322a2b52fd17</uuid>
                             <name>AS Name for IPv6 peer &quot;$2&quot; ASN &quot;$1&quot;</name>
                             <type>EXTERNAL</type>
                             <key>as_name[&quot;{#SNMPASN}&quot;,&quot;{#SNMPINDEX}&quot;,&quot;BGPv6&quot;]</key>
                             <delay>1d</delay>
                             <history>7d</history>
                             <trends>0</trends>
+                            <status>DISABLED</status>
+                            <discover>NO_DISCOVER</discover>
                             <value_type>CHAR</value_type>
-                            <applications>
-                                <application>
-                                    <name>BGPv6</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv6 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>c96bab9f8b274f26a94acb9ae0d6c111</uuid>
                             <name>Administrative status for peer &quot;$1&quot; ASN &quot;$2&quot;</name>
-                            <type>SNMPV2</type>
-                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.4.1.9.9.187.1.2.5.1.4.2.16.{#SNMPINDEX}</snmp_oid>
                             <key>cbgp6Peer2AdminStatus[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;]</key>
                             <delay>10m</delay>
                             <history>30d</history>
                             <trends>0</trends>
-                            <applications>
-                                <application>
-                                    <name>BGPv6</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv6 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
                             <valuemap>
                                 <name>BGP4-MIB::bgpPeerAdminStatus</name>
                             </valuemap>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>0dab0cbc237a4d71a7f6cc946f514245</uuid>
                             <name>Established time for peer &quot;$1&quot; ASN &quot;$2&quot;</name>
-                            <type>SNMPV2</type>
-                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.4.1.9.9.187.1.2.5.1.19.2.16.{#SNMPINDEX}</snmp_oid>
                             <key>cbgp6Peer2FsmEstablishedTime[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;]</key>
                             <delay>10m</delay>
                             <history>30d</history>
                             <trends>0</trends>
                             <units>uptime</units>
-                            <applications>
-                                <application>
-                                    <name>BGPv6</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv6 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
-                            <trigger_prototypes>
-                                <trigger_prototype>
-                                    <expression>{last()}&lt;{$PEER_LOW_TIME}</expression>
-                                    <name>BGPv6 peer up time low {#SNMPVALUE} ASN {#SNMPASN}</name>
-                                    <priority>INFO</priority>
-                                    <dependencies>
-                                        <dependency>
-                                            <name>BGPv6 peer {#SNMPVALUE} ASN {#SNMPASN} is DOWN</name>
-                                            <expression>{Template Cisco BGP SNMP:cbgp6Peer2State[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;].last(#3)}&lt;&gt;6 and {Template Cisco BGP SNMP:cbgp6Peer2AdminStatus[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;].last(0)}=2</expression>
-                                        </dependency>
-                                    </dependencies>
-                                </trigger_prototype>
-                            </trigger_prototypes>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>ca734c6f51804a25b5f7715b7a0bd852</uuid>
                             <name>Remote AS for peer &quot;$1&quot; ASN &quot;$2&quot;</name>
-                            <type>SNMPV2</type>
-                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.4.1.9.9.187.1.2.5.1.11.2.16.{#SNMPINDEX}</snmp_oid>
                             <key>cbgp6Peer2RemoteAs[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;]</key>
                             <delay>1d</delay>
                             <history>7d</history>
                             <trends>0</trends>
-                            <applications>
-                                <application>
-                                    <name>BGPv6</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv6 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>1f8ce41427694cc1a6cad4cc5f0e218d</uuid>
                             <name>Operational status for peer &quot;$1&quot; ASN &quot;$2&quot;</name>
-                            <type>SNMPV2</type>
-                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.4.1.9.9.187.1.2.5.1.3.2.16.{#SNMPINDEX}</snmp_oid>
                             <key>cbgp6Peer2State[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;]</key>
                             <history>30d</history>
                             <trends>0</trends>
-                            <applications>
-                                <application>
-                                    <name>BGPv6</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv6 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
                             <valuemap>
                                 <name>BGP4-MIB::bgpPeerState</name>
                             </valuemap>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>92277bc0279d44acbefe0b99ec7c8312</uuid>
+                            <name>Accepted prefix for peer &quot;$1&quot;</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>.1.3.6.1.4.1.9.9.187.1.2.8.1.1.{#SNMPINDEX}</snmp_oid>
+                            <key>cbgpPeer2AcceptedPrefixes[{#SNMPINDEX}]</key>
+                            <delay>10m</delay>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>d1a64b429c794d76b9fb39b7567cc37e</uuid>
                             <name>BGP peer last error &quot;$1&quot; ASN &quot;$2&quot;</name>
-                            <type>SNMPV2</type>
-                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.4.1.9.9.187.1.2.5.1.17.2.16.{#SNMPINDEX}</snmp_oid>
                             <key>cbgpPeer2LastError[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;]</key>
                             <delay>10m</delay>
                             <history>30d</history>
                             <trends>0</trends>
                             <value_type>CHAR</value_type>
-                            <applications>
-                                <application>
-                                    <name>BGPv6</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv6 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
                             <preprocessing>
                                 <step>
                                     <type>JAVASCRIPT</type>
-                                    <params>value = (value.replace(/\s+/g, ''));
+                                    <parameters>
+                                        <parameter>value = (value.replace(/\s+/g, ''));
 
 if (value === &quot;0000&quot;) {
    return &quot;NO last error&quot;
@@ -375,241 +391,369 @@ if (value === &quot;0701&quot;) {
    return &quot;ROUTE-REFRESH Message Error - Invalid Message Length&quot;
 }
 
-return value</params>
+return value</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>2bf3333f2334465c9378999e6fbb638d</uuid>
+                            <name>Maximum prefix for peer &quot;$1&quot;</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>.1.3.6.1.4.1.9.9.187.1.2.8.1.3.{#SNMPINDEX}</snmp_oid>
+                            <key>cbgpPeer2PrefixAdminLimit[{#SNMPINDEX}]</key>
+                            <delay>1h</delay>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>d9f4b618cd854ff597b15c537399802c</uuid>
+                            <name>Max Prefix Threshold for peer &quot;$1&quot;</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>.1.3.6.1.4.1.9.9.187.1.2.8.1.4{#SNMPINDEX}</snmp_oid>
+                            <key>cbgpPeer2PrefixThreshold[{#SNMPINDEX}]</key>
+                            <delay>1h</delay>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>2f077646ccec4afab18e69559990631c</uuid>
                             <name>Remote IPv6 Peer &quot;$1&quot;</name>
                             <type>EXTERNAL</type>
                             <key>oid_to_ipv6[&quot;{#SNMPINDEX}&quot;]</key>
-                            <delay>1d</delay>
+                            <delay>5m</delay>
                             <history>7d</history>
                             <trends>0</trends>
                             <value_type>CHAR</value_type>
-                            <applications>
-                                <application>
-                                    <name>BGPv6</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv6 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv6 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{Template Cisco BGP SNMP:cbgp6Peer2State[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;].last(#3)}&lt;&gt;6 and {Template Cisco BGP SNMP:cbgp6Peer2AdminStatus[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;].last(0)}=2</expression>
-                            <name>BGPv6 peer {#SNMPVALUE} ASN {#SNMPASN} is DOWN</name>
+                            <uuid>e92fcc4c92884e6badf7a3c3b08fe3ff</uuid>
+                            <expression>last(/Template Cisco BGP SNMP/cbgp6Peer2FsmEstablishedTime[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;])&lt;{$PEER_LOW_TIME} and last(/Template Cisco BGP SNMP/oid_to_ipv6[&quot;{#SNMPINDEX}&quot;])&lt;&gt;0</expression>
+                            <name>BGPv6 peer up time low {ITEM.LASTVALUE2} ASN {#SNMPASN}</name>
+                            <priority>INFO</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>BGPv6 peer {ITEM.LASTVALUE3} ASN {#SNMPASN} is DOWN</name>
+                                    <expression>last(/Template Cisco BGP SNMP/cbgp6Peer2State[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;],#3)&lt;&gt;6 and last(/Template Cisco BGP SNMP/cbgp6Peer2AdminStatus[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;])=2 and last(/Template Cisco BGP SNMP/oid_to_ipv6[&quot;{#SNMPINDEX}&quot;])&lt;&gt;0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <uuid>b9d84f915a1346c3848c6b3b39926dc4</uuid>
+                            <expression>last(/Template Cisco BGP SNMP/cbgp6Peer2State[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;],#3)&lt;&gt;6 and last(/Template Cisco BGP SNMP/cbgp6Peer2AdminStatus[&quot;{#SNMPINDEX}&quot;,&quot;{#SNMPASN}&quot;])=2 and last(/Template Cisco BGP SNMP/oid_to_ipv6[&quot;{#SNMPINDEX}&quot;])&lt;&gt;0</expression>
+                            <name>BGPv6 peer {ITEM.LASTVALUE3} ASN {#SNMPASN} is DOWN</name>
                             <priority>HIGH</priority>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <uuid>0cad316b9abd431fabf356beace04701</uuid>
+                            <expression>( last(/Template Cisco BGP SNMP/cbgpPeer2AcceptedPrefixes[{#SNMPINDEX}]) * 100 / last(/Template Cisco BGP SNMP/cbgpPeer2PrefixAdminLimit[{#SNMPINDEX}]) ) &gt; last(/Template Cisco BGP SNMP/cbgpPeer2PrefixThreshold[{#SNMPINDEX}])</expression>
+                            <name>BGPv6 Prefix Limit {#SNMPINDEX} ASN {#SNMPASN} near</name>
+                            <priority>WARNING</priority>
+                            <description>Triggered if current prefixes we accept * 100 / max configured prefixes is greater than the threshold in percentage
+
+Example 1:
+Number of prefixes we accept: 125
+Number of max prefix: 200
+Threshold: 75
+
+125 * 100 / 200 = 62,5
+Not above threshold, meaning not triggered
+
+Example 2: 
+Number of prefixes we accept: 125
+Number of max prefix: 150
+Threshold: 80
+
+125 * 100 / 150 = 62,5
+Above threshold, triggered</description>
                         </trigger_prototype>
                     </trigger_prototypes>
                 </discovery_rule>
                 <discovery_rule>
+                    <uuid>6335539e89a94a1e90c09249b0ecf1c3</uuid>
                     <name>BGPv4 Peers Discovery</name>
-                    <type>SNMPV2</type>
-                    <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                    <type>SNMP_AGENT</type>
                     <snmp_oid>discovery[{#SNMPASN},.1.3.6.1.4.1.9.9.187.1.2.5.1.11.1.4]</snmp_oid>
                     <key>cbgpPeer2RemoteAs[&quot;BGPv4&quot;]</key>
                     <delay>1h</delay>
                     <lifetime>7d</lifetime>
                     <item_prototypes>
                         <item_prototype>
+                            <uuid>89bbe4f5c21145489c68c7264c205132</uuid>
                             <name>AS Name for IPv4 peer &quot;{#SNMPINDEX}&quot;</name>
                             <type>EXTERNAL</type>
                             <key>as_name[&quot;{#SNMPASN}&quot;,&quot;{#SNMPINDEX}&quot;]</key>
                             <delay>1d</delay>
                             <history>7d</history>
                             <trends>0</trends>
+                            <status>DISABLED</status>
+                            <discover>NO_DISCOVER</discover>
                             <value_type>CHAR</value_type>
-                            <applications>
-                                <application>
-                                    <name>BGPv4</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv4 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>35fc0ad74ae34ce4a9ef89cb769dc495</uuid>
                             <name>Administrative status for peer &quot;$1&quot;</name>
-                            <type>SNMPV2</type>
-                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.4.1.9.9.187.1.2.5.1.4.1.4.{#SNMPINDEX}</snmp_oid>
                             <key>cbgpPeer2AdminStatus[{#SNMPINDEX}]</key>
                             <delay>10m</delay>
                             <history>7d</history>
                             <trends>0</trends>
-                            <applications>
-                                <application>
-                                    <name>BGPv4</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv4 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
                             <valuemap>
                                 <name>BGP4-MIB::bgpPeerAdminStatus</name>
                             </valuemap>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>2ada67f625a54199bc6e879931c2e30e</uuid>
                             <name>Established time for peer &quot;$1&quot;</name>
-                            <type>SNMPV2</type>
-                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.4.1.9.9.187.1.2.5.1.19.1.4.{#SNMPINDEX}</snmp_oid>
                             <key>cbgpPeer2FsmEstablishedTime[{#SNMPINDEX}]</key>
                             <delay>10m</delay>
                             <history>30d</history>
                             <trends>0</trends>
                             <units>uptime</units>
-                            <applications>
-                                <application>
-                                    <name>BGPv4</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv4 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{last()}&lt;{$PEER_LOW_TIME}</expression>
+                                    <uuid>4601702511364ade9d24c7a6a8a7615b</uuid>
+                                    <expression>last(/Template Cisco BGP SNMP/cbgpPeer2FsmEstablishedTime[{#SNMPINDEX}])&lt;{$PEER_LOW_TIME}</expression>
                                     <name>BGPv4 peer up time low {#SNMPINDEX} ASN {#SNMPASN}</name>
                                     <priority>INFO</priority>
                                     <dependencies>
                                         <dependency>
                                             <name>BGPv4 peer {#SNMPINDEX} ASN {#SNMPASN} is DOWN</name>
-                                            <expression>{Template Cisco BGP SNMP:cbgpPeer2State[{#SNMPINDEX}].last(#3)}&lt;&gt;6 and {Template Cisco BGP SNMP:cbgpPeer2AdminStatus[{#SNMPINDEX}].last(0)}=2</expression>
+                                            <expression>last(/Template Cisco BGP SNMP/cbgpPeer2State[{#SNMPINDEX}],#3)&lt;&gt;6 and last(/Template Cisco BGP SNMP/cbgpPeer2AdminStatus[{#SNMPINDEX}])=2</expression>
                                         </dependency>
                                     </dependencies>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>036ad26376e0477e8961de22a38b9dda</uuid>
                             <name>Remote AS for peer &quot;$1&quot;</name>
-                            <type>SNMPV2</type>
-                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.4.1.9.9.187.1.2.5.1.11.1.4.{#SNMPINDEX}</snmp_oid>
                             <key>cbgpPeer2RemoteAs[{#SNMPINDEX}]</key>
                             <delay>1d</delay>
                             <history>7d</history>
                             <trends>0</trends>
-                            <applications>
-                                <application>
-                                    <name>BGPv4</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv4 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>611c787349b64f269d6190d00e26e07c</uuid>
                             <name>Operational status for peer &quot;$1&quot;</name>
-                            <type>SNMPV2</type>
-                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.4.1.9.9.187.1.2.5.1.3.1.4.{#SNMPINDEX}</snmp_oid>
                             <key>cbgpPeer2State[{#SNMPINDEX}]</key>
                             <history>30d</history>
                             <trends>0</trends>
-                            <applications>
-                                <application>
-                                    <name>BGPv4</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv4 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
                             <valuemap>
                                 <name>BGP4-MIB::bgpPeerState</name>
                             </valuemap>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>9f292d8915334d698550414a30bc98a6</uuid>
                             <name>BGP peer last error &quot;$1&quot;</name>
-                            <type>SNMPV2</type>
-                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.4.1.9.9.187.1.2.1.1.7.{#SNMPINDEX}</snmp_oid>
                             <key>cbgpPeerLastErrorTxt[&quot;{#SNMPINDEX}&quot;]</key>
                             <delay>10m</delay>
                             <history>30d</history>
                             <trends>0</trends>
                             <value_type>CHAR</value_type>
-                            <applications>
-                                <application>
-                                    <name>BGPv4</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv4 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>6c9d45eb624643279daaaf2f944fe4d9</uuid>
                             <name>Accepted prefix for peer &quot;$1&quot;</name>
-                            <type>SNMPV2</type>
-                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.4.1.9.9.187.1.2.1.1.1.{#SNMPINDEX}</snmp_oid>
                             <key>cbgpPeerPrefixAccepted[{#SNMPINDEX}]</key>
                             <delay>10m</delay>
                             <history>7d</history>
                             <trends>180d</trends>
-                            <applications>
-                                <application>
-                                    <name>BGPv4</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv4 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>9b3d4c3df2844b5dae66c64a332a45bb</uuid>
                             <name>Maximum prefix for peer &quot;$1&quot;</name>
-                            <type>SNMPV2</type>
-                            <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
+                            <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.4.1.9.9.187.1.2.1.1.3.{#SNMPINDEX}</snmp_oid>
                             <key>cbgpPeerPrefixLimit[{#SNMPINDEX}]</key>
                             <delay>1h</delay>
                             <history>30d</history>
                             <trends>0</trends>
-                            <applications>
-                                <application>
-                                    <name>BGPv4</name>
-                                </application>
-                            </applications>
-                            <application_prototypes>
-                                <application_prototype>
-                                    <name>BGPv4 {#SNMPINDEX}</name>
-                                </application_prototype>
-                            </application_prototypes>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>a07620e43d5045f6a5f62f2d8fdff979</uuid>
+                            <name>Max Prefix Threshold for peer &quot;$1&quot;</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>.1.3.6.1.4.1.9.9.187.1.2.4.1.4.{#SNMPINDEX}.1.1</snmp_oid>
+                            <key>cbgpPeerPrefixThreshold[{#SNMPINDEX}]</key>
+                            <delay>1h</delay>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>BGPv4 {#SNMPINDEX}</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{Template Cisco BGP SNMP:cbgpPeer2State[{#SNMPINDEX}].last(#3)}&lt;&gt;6 and {Template Cisco BGP SNMP:cbgpPeer2AdminStatus[{#SNMPINDEX}].last(0)}=2</expression>
+                            <uuid>f50a1a91f26c450091069a9066882199</uuid>
+                            <expression>last(/Template Cisco BGP SNMP/cbgpPeer2State[{#SNMPINDEX}],#3)&lt;&gt;6 and last(/Template Cisco BGP SNMP/cbgpPeer2AdminStatus[{#SNMPINDEX}])=2</expression>
                             <name>BGPv4 peer {#SNMPINDEX} ASN {#SNMPASN} is DOWN</name>
                             <priority>HIGH</priority>
                         </trigger_prototype>
                         <trigger_prototype>
-                            <expression>( {Template Cisco BGP SNMP:cbgpPeerPrefixAccepted[{#SNMPINDEX}].last()} * 100 / {Template Cisco BGP SNMP:cbgpPeerPrefixLimit[{#SNMPINDEX}].last()} ) &gt; {$MAXIMUM_PREFIX_ALARM}</expression>
+                            <uuid>9ff1463e2995457681b4d307f199ef7a</uuid>
+                            <expression>( last(/Template Cisco BGP SNMP/cbgpPeerPrefixAccepted[{#SNMPINDEX}]) * 100 / last(/Template Cisco BGP SNMP/cbgpPeerPrefixLimit[{#SNMPINDEX}]) ) &gt; last(/Template Cisco BGP SNMP/cbgpPeerPrefixThreshold[{#SNMPINDEX}])</expression>
                             <name>BGPv4 Prefix Limit {#SNMPINDEX} ASN {#SNMPASN} near</name>
                             <priority>WARNING</priority>
+                            <description>Triggered if current prefixes we accept * 100 / max configured prefixes is greater than the threshold in percentage
+
+Example 1:
+Number of prefixes we accept: 125
+Number of max prefix: 200
+Threshold: 75
+
+125 * 100 / 200 = 62,5
+Not above threshold, meaning not triggered
+
+Example 2: 
+Number of prefixes we accept: 125
+Number of max prefix: 150
+Threshold: 80
+
+125 * 100 / 150 = 62,5
+Above threshold, triggered</description>
                         </trigger_prototype>
                     </trigger_prototypes>
                     <graph_prototypes>
                         <graph_prototype>
+                            <uuid>f05e81ba268a453cbc4399c745aad3ae</uuid>
                             <name>BGP Prefix Accepted {#SNMPINDEX}</name>
                             <ymin_type_1>FIXED</ymin_type_1>
                             <graph_items>
@@ -636,91 +780,99 @@ return value</params>
             </discovery_rules>
             <macros>
                 <macro>
-                    <macro>{$MAXIMUM_PREFIX_ALARM}</macro>
-                    <value>80</value>
-                    <description>% maximum prefix limit alarm to reach 100%</description>
-                </macro>
-                <macro>
                     <macro>{$PEER_LOW_TIME}</macro>
-                    <value>14400</value>
+                    <value>3600</value>
                     <description>time in sec alarm for uptime bgp session</description>
                 </macro>
             </macros>
-            <screens>
-                <screen>
+            <dashboards>
+                <dashboard>
+                    <uuid>29d0fa38c4644bf4a6f6298b8a6bf72f</uuid>
                     <name>Screen BGPv4</name>
-                    <hsize>1</hsize>
-                    <vsize>1</vsize>
-                    <screen_items>
-                        <screen_item>
-                            <resourcetype>20</resourcetype>
-                            <style>0</style>
-                            <resource>
-                                <name>BGP Prefix Accepted {#SNMPINDEX}</name>
-                                <host>Template Cisco BGP SNMP</host>
-                            </resource>
-                            <width>500</width>
-                            <height>100</height>
-                            <x>0</x>
-                            <y>0</y>
-                            <colspan>1</colspan>
-                            <rowspan>1</rowspan>
-                            <elements>0</elements>
-                            <valign>0</valign>
-                            <halign>0</halign>
-                            <dynamic>0</dynamic>
-                            <sort_triggers>0</sort_triggers>
-                            <url/>
-                            <application/>
-                            <max_columns>3</max_columns>
-                        </screen_item>
-                    </screen_items>
-                </screen>
-            </screens>
+                    <pages>
+                        <page>
+                            <widgets>
+                                <widget>
+                                    <type>GRAPH_PROTOTYPE</type>
+                                    <width>24</width>
+                                    <height>5</height>
+                                    <fields>
+                                        <field>
+                                            <type>INTEGER</type>
+                                            <name>source_type</name>
+                                            <value>2</value>
+                                        </field>
+                                        <field>
+                                            <type>INTEGER</type>
+                                            <name>columns</name>
+                                            <value>1</value>
+                                        </field>
+                                        <field>
+                                            <type>INTEGER</type>
+                                            <name>rows</name>
+                                            <value>1</value>
+                                        </field>
+                                        <field>
+                                            <type>GRAPH_PROTOTYPE</type>
+                                            <name>graphid</name>
+                                            <value>
+                                                <name>BGP Prefix Accepted {#SNMPINDEX}</name>
+                                                <host>Template Cisco BGP SNMP</host>
+                                            </value>
+                                        </field>
+                                    </fields>
+                                </widget>
+                            </widgets>
+                        </page>
+                    </pages>
+                </dashboard>
+            </dashboards>
+            <valuemaps>
+                <valuemap>
+                    <uuid>e1bf28713c98486e8ba251b1b6c3b3f7</uuid>
+                    <name>BGP4-MIB::bgpPeerAdminStatus</name>
+                    <mappings>
+                        <mapping>
+                            <value>1</value>
+                            <newvalue>stoped</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>2</value>
+                            <newvalue>started</newvalue>
+                        </mapping>
+                    </mappings>
+                </valuemap>
+                <valuemap>
+                    <uuid>225c0128ce1e4c39bb8487bd37fea91e</uuid>
+                    <name>BGP4-MIB::bgpPeerState</name>
+                    <mappings>
+                        <mapping>
+                            <value>1</value>
+                            <newvalue>idle</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>2</value>
+                            <newvalue>connect</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>3</value>
+                            <newvalue>active</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>4</value>
+                            <newvalue>opensent</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>5</value>
+                            <newvalue>openconfirm</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>6</value>
+                            <newvalue>established</newvalue>
+                        </mapping>
+                    </mappings>
+                </valuemap>
+            </valuemaps>
         </template>
     </templates>
-    <value_maps>
-        <value_map>
-            <name>BGP4-MIB::bgpPeerAdminStatus</name>
-            <mappings>
-                <mapping>
-                    <value>1</value>
-                    <newvalue>stoped</newvalue>
-                </mapping>
-                <mapping>
-                    <value>2</value>
-                    <newvalue>started</newvalue>
-                </mapping>
-            </mappings>
-        </value_map>
-        <value_map>
-            <name>BGP4-MIB::bgpPeerState</name>
-            <mappings>
-                <mapping>
-                    <value>1</value>
-                    <newvalue>idle</newvalue>
-                </mapping>
-                <mapping>
-                    <value>2</value>
-                    <newvalue>connect</newvalue>
-                </mapping>
-                <mapping>
-                    <value>3</value>
-                    <newvalue>active</newvalue>
-                </mapping>
-                <mapping>
-                    <value>4</value>
-                    <newvalue>opensent</newvalue>
-                </mapping>
-                <mapping>
-                    <value>5</value>
-                    <newvalue>openconfirm</newvalue>
-                </mapping>
-                <mapping>
-                    <value>6</value>
-                    <newvalue>established</newvalue>
-                </mapping>
-            </mappings>
-        </value_map>
-    </value_maps>
 </zabbix_export>
