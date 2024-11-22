@@ -1,0 +1,131 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 6edc5ee324434e119822a8d9cceb0383
+      template: 'Template Cisco Pseudowire Monitor SNMP'
+      name: 'Template Cisco Pseudowire Monitor SNMP'
+      description: |
+        Template Cisco Pseudowire Monitor
+        -Pseudowire Status
+        -Associated Interface
+        -Missmatch L2MTU
+        -PW Control Word
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        CISCO-IETF-PW-TC-MIB.mib
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: 68e4165cad6541d2af18c3b9b1fb35ac
+          name: 'PW Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#PWDSTIP},1.3.6.1.4.1.9.10.106.1.2.1.9,{#PWVCID},1.3.6.1.4.1.9.10.106.1.2.1.10,{#PWINT},1.3.6.1.4.1.9.10.106.1.2.1.21]'
+          key: 'cpwVcPeerAddr["PW"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'CISCO-IETF-PW-MIB::cpwVcPeerAddr'
+          item_prototypes:
+            - uuid: 4522b8800bb94f76b82287100b18bd82
+              name: 'PW "{#PWINT}" VCID "{#PWVCID}" Control Word'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.10.106.1.2.1.12.{#SNMPINDEX}'
+              key: 'cpwVcControlWord["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'SNMPv2-TC::TruthValue'
+              tags:
+                - tag: application
+                  value: mpls
+                - tag: component
+                  value: pw
+                - tag: element
+                  value: '"{#PWINT}" "{#PWVCID}"'
+            - uuid: a03296a65e054d738e628f8b4fc4a0d0
+              name: 'PW "{#PWINT}" VCID "{#PWVCID}" Local L2MTU'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.10.106.1.2.1.13.{#SNMPINDEX}'
+              key: 'cpwVcLocalIfMtu["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: mpls
+                - tag: component
+                  value: pw
+                - tag: element
+                  value: '"{#PWINT}" "{#PWVCID}"'
+            - uuid: 864b7215bce442da82234cc5b1aae025
+              name: 'PW "{#PWINT}" VCID "{#PWVCID}" Status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.10.106.1.2.1.26.{#SNMPINDEX}'
+              key: 'cpwVcOperStatus["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'CISCO-IETF-PW-MIB::CpwOperStatus'
+              tags:
+                - tag: application
+                  value: mpls
+                - tag: component
+                  value: pw
+                - tag: element
+                  value: '"{#PWINT}" "{#PWVCID}"'
+              trigger_prototypes:
+                - uuid: c9f9f7576ea04f87966077df420ee18a
+                  expression: 'last(/Template Cisco Pseudowire Monitor SNMP/cpwVcOperStatus["{#SNMPINDEX}"])<>1'
+                  name: 'PW "{#PWINT}" VcID "{#PWVCID}" Down'
+                  priority: HIGH
+            - uuid: c42a0b0688b14b24b9b6d28197850141
+              name: 'PW "{#PWINT}" VCID "{#PWVCID}" Remote L2MTU'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.10.106.1.2.1.17.{#SNMPINDEX}'
+              key: 'cpwVcRemoteIfMtu["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: mpls
+                - tag: component
+                  value: pw
+                - tag: element
+                  value: '"{#PWINT}" "{#PWVCID}"'
+          trigger_prototypes:
+            - uuid: c300d265926a4c7093fa025c1dfabe86
+              expression: 'last(/Template Cisco Pseudowire Monitor SNMP/cpwVcLocalIfMtu["{#SNMPINDEX}"])<> last(/Template Cisco Pseudowire Monitor SNMP/cpwVcRemoteIfMtu["{#SNMPINDEX}"])'
+              name: 'PW "{#PWINT}" VcID "{#PWVCID}" missmatch L2MTU'
+              priority: AVERAGE
+      tags:
+        - tag: class
+          value: pw
+      valuemaps:
+        - uuid: d6374ae906d44c85bcfec09d9f13a96a
+          name: 'CISCO-IETF-PW-MIB::CpwOperStatus'
+          mappings:
+            - value: '1'
+              newvalue: up
+            - value: '2'
+              newvalue: down
+            - value: '3'
+              newvalue: testing
+            - value: '4'
+              newvalue: unknown
+            - value: '5'
+              newvalue: dormant
+            - value: '6'
+              newvalue: notPresent
+            - value: '7'
+              newvalue: lowerLayerDown
+        - uuid: bc9392afc7794854a0d3917ff8c69cf0
+          name: 'SNMPv2-TC::TruthValue'
+          mappings:
+            - value: '1'
+              newvalue: 'true'
+            - value: '2'
+              newvalue: 'false'

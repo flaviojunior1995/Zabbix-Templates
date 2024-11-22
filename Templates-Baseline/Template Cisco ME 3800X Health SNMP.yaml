@@ -1,0 +1,319 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 3227a2167a7e4612ab2133844652d24c
+      template: 'Template Cisco ME 3800X Health SNMP'
+      name: 'Template Cisco ME 3800X Health SNMP'
+      description: |
+        Template Cisco ME 3800X Health
+        -CPU
+        -Memory
+        -PowerSupply
+        -Fan
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        CISCO-MEMORY-POOL-MIB.mib
+        CISCO-PROCESS-MIB.mib
+        ENTITY-MIB.mib
+        CISCO-ENVMON-MIB.mib
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: fe85896b23cd48a0bf38d62ccd02ee40
+          name: 'FAN Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.13.1.4.1.2]'
+          key: 'ciscoEnvMonFanStatusDescr["FAN"]'
+          delay: 1h
+          lifetime: 30d
+          item_prototypes:
+            - uuid: 403423c5cf924bdc8ed7285261da30d5
+              name: 'Operational Status of "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.13.1.4.1.3.{#SNMPINDEX}'
+              key: 'ciscoEnvMonFanState["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'CISCO-ENVMON-MIB::CiscoEnvMonState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: status
+              trigger_prototypes:
+                - uuid: 11078c193255484092d4c9afbaef74b5
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/ciscoEnvMonFanState["{#SNMPVALUE}"])=3'
+                  name: '"{#SNMPVALUE}" is critical Failure'
+                  priority: HIGH
+                - uuid: b840534d954e47ccbb55812d95efe6a2
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/ciscoEnvMonFanState["{#SNMPVALUE}"])=6'
+                  name: '"{#SNMPVALUE}" is not Functioning'
+                  priority: HIGH
+                - uuid: 6d929e7c224d4e2897c3cbdce9fd397d
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/ciscoEnvMonFanState["{#SNMPVALUE}"])=5'
+                  name: '"{#SNMPVALUE}" is not Present'
+                  priority: INFO
+                - uuid: 0a059df4883c49edaa2db70b832f547a
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/ciscoEnvMonFanState["{#SNMPVALUE}"])=4'
+                  name: '"{#SNMPVALUE}" is shutdown'
+                  priority: INFO
+                - uuid: d4ee92d29b184033b4eddf1a48902c4b
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/ciscoEnvMonFanState["{#SNMPVALUE}"])=2'
+                  name: '"{#SNMPVALUE}" is warned'
+                  priority: WARNING
+        - uuid: 48062009234343fb9b87c85d62032d7f
+          name: 'Power Supply Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.13.1.5.1.2]'
+          key: 'ciscoEnvMonSupplyStatusDescr["Power Supply"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'The textual name of the physical entity.'
+          item_prototypes:
+            - uuid: b443dd421efd40388b70a32ba9b5929c
+              name: 'Status "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.13.1.5.1.3.{#SNMPINDEX}'
+              key: 'ciscoEnvMonSupplyState["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              description: |
+                CISCO-ENTITY-FRU-CONTROL-MIB::cefcFRUPowerOperStatus
+                
+                Operational FRU power state.
+              valuemap:
+                name: 'CISCO-ENVMON-MIB::CiscoEnvMonState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+                - tag: element
+                  value: status
+              trigger_prototypes:
+                - uuid: b2a298c0e7f04411b4ca72219db1cc68
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=3'
+                  name: '"{#SNMPVALUE}" Critical State'
+                  priority: HIGH
+                - uuid: 8e2d74b6441d4e7c8d483bb463e267cd
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=4'
+                  name: '"{#SNMPVALUE}" is shutdown'
+                  priority: WARNING
+                - uuid: fb4ffd06d93643cca2efde9de37bf86f
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=6'
+                  name: '"{#SNMPVALUE}" not Functioning'
+                  priority: AVERAGE
+                - uuid: 66debe66ab7845e7bd04f28f895f52fb
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=5'
+                  name: '"{#SNMPVALUE}" not Present'
+                  priority: AVERAGE
+                - uuid: 30a02545d5274f4493b498526c7aab66
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=2'
+                  name: '"{#SNMPVALUE}" Warning'
+                  priority: WARNING
+        - uuid: 9740e842bb074f95b6dd5b540f0b5eb9
+          name: 'Memory Pool Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.48.1.1.1.2]'
+          key: 'ciscoMemoryPoolName["Memory"]'
+          delay: 1h
+          lifetime: 30d
+          description: |
+            CISCO-MEMORY-POOL-MIB::ciscoMemoryPoolName
+            
+            A textual name assigned to the memory pool.
+          item_prototypes:
+            - uuid: 7c45b757cddd466d9221cf9b87b5e283
+              name: 'Free memory on Memory Pool "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.48.1.1.1.6.{#SNMPINDEX}'
+              key: 'ciscoMemoryPoolFree["{#SNMPVALUE}"]'
+              history: 30d
+              units: B
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: value
+            - uuid: 97a40c5881e04c94a3fade75d91482c0
+              name: 'Total Memory Pool "{#SNMPVALUE}"'
+              type: CALCULATED
+              key: 'ciscoMemoryPoolTotal["{#SNMPVALUE}"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              params: 'last(//ciscoMemoryPoolFree["{#SNMPVALUE}"]) + last(//ciscoMemoryPoolUsed["{#SNMPVALUE}"])'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: value
+            - uuid: c3e7e0a98ca84144a386399192e844d8
+              name: 'Used memory on Memory Pool "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.48.1.1.1.5.{#SNMPINDEX}'
+              key: 'ciscoMemoryPoolUsed["{#SNMPVALUE}"]'
+              history: 30d
+              units: B
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: value
+          trigger_prototypes:
+            - uuid: 86ac426b174c4e839100962702e0438a
+              expression: '( last(/Template Cisco ME 3800X Health SNMP/ciscoMemoryPoolUsed["{#SNMPVALUE}"]) * 100 ) / last(/Template Cisco ME 3800X Health SNMP/ciscoMemoryPoolTotal["{#SNMPVALUE}"]) > {$MEMORY_HIGH_ALARM}'
+              name: 'High memory untilization alarm on Pool "{#SNMPVALUE}"'
+              priority: HIGH
+            - uuid: 82a26c5d679a4a8e836a5ae5c48004c4
+              expression: '( last(/Template Cisco ME 3800X Health SNMP/ciscoMemoryPoolUsed["{#SNMPVALUE}"]) * 100 ) / last(/Template Cisco ME 3800X Health SNMP/ciscoMemoryPoolTotal["{#SNMPVALUE}"]) > {$MEMORY_HIGH_WARNING}'
+              name: 'High memory untilization warning on Pool "{#SNMPVALUE}"'
+              priority: WARNING
+              dependencies:
+                - name: 'High memory untilization alarm on Pool "{#SNMPVALUE}"'
+                  expression: '( last(/Template Cisco ME 3800X Health SNMP/ciscoMemoryPoolUsed["{#SNMPVALUE}"]) * 100 ) / last(/Template Cisco ME 3800X Health SNMP/ciscoMemoryPoolTotal["{#SNMPVALUE}"]) > {$MEMORY_HIGH_ALARM}'
+          graph_prototypes:
+            - uuid: 01891d0c7e134a9b97bd6e364a5c8a1b
+              name: 'Memory "{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: GRADIENT_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco ME 3800X Health SNMP'
+                    key: 'ciscoMemoryPoolUsed["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Cisco ME 3800X Health SNMP'
+                    key: 'ciscoMemoryPoolTotal["{#SNMPVALUE}"]'
+        - uuid: d0ed6d95ee2d487cba1eded25a3ab11e
+          name: 'CPU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.109.1.1.1.1.2]'
+          key: 'cpmCPUTotalPhysicalIndex["CPU"]'
+          delay: 1h
+          lifetime: 30d
+          description: |
+            CISCO-PROCESS-MIB::cpmCPUTotalPhysicalIndex
+            
+            The entPhysicalIndex of the physical entity for which the CPU statistics in this entry are maintained. The physical entity can be a CPU chip, a group of CPUs, a CPU card etc. The exact type of this entity is described by its entPhysicalVendorType value. If the CPU statistics in this entry correspond to more than one physical entity (or to no physical entity), or if the entPhysicalTable is not supported on the SNMP agent, the value of this object must be zero.
+          item_prototypes:
+            - uuid: 9920adbc8c554d7ab5f1b9ba2bd91e40
+              name: 'CPU #"{#SNMPINDEX}" Usage 1min Rev'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.9.9.109.1.1.1.1.7.{#SNMPINDEX}'
+              key: 'cpmCPUTotal1minRev["{#SNMPINDEX}"]'
+              history: 30d
+              units: '%'
+              description: |
+                CISCO-PROCESS-MIB::cpmCPUTotal1minRev
+                
+                The overall CPU busy percentage in the last 1 minute period. This object deprecates the object cpmCPUTotal1min and increases the value range to (0..100).
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+                - tag: element
+                  value: value
+              trigger_prototypes:
+                - uuid: a0b8e6acf5614713a0301e6401b4c719
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/cpmCPUTotal1minRev["{#SNMPINDEX}"]) > {$CPU_HIGH_ALARM}'
+                  name: 'High CPU Alarm #"{#SNMPINDEX}" 1min Usage'
+                  priority: HIGH
+                - uuid: 7e63379e93f4491e93189e107ad70ede
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/cpmCPUTotal1minRev["{#SNMPINDEX}"]) > {$CPU_HIGH_WARNING}'
+                  name: 'High CPU Warning #"{#SNMPINDEX}" 1min Usage'
+                  priority: WARNING
+                  dependencies:
+                    - name: 'High CPU Alarm #"{#SNMPINDEX}" 1min Usage'
+                      expression: 'last(/Template Cisco ME 3800X Health SNMP/cpmCPUTotal1minRev["{#SNMPINDEX}"]) > {$CPU_HIGH_ALARM}'
+            - uuid: 4c413f8ee5f542ed9682057a79977bc7
+              name: 'CPU #"{#SNMPINDEX}" Usage 5min Rev'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.109.1.1.1.1.8.{#SNMPINDEX}'
+              key: 'cpmCPUTotal5minRev["{#SNMPINDEX}"]'
+              delay: 5m
+              history: 30d
+              units: '%'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+                - tag: element
+                  value: value
+              trigger_prototypes:
+                - uuid: e255484b9e294747b808a0c7f988b100
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/cpmCPUTotal5minRev["{#SNMPINDEX}"]) > {$CPU_HIGH_ALARM}'
+                  name: 'High CPU Alarm #"{#SNMPINDEX}" 5min Usage'
+                  priority: HIGH
+                - uuid: 0c8ef71f240b454798dce937e64601f0
+                  expression: 'last(/Template Cisco ME 3800X Health SNMP/cpmCPUTotal5minRev["{#SNMPINDEX}"]) > {$CPU_HIGH_WARNING}'
+                  name: 'High CPU Warning #"{#SNMPINDEX}" 5min Usage'
+                  priority: WARNING
+                  dependencies:
+                    - name: 'High CPU Alarm #"{#SNMPINDEX}" 5min Usage'
+                      expression: 'last(/Template Cisco ME 3800X Health SNMP/cpmCPUTotal5minRev["{#SNMPINDEX}"]) > {$CPU_HIGH_ALARM}'
+          graph_prototypes:
+            - uuid: 944f427d36e5465a89fafadba366dcc8
+              name: 'CPU #"{#SNMPINDEX}" 1min Usage'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco ME 3800X Health SNMP'
+                    key: 'cpmCPUTotal1minRev["{#SNMPINDEX}"]'
+            - uuid: 86e80b40774c46eaa87510cf331d412d
+              name: 'CPU #"{#SNMPINDEX}" 5min Usage'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco ME 3800X Health SNMP'
+                    key: 'cpmCPUTotal5minRev["{#SNMPINDEX}"]'
+      tags:
+        - tag: class
+          value: health
+      macros:
+        - macro: '{$CPU_HIGH_ALARM}'
+          value: '90'
+          description: '% alarm cpu'
+        - macro: '{$CPU_HIGH_WARNING}'
+          value: '70'
+          description: '% waning cpu'
+        - macro: '{$MEMORY_UTIL_MAX}'
+          value: '70'
+          description: '% maximum alarm memory'
+      valuemaps:
+        - uuid: e766f8016cba4bce8bc23753c251aaf9
+          name: 'CISCO-ENVMON-MIB::CiscoEnvMonState'
+          mappings:
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: warning
+            - value: '3'
+              newvalue: critical
+            - value: '4'
+              newvalue: shutdown
+            - value: '5'
+              newvalue: notPresent
+            - value: '6'
+              newvalue: notFunctioning

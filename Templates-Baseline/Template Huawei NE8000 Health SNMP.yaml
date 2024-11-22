@@ -1,0 +1,701 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 60f5187e64c44f0086a0d68b1fbbec30
+      template: 'Template Huawei NE8000 Health SNMP'
+      name: 'Template Huawei NE8000 Health SNMP'
+      description: |
+        Template Huawei NE8000 Health
+        -CPU IPU
+        -Memory IPU 
+        -PSU
+        -PowerConsumption
+        -Temperature IPU
+        -FAN
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        HUAWEI-CPU-MIB.mib 
+        HUAWEI-ENTITY-EXTENT-MIB.mib
+        HUAWEI-ENERGYMNGT-MIB.mib
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: 5e80724798624022a4f3b9a48c7143c7
+          name: 'Total Power Consumption'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2011.6.157.1.6.0
+          key: hwCurrentPower
+          history: 30d
+          value_type: FLOAT
+          units: W
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.001'
+          tags:
+            - tag: application
+              value: health
+            - tag: component
+              value: 'power supply'
+            - tag: element
+              value: consumption
+          triggers:
+            - uuid: 2fa7cd947ec44b3fbf8ae9db414e6480
+              expression: 'last(/Template Huawei NE8000 Health SNMP/hwCurrentPower)>={$POWER_USAGE_HIGH}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: '{$POWER_USAGE_HIGH} > last(/Template Huawei NE8000 Health SNMP/hwCurrentPower)'
+              name: 'High Power Usage'
+              priority: HIGH
+        - uuid: fd66cd11c4d841d69903549d7a2b352c
+          name: 'Serial Number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2011.5.25.188.1.1.0
+          key: hwDeviceEsn
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SERIALNO_A
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: dfcd70ed4cca49ab812dea043340770f
+          name: 'Software Version'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2011.5.25.188.1.5.0
+          key: hwPlatformVersion
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          description: HUAWEI-DEVICE-EXT-MIB
+          inventory_link: SOFTWARE
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: b7dd67a03d544dfeba6828a7a367019f
+          name: 'Software OS'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2011.5.25.188.1.4.0
+          key: hwProductName
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: OS
+          tags:
+            - tag: application
+              value: inventory
+      discovery_rules:
+        - uuid: e37d2837a8034d90aeb145fcc390dae7
+          name: 'IPU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.2.1.47.1.1.1.1.7]'
+          key: 'entPhysicalName["IPU"]'
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: ^(CR81IPU1T2C1)
+                formulaid: A
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'The textual name of the physical entity.'
+          item_prototypes:
+            - uuid: 1e05e786861a49979b9b5a48902ce219
+              name: 'Memory Usage "{#SNMPVALUE}" Threshold | Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.8.{#SNMPINDEX}'
+              key: 'hwEntityMemUsageThreshold["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              trends: '0'
+              units: '%'
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB::hwEntityMemUsage
+                
+                This variable reports the most recent measurement seen by the sensor.
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: threshold
+            - uuid: 9b1316dbdf4941eb8a1889213151a2cd
+              name: 'Memory Usage "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.7.{#SNMPINDEX}'
+              key: 'hwEntityMemUsage["{#SNMPVALUE}"]'
+              history: 30d
+              units: '%'
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB::hwEntityMemUsage
+                
+                This variable reports the most recent measurement seen by the sensor.
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: value
+            - uuid: baf36656d09441cca59e1e029f708afe
+              name: 'Temperature "{#SNMPVALUE}" Threshold | Alarm Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.16.{#SNMPINDEX}'
+              key: 'hwEntityTemperatureLowThreshold["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: ºC
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB::hwEntityTemperatureLowThreshold
+                
+                This variable indicates the present operational status of the sensor.
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '-1'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: threshold
+            - uuid: 69976ecc9ff44dcdba962ef161bc767e
+              name: 'Temperature "{#SNMPVALUE}" Threshold | Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.12.{#SNMPINDEX}'
+              key: 'hwEntityTemperatureThreshold["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: ºC
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB::hwEntityTemperatureThreshold
+                
+                This variable indicates the present operational status of the sensor.
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: threshold
+            - uuid: 24863c6e5feb4fe8acc95c864edaf3b1
+              name: 'Temperature "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.11.{#SNMPINDEX}'
+              key: 'hwEntityTemperature["{#SNMPVALUE}"]'
+              history: 30d
+              value_type: FLOAT
+              units: ºC
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB::hwEntityTemperature
+                
+                This variable indicates the present operational status of the sensor.
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: value
+          trigger_prototypes:
+            - uuid: 06618dda4b7348d58bda43bb4a7787ce
+              expression: 'last(/Template Huawei NE8000 Health SNMP/hwEntityMemUsage["{#SNMPVALUE}"])>=last(/Template Huawei NE8000 Health SNMP/hwEntityMemUsageThreshold["{#SNMPVALUE}"])'
+              name: 'High Memory Utilization "{#SNMPVALUE}"'
+              priority: HIGH
+            - uuid: 36d2b4965e444b59a87e95eb584695f3
+              expression: 'last(/Template Huawei NE8000 Health SNMP/hwEntityTemperature["{#SNMPVALUE}"])>=last(/Template Huawei NE8000 Health SNMP/hwEntityTemperatureThreshold["{#SNMPVALUE}"])'
+              name: 'High Temperature "{#SNMPVALUE}"'
+              priority: HIGH
+            - uuid: f26eb2e36e8647878c3ef8d9e4eb4745
+              expression: 'last(/Template Huawei NE8000 Health SNMP/hwEntityTemperature["{#SNMPVALUE}"])<=last(/Template Huawei NE8000 Health SNMP/hwEntityTemperatureLowThreshold["{#SNMPVALUE}"])'
+              name: 'Low Temperature "{#SNMPVALUE}"'
+              priority: HIGH
+          graph_prototypes:
+            - uuid: 35a9e36562f2488abee785a12af6a8d3
+              name: 'Memory Usage "{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Health SNMP'
+                    key: 'hwEntityMemUsageThreshold["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Huawei NE8000 Health SNMP'
+                    key: 'hwEntityMemUsage["{#SNMPVALUE}"]'
+            - uuid: 60e8726cc6b64306a57389dc41cdfcef
+              name: 'Temperature "{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: FF8000
+                  item:
+                    host: 'Template Huawei NE8000 Health SNMP'
+                    key: 'hwEntityTemperature["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Health SNMP'
+                    key: 'hwEntityTemperatureThreshold["{#SNMPVALUE}"]'
+                - sortorder: '2'
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Health SNMP'
+                    key: 'hwEntityTemperatureLowThreshold["{#SNMPVALUE}"]'
+        - uuid: 27ceae37881f45f7843f6dcfb3eb1556
+          name: 'PowerSupply Consumption'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.2011.6.157.2.1.1.3]'
+          key: 'hwBoardName["Power Comsumption"]'
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: ^POWER
+                formulaid: A
+          lifetime: 30d
+          item_prototypes:
+            - uuid: 311395d96acb4e9990b2e0705fd9050f
+              name: 'PowerSupply Consumption "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.6.157.2.1.1.4.{#SNMPINDEX}'
+              key: 'hwBoardCurrentPower["{#SNMPVALUE}"]'
+              history: 30d
+              units: W
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+                - tag: element
+                  value: consumption
+          graph_prototypes:
+            - uuid: f7c7e2e9abb14d4182ed400398a6414f
+              name: 'PowerSupply Consumption "{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Health SNMP'
+                    key: 'hwBoardCurrentPower["{#SNMPVALUE}"]'
+        - uuid: c8fdc98ec3144365af1402f878b3c68b
+          name: 'FAN Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.2011.5.25.31.1.1.10.1.1]'
+          key: 'hwEntityFanSlot["FAN"]'
+          delay: 1d
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: HUAWEI-ENTITY-EXTENT-MIB
+          item_prototypes:
+            - uuid: 0545774aaf9e4fa3802514dea482b1f5
+              name: 'FAN Speed #"{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.10.1.5.{#SNMPINDEX}'
+              key: 'hwEntityFanSpeed["{#SNMPVALUE}"]'
+              history: 30d
+              units: '%'
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB
+                
+                This variable reports the most recent measurement seen by the sensor.
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: speed
+              trigger_prototypes:
+                - uuid: a6af97f732b944eea08e26e5aef06dcf
+                  expression: 'last(/Template Huawei NE8000 Health SNMP/hwEntityFanSpeed["{#SNMPVALUE}"])>=80'
+                  name: 'FAN Speed "{#SNMPINDEX}" is over 80%'
+                  priority: WARNING
+            - uuid: 3784520de8a9445ab5f1f7503bd135a1
+              name: 'FAN State #"{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.10.1.7.{#SNMPINDEX}'
+              key: 'hwEntityFanState["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB
+                
+                This variable indicates the present operational status of the sensor.
+              valuemap:
+                name: 'HUAWEI-ENTITY-EXTENT-MIB::hwEntityFanState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: status
+              trigger_prototypes:
+                - uuid: 65564a4bb83f4bfd88e942a7aba3d5a8
+                  expression: 'last(/Template Huawei NE8000 Health SNMP/hwEntityFanState["{#SNMPVALUE}"])=2'
+                  name: 'FAN State "{#SNMPINDEX}" is abnormal'
+                  priority: HIGH
+          graph_prototypes:
+            - uuid: fa0354135a6e436e9d08ad91627d3f85
+              name: 'FAN Speed "{#SNMPINDEX}"'
+              show_work_period: 'NO'
+              show_triggers: 'NO'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Huawei NE8000 Health SNMP'
+                    key: 'hwEntityFanSpeed["{#SNMPVALUE}"]'
+        - uuid: c30b93472ffe4c88abe82dfd9353f3d5
+          name: 'PSU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.2011.5.25.31.1.1.18.1.1]'
+          key: 'hwEntityPwrSlot["PSU"]'
+          delay: 1h
+          lifetime: 30d
+          item_prototypes:
+            - uuid: c9e3b62a29614e868813cefb32f89462
+              name: 'PSU State #"{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.18.1.6.{#SNMPVALUE}.0'
+              key: 'hwEntityPwrState["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB::hwEntityPwrState
+                
+                State power supply
+              valuemap:
+                name: 'HUAWEI-ENTITY-EXTENT-MIB::hwEntityPwrState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+                - tag: element
+                  value: status
+              trigger_prototypes:
+                - uuid: 834fa7416ae6468291ae74307c1bf39e
+                  expression: 'last(/Template Huawei NE8000 Health SNMP/hwEntityPwrState["{#SNMPVALUE}"])=2'
+                  name: 'PSU #"{#SNMPVALUE}" is notSupply'
+                  priority: AVERAGE
+                - uuid: 8c0639c7a7bb456ebf457ae4bd130e3d
+                  expression: 'last(/Template Huawei NE8000 Health SNMP/hwEntityPwrState["{#SNMPVALUE}"])=3'
+                  name: 'PSU #"{#SNMPVALUE}" is sleep'
+                  priority: INFO
+                - uuid: ab24bf6869c34e98bc315f7067013d40
+                  expression: 'last(/Template Huawei NE8000 Health SNMP/hwEntityPwrState["{#SNMPVALUE}"])=4'
+                  name: 'PSU #"{#SNMPVALUE}" is unknown'
+                  priority: HIGH
+        - uuid: b83b67c825f14ac39690a749699cc2b7
+          name: 'CPU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.2011.6.3.3.2.1.1.1]'
+          key: 'hwSlotIndex["CPU"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'The number o slot index.'
+          item_prototypes:
+            - uuid: 4c4e9af491784895a94f20ef52ba4913
+              name: 'CPU Usage Slot "{#SNMPVALUE}" 1min'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.6.3.4.1.3.1.{#SNMPVALUE}.0'
+              key: 'hwAvgDuty1min["{#SNMPVALUE}"]'
+              history: 30d
+              units: '%'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+                - tag: element
+                  value: 'Slot {#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: b09242fc739c4967a2a764d743049097
+                  expression: 'last(/Template Huawei NE8000 Health SNMP/hwAvgDuty1min["{#SNMPVALUE}"])>={$CPU_HIGH_ALARM}'
+                  name: 'High CPU Alarm #"{#SNMPVALUE}" 1min Usage'
+                  priority: HIGH
+                - uuid: 8d0ea008d22b4178967d141e8ea979d9
+                  expression: 'last(/Template Huawei NE8000 Health SNMP/hwAvgDuty1min["{#SNMPVALUE}"])>={$CPU_HIGH_WARNING}'
+                  name: 'High CPU Warning #"{#SNMPVALUE}" 1min Usage'
+                  priority: AVERAGE
+                  dependencies:
+                    - name: 'High CPU Alarm #"{#SNMPVALUE}" 1min Usage'
+                      expression: 'last(/Template Huawei NE8000 Health SNMP/hwAvgDuty1min["{#SNMPVALUE}"])>={$CPU_HIGH_ALARM}'
+            - uuid: 9cf666ef9f3045f8b9a32fb4ffc06b66
+              name: 'CPU Usage Slot "{#SNMPVALUE}" 5min'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.6.3.4.1.4.1.{#SNMPVALUE}.0'
+              key: 'hwAvgDuty5min["{#SNMPVALUE}"]'
+              delay: 5m
+              history: 30d
+              units: '%'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+                - tag: element
+                  value: 'Slot {#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 6e164ff2fac2445ca9a0b32f0f7bb012
+                  expression: 'last(/Template Huawei NE8000 Health SNMP/hwAvgDuty5min["{#SNMPVALUE}"])>={$CPU_HIGH_ALARM}'
+                  name: 'High CPU Alarm #"{#SNMPVALUE}" 5min Usage'
+                  priority: HIGH
+                - uuid: d9afc94ff97d47e9b78c7e1c3035ef24
+                  expression: 'last(/Template Huawei NE8000 Health SNMP/hwAvgDuty5min["{#SNMPVALUE}"])>={$CPU_HIGH_WARNING}'
+                  name: 'High CPU Warning #"{#SNMPVALUE}" 5min Usage'
+                  priority: AVERAGE
+                  dependencies:
+                    - name: 'High CPU Alarm #"{#SNMPVALUE}" 5min Usage'
+                      expression: 'last(/Template Huawei NE8000 Health SNMP/hwAvgDuty5min["{#SNMPVALUE}"])>={$CPU_HIGH_ALARM}'
+            - uuid: 34b6d3b95f894584bb48a2af8c8baf48
+              name: 'CPU Usage Slot "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.6.3.4.1.2.1.{#SNMPVALUE}.0'
+              key: 'hwCpuDevDuty["{#SNMPVALUE}"]'
+              history: 30d
+              units: '%'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+                - tag: element
+                  value: 'Slot {#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 31b6d548655748d2bfd1e8f182a51c2d
+                  expression: 'last(/Template Huawei NE8000 Health SNMP/hwCpuDevDuty["{#SNMPVALUE}"])>={$CPU_HIGH_ALARM}'
+                  name: 'High CPU Alarm #"{#SNMPVALUE}"'
+                  priority: HIGH
+                - uuid: 2bd53a6511a849c38a028eab88175812
+                  expression: 'last(/Template Huawei NE8000 Health SNMP/hwCpuDevDuty["{#SNMPVALUE}"])>={$CPU_HIGH_WARNING}'
+                  name: 'High CPU Warning #"{#SNMPVALUE}"'
+                  priority: AVERAGE
+                  dependencies:
+                    - name: 'High CPU Alarm #"{#SNMPVALUE}"'
+                      expression: 'last(/Template Huawei NE8000 Health SNMP/hwCpuDevDuty["{#SNMPVALUE}"])>={$CPU_HIGH_ALARM}'
+          graph_prototypes:
+            - uuid: 5bac35e421b94e9787f14028acc8d286
+              name: 'CPU Usage Slot "{#SNMPVALUE}"'
+              ymin_type_1: FIXED
+              ymax_type_1: FIXED
+              graph_items:
+                - color: 00FF00
+                  item:
+                    host: 'Template Huawei NE8000 Health SNMP'
+                    key: 'hwCpuDevDuty["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Health SNMP'
+                    key: 'hwAvgDuty1min["{#SNMPVALUE}"]'
+                - sortorder: '2'
+                  color: 0000FF
+                  item:
+                    host: 'Template Huawei NE8000 Health SNMP'
+                    key: 'hwAvgDuty5min["{#SNMPVALUE}"]'
+      tags:
+        - tag: class
+          value: health
+      macros:
+        - macro: '{$CPU_HIGH_ALARM}'
+          value: '80'
+          description: '% maximum alarm cpu'
+        - macro: '{$CPU_HIGH_WARNING}'
+          value: '70'
+          description: '% maximum warning cpu'
+        - macro: '{$POWER_USAGE_HIGH}'
+          value: '500'
+          description: 'alarm power usage W high'
+      dashboards:
+        - uuid: 1827a64098514a9cb15f5c6508698214
+          name: 'Screen CPU'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Huawei NE8000 Health SNMP'
+                        name: 'CPU Usage Slot "{#SNMPVALUE}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+        - uuid: 69be0df396574f8e81f441e90f75c1f8
+          name: 'Screen FAN'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Huawei NE8000 Health SNMP'
+                        name: 'FAN Speed "{#SNMPINDEX}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+        - uuid: 6ca62ff503ac4430ab7b178c4300b350
+          name: 'Screen Memory'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Huawei NE8000 Health SNMP'
+                        name: 'Memory Usage "{#SNMPVALUE}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+        - uuid: e258c1335a2e443db06232fd3cced2d8
+          name: 'Screen Power'
+          pages:
+            - widgets:
+                - type: graph
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: GRAPH
+                      name: graphid
+                      value:
+                        host: 'Template Huawei NE8000 Health SNMP'
+                        name: 'Power Consumption'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: source_type
+                      value: '0'
+                - type: graphprototype
+                  'y': '5'
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Huawei NE8000 Health SNMP'
+                        name: 'PowerSupply Consumption "{#SNMPVALUE}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAB
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+        - uuid: 2d13fa81c8004e6eb9dfb9eecf7855fd
+          name: 'Screen Temperature'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Huawei NE8000 Health SNMP'
+                        name: 'Temperature "{#SNMPVALUE}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+      valuemaps:
+        - uuid: 9d8a0b4aa5454473b4ab09eef8a38e42
+          name: 'HUAWEI-ENTITY-EXTENT-MIB::hwEntityFanState'
+          mappings:
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: abnormal
+        - uuid: 1b0a3fbc1d3b4cdda9684b0220eeccd9
+          name: 'HUAWEI-ENTITY-EXTENT-MIB::hwEntityPwrState'
+          mappings:
+            - value: '1'
+              newvalue: supply
+            - value: '2'
+              newvalue: notSupply
+            - value: '3'
+              newvalue: sleep
+            - value: '4'
+              newvalue: unknown
+  graphs:
+    - uuid: 175cd1ba0e884530bbb2305d3e4a0f09
+      name: 'Power Consumption'
+      graph_items:
+        - drawtype: FILLED_REGION
+          color: FF0000
+          item:
+            host: 'Template Huawei NE8000 Health SNMP'
+            key: hwCurrentPower

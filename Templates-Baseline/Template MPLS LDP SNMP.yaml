@@ -1,0 +1,75 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 7c9ba8820c544a47857bd9e73efb70d6
+      template: 'Template MPLS LDP SNMP'
+      name: 'Template MPLS LDP SNMP'
+      description: |
+        Template MPLD LDP
+        -LDP Session State
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        MPLS-LDP-STD-MIB.mib
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: a3ad5d5da43e4794941c297b070af749
+          name: 'MPLD LDP Peer Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.2.1.10.166.4.1.3.3.1.2]'
+          key: 'mplsLdpSessionState["MPLS_LDP"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'MPLS-LDP-STD-MIB::mplsLdpSessionState'
+          item_prototypes:
+            - uuid: 238e324634cb41ffb8a989f7f7941afa
+              name: 'MPLS LDP Peer "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.10.166.4.1.3.3.1.2.{#SNMPINDEX}'
+              key: 'mplsLdpSessionState["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'MPLS-LDP-STD::mplsLdpSessionState'
+              tags:
+                - tag: application
+                  value: mpls
+                - tag: component
+                  value: ldp
+                - tag: element
+                  value: '{#SNMPINDEX}'
+              trigger_prototypes:
+                - uuid: aa40a75ab3854cdb94395f1bbf2e8fa4
+                  expression: 'last(/Template MPLS LDP SNMP/mplsLdpSessionState["{#SNMPINDEX}"]) <> 5'
+                  name: 'MPLS LDP Peer "{#SNMPINDEX}" Down'
+                  priority: HIGH
+      tags:
+        - tag: class
+          value: mpls
+      valuemaps:
+        - uuid: 2377ffa619e8487f99daa793200ed572
+          name: 'MPLS-LDP-STD-MIB::mplsLdpEntityAdminStatus'
+          mappings:
+            - value: '1'
+              newvalue: enable
+            - value: '2'
+              newvalue: disable
+        - uuid: b3929794c661411cbda54f4c3c1bf032
+          name: 'MPLS-LDP-STD::mplsLdpSessionState'
+          mappings:
+            - value: '1'
+              newvalue: nonexistent
+            - value: '2'
+              newvalue: initialized
+            - value: '3'
+              newvalue: openrec
+            - value: '4'
+              newvalue: opensent
+            - value: '5'
+              newvalue: operational

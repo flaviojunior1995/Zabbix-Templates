@@ -1,0 +1,669 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 4c4472c822e141e288f8c2e6caa23800
+      template: 'Template UPS Eaton 9390 SNMP'
+      name: 'Template UPS Eaton 9390 SNMP'
+      description: |
+        Template UPS Eaton 9390
+        -UPS Alarm
+        -Battery Current
+        -Battery Status
+        -Battery Temperature ( Disable )
+        -Battery Voltage
+        -Battery Remaining Capacity (%)
+        -Battery Remaining Time (m)
+        -Current input/output - R/S/T
+        -Voltage input/output -R/S/T
+        -Power input - R/S/T
+        -Bypass Voltage - R/S/T
+        -Power output Load - R/S/T
+        -Time on Battery
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        UPS-MIB.mib
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: 187856b0c5394de48194d6e763ad605c
+          name: 'UPS Alarms'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.6.1.0
+          key: upsAlarmsPresent
+          history: 30d
+          trends: '0'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: alarm
+          triggers:
+            - uuid: a569c333ac3f44899065a30552c3e87b
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsAlarmsPresent)>0'
+              name: 'UPS Alarmed'
+              priority: HIGH
+        - uuid: 60759e932df143b88f5d542e4cc9e71b
+          name: 'Battery Current'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.2.6.0
+          key: upsBatteryCurrent
+          history: 30d
+          value_type: FLOAT
+          units: ah
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: battery
+        - uuid: 56437fa2507a41f2aa32f9584d53b0b3
+          name: 'Battery Status'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.2.1.0
+          key: upsBatteryStatus
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'UPS-MIB::upsBatteryStatus'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: battery
+          triggers:
+            - uuid: 0e1e6cd910d9461b9a62b6602a0f33c9
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsBatteryStatus)=4'
+              name: 'Battery deplated'
+              priority: DISASTER
+            - uuid: 859c2205430d41ad977b83bc2ccb1174
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsBatteryStatus)=3'
+              name: 'Battery low'
+              priority: AVERAGE
+            - uuid: dc160fcf93d640c7a3d0e16eb3b06cbc
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsBatteryStatus)=1'
+              name: 'Battery unknown'
+              priority: WARNING
+        - uuid: e7b71af646cf472ca3adea03b8d18b82
+          name: 'Battery Temperature'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.2.7
+          key: upsBatteryTemperature
+          history: 30d
+          value_type: FLOAT
+          units: ºC
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: battery
+          triggers:
+            - uuid: b716767ebcb8476682364137a5308af4
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsBatteryTemperature) > {$TEMP_BATTERY_ALARM}'
+              name: 'Battery High Temperature ALARM'
+              priority: HIGH
+            - uuid: ffef540055734d99add2860cc64057a4
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsBatteryTemperature)>{$TEMP_BATTERY_WARNING}'
+              name: 'Battery High Temperature WARNING'
+              priority: AVERAGE
+              dependencies:
+                - name: 'Battery High Temperature ALARM'
+                  expression: 'last(/Template UPS Eaton 9390 SNMP/upsBatteryTemperature) > {$TEMP_BATTERY_ALARM}'
+        - uuid: db82f9363add46edaf5fd374ad4b3abb
+          name: 'Battery Voltage'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.2.5.0
+          key: upsBatteryVoltage
+          history: 30d
+          value_type: FLOAT
+          units: v
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: battery
+        - uuid: d3c88990fa054bfca74e8fe433322c97
+          name: 'Bypass Voltage AC - R'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.5.3.1.2.1
+          key: upsBypassVoltage_R
+          history: 30d
+          units: V
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: bypass
+        - uuid: 6fe5d3cf61c444b1813eea9b0d5d1f86
+          name: 'Bypass Voltage AC - S'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.5.3.1.2.2
+          key: upsBypassVoltage_S
+          history: 30d
+          units: V
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: bypass
+        - uuid: f0bf6f85a12543abb8a4fefa487724ae
+          name: 'Bypass Voltage AC - T'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.5.3.1.2.3
+          key: upsBypassVoltage_T
+          history: 30d
+          units: V
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: bypass
+        - uuid: cb03edbd85a84704b42196e9027948b1
+          name: 'Battery Remaining Capacity (%)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.2.4.0
+          key: upsEstimatedChargeRemaining
+          history: 30d
+          value_type: FLOAT
+          trends: '0'
+          units: '%'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: battery
+          triggers:
+            - uuid: 2e4e2d7426fd4118b1b8b6c3452cc97e
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsEstimatedChargeRemaining)<{$BATTERY_REMAINING_ALARM}'
+              name: 'Battery Remaining % ALARM'
+              priority: HIGH
+            - uuid: 6764d7b48b5c4762ba76e66a0b895aa2
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsEstimatedChargeRemaining)<{$BATTERY_REMAINING_WARNING}'
+              name: 'Battery Remaining % WARNING'
+              priority: AVERAGE
+              dependencies:
+                - name: 'Battery Remaining % ALARM'
+                  expression: 'last(/Template UPS Eaton 9390 SNMP/upsEstimatedChargeRemaining)<{$BATTERY_REMAINING_ALARM}'
+        - uuid: 8a57b1aa00d04069b39ab1cd43556e5c
+          name: 'Battery Remaining Time (m)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.2.3.0
+          key: upsEstimatedMinutesRemaining
+          history: 30d
+          trends: '0'
+          units: m
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: battery
+          triggers:
+            - uuid: 35227fc50332444db11449b01bba3858
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsEstimatedMinutesRemaining)<{$BATTERY_REMAINING_TIME_ALARM}'
+              name: 'Battery Remaining Time ALARM'
+              priority: HIGH
+            - uuid: a2478e946252416b9e19420c100a0342
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsEstimatedMinutesRemaining)<{$BATTERY_REMAINING_TIME_WARNING}'
+              name: 'Battery Remaining Time WARNING'
+              priority: AVERAGE
+              dependencies:
+                - name: 'Battery Remaining Time ALARM'
+                  expression: 'last(/Template UPS Eaton 9390 SNMP/upsEstimatedMinutesRemaining)<{$BATTERY_REMAINING_TIME_ALARM}'
+        - uuid: 773e4c3a5c8442678e9f15071fbdb1f6
+          name: 'Current input - R'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.3.3.1.4.1
+          key: upsInputCurrent_R
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: current
+        - uuid: d81a6f6c565e440c8b260958de7f76ff
+          name: 'Current input - S'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.3.3.1.4.2
+          key: upsInputCurrent_S
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: current
+        - uuid: 16cf7c6e6782403785031ac069c55953
+          name: 'Current input - T'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.3.3.1.4.3
+          key: upsInputCurrent_T
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: current
+        - uuid: e4c2b896528f4180839cf96b36bd2a60
+          name: 'Power input AC - R'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.3.3.1.5.1
+          key: upsInputTruePower_R
+          history: 30d
+          units: W
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: power
+        - uuid: bb77e79a056d43c5be2db0980130baf6
+          name: 'Power input AC - S'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.3.3.1.5.2
+          key: upsInputTruePower_S
+          history: 30d
+          units: W
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: power
+        - uuid: 0bf3eefd3c2244ac86a2250e17ce2be5
+          name: 'Power input AC - T'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.3.3.1.5.3
+          key: upsInputTruePower_T
+          history: 30d
+          units: W
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: power
+        - uuid: 5a36b7b6b1a440e3ae9d332c1d21630b
+          name: 'Voltage input AC - R'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.3.3.1.3.1
+          key: upsInputVoltage_R
+          history: 30d
+          units: V
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: voltage
+          triggers:
+            - uuid: 7c24fb69fdf5414092fdc0a787e0da62
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsInputVoltage_R)<{$INPUT_VOLTAGE_ALARM}'
+              name: 'Input Voltage R Problem'
+              priority: HIGH
+        - uuid: 178fc390eeff45b6830cf58d27dfbb35
+          name: 'Voltage input AC - S'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.3.3.1.3.2
+          key: upsInputVoltage_S
+          history: 30d
+          units: V
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: voltage
+          triggers:
+            - uuid: 3c0fc1445f18427aa14bda1782da8cd3
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsInputVoltage_S)<{$INPUT_VOLTAGE_ALARM}'
+              name: 'Input Voltage S Problem'
+              priority: HIGH
+        - uuid: 41c683180ab64b82880f217fa6be81b1
+          name: 'Voltage input AC - T'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.3.3.1.3.3
+          key: upsInputVoltage_T
+          history: 30d
+          units: V
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: voltage
+          triggers:
+            - uuid: a15ade99d3264f67a12317f627873680
+              expression: 'last(/Template UPS Eaton 9390 SNMP/upsInputVoltage_T)<{$INPUT_VOLTAGE_ALARM}'
+              name: 'Input Voltage T Problem'
+              priority: HIGH
+        - uuid: 2d37b03109624cb3afdebedff1d668f5
+          name: 'Current output - R'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.4.4.1.3.1
+          key: upsOutputCurrent_R
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: current
+        - uuid: b1050fd791f944d5b4c498da8251eed4
+          name: 'Current output - S'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.4.4.1.3.2
+          key: upsOutputCurrent_S
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: current
+        - uuid: 5c19f92fa5f9405da990c4c7c03f683b
+          name: 'Current output - T'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.4.4.1.3.3
+          key: upsOutputCurrent_T
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: current
+        - uuid: 6d33393c8f7e47dabe0b301513724081
+          name: 'Power Load output - R'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.4.4.1.5.1
+          key: upsOutputPercentLoad_R
+          history: 30d
+          units: '%'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: power
+        - uuid: 3bfaf03109244d6588ed70f0d756aa2b
+          name: 'Power Load output - S'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.4.4.1.5.2
+          key: upsOutputPercentLoad_S
+          history: 30d
+          units: '%'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: power
+        - uuid: 42ae51ebf04e4ed180fb56057d2b7693
+          name: 'Power Load output - T'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.4.4.1.5.3
+          key: upsOutputPercentLoad_T
+          history: 30d
+          units: '%'
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: power
+        - uuid: 601d60d818c54f6ea0a64ed87ab426b9
+          name: 'Voltage output AC - R'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.4.4.1.2.1
+          key: upsOutputVoltage_R
+          history: 30d
+          units: V
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: voltage
+        - uuid: c0de91fc7e04408a8e0bfce7e6ebf58b
+          name: 'Voltage output AC - S'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.4.4.1.2.2
+          key: upsOutputVoltage_S
+          history: 30d
+          units: V
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: voltage
+        - uuid: 3637e3b7d1914776ad2dfd2e79b92a63
+          name: 'Voltage output AC - T'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.4.4.1.2.3
+          key: upsOutputVoltage_T
+          history: 30d
+          units: V
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: voltage
+        - uuid: 3c95525bdff04d2a8050dc96cd3e1524
+          name: 'Time on Battery (s)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.33.1.2.2.0
+          key: upsSecondsOnBattery
+          history: 30d
+          trends: '0'
+          units: s
+          tags:
+            - tag: application
+              value: power
+            - tag: component
+              value: battery
+      macros:
+        - macro: '{$BATTERY_REMAINING_ALARM}'
+          value: '30'
+          description: 'alarm remaining % battery'
+        - macro: '{$BATTERY_REMAINING_TIME_ALARM}'
+          value: '60'
+          description: 'alarm remaining time battery'
+        - macro: '{$BATTERY_REMAINING_TIME_WARNING}'
+          value: '120'
+          description: 'warning remaining time battery'
+        - macro: '{$BATTERY_REMAINING_WARNING}'
+          value: '50'
+          description: 'warning remaining % battery'
+        - macro: '{$INPUT_VOLTAGE_ALARM}'
+          value: '100'
+          description: 'alarm input voltage'
+        - macro: '{$TEMP_BATTERY_ALARM}'
+          value: '50'
+          description: 'alarm temperature battery'
+        - macro: '{$TEMP_BATTERY_WARNING}'
+          value: '40'
+          description: 'warning temperature battery'
+      valuemaps:
+        - uuid: 0d8c767c676e4315b568886a7ce69f37
+          name: 'UPS-MIB::upsBatteryStatus'
+          mappings:
+            - value: '1'
+              newvalue: unknown
+            - value: '2'
+              newvalue: batteryNormal
+            - value: '3'
+              newvalue: batteryLow
+            - value: '4'
+              newvalue: batteryDepleted
+  graphs:
+    - uuid: 84f2f07f1a604411ae9d779615bf9cf0
+      name: 'Battery Remaining Capacity (%)'
+      ymin_type_1: FIXED
+      graph_items:
+        - drawtype: GRADIENT_LINE
+          color: 00FF00
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsEstimatedChargeRemaining
+    - uuid: 9e24c853cc564d9b8c1ee73661c61352
+      name: 'Bypass Voltage R/S/T'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      graph_items:
+        - color: FF0000
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsBypassVoltage_R
+        - sortorder: '1'
+          color: FFFF00
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsBypassVoltage_S
+        - sortorder: '2'
+          color: FFFFFF
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsBypassVoltage_T
+    - uuid: b87afc51fed84e2a8df95f467255bf60
+      name: 'Current input R/S/T'
+      ymin_type_1: FIXED
+      graph_items:
+        - color: FF0000
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsInputCurrent_R
+        - sortorder: '1'
+          color: FFFF00
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsInputCurrent_S
+        - sortorder: '2'
+          color: FFFFFF
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsInputCurrent_T
+    - uuid: 30054098b9f84253b6d76fa3812addd2
+      name: 'Current output R/S/T'
+      ymin_type_1: FIXED
+      graph_items:
+        - color: FF0000
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsOutputCurrent_R
+        - sortorder: '1'
+          color: FFFF00
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsOutputCurrent_S
+        - sortorder: '2'
+          color: FFFFFF
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsOutputCurrent_T
+    - uuid: 66da6fc3621c4a7f8e501e12745d80da
+      name: 'Power input R/S/T'
+      ymin_type_1: FIXED
+      graph_items:
+        - color: FF0000
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsInputTruePower_R
+        - sortorder: '1'
+          color: FFFF00
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsInputTruePower_S
+        - sortorder: '2'
+          color: FFFFFF
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsInputTruePower_T
+    - uuid: 10aaed673ca646408740c03fc4bb830e
+      name: 'Power Load output R/S/T'
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        - color: FF0000
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsOutputPercentLoad_R
+        - sortorder: '1'
+          color: FFFF00
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsOutputPercentLoad_S
+        - sortorder: '2'
+          color: FFFFFF
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsOutputPercentLoad_T
+    - uuid: 8d1462472dea409bb6a0767ca57cc07e
+      name: 'Voltage input R/S/T'
+      ymin_type_1: FIXED
+      graph_items:
+        - color: FF0000
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsInputVoltage_R
+        - sortorder: '1'
+          color: FFFF00
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsInputVoltage_S
+        - sortorder: '2'
+          color: FFFFFF
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsInputVoltage_T
+    - uuid: b52d2e19a6cb4ffabba516f8d17bc553
+      name: 'Voltage output R/S/T'
+      ymin_type_1: FIXED
+      graph_items:
+        - color: FF0000
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsOutputVoltage_R
+        - sortorder: '1'
+          color: FFFF00
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsOutputVoltage_S
+        - sortorder: '2'
+          color: FFFFFF
+          item:
+            host: 'Template UPS Eaton 9390 SNMP'
+            key: upsOutputVoltage_T

@@ -1,0 +1,239 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: d87f14905d864e2ea411b0cdd5459a65
+      template: 'Template Cisco Catalyst 4948E Optical Monitor  SNMP'
+      name: 'Template Cisco Catalyst 4948E Optical Monitor  SNMP'
+      description: |
+        Template Cisco Catalyst 4948E Optical Monitor
+        -RX Treshould
+        -TX Treshould
+        -Laser Off
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        ENTITY-MIB.mib
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: ee9e325bc7ff4cc1abba3984452bf02c
+          name: 'Optical Sensor Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.47.1.1.1.1.7]'
+          key: 'entPhysicalName["Optical"]'
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: '^Te1/(49|50|51|52) (Transmit|Receive) Power Sensor'
+                formulaid: A
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: |
+            ENTITY-MIB::entPhysicalDescr (.1.3.6.1.2.1.47.1.1.1.1.2)
+            
+            ENTITY-MIB::entPhysicalName (.1.3.6.1.2.1.47.1.1.1.1.7)
+            
+            A textual description of physical entity.  This object should contain a string that identifies the manufacturer's name for the physical entity, and should be set to a distinct value for each version or model of the physical entity.
+          item_prototypes:
+            - uuid: 8048c3af71b240ac86037139d107c00f
+              name: 'Optical "{#SNMPVALUE}" Threshold | Warning High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.2'
+              key: 'entSensorThresholdRxTxValueHighWarn["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#SNMPVALUE}'
+                - tag: element
+                  value: threshold
+            - uuid: 6e14b6104a7e4e50a319f84ccccb100b
+              name: 'Optical "{#SNMPVALUE}" Threshold | Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.1'
+              key: 'entSensorThresholdRxTxValueHigh["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              description: |
+                This variable indicates the value of the threshold.
+                
+                To correctly display or interpret this variable's value, you must also know entSensorType, entSensorScale, and entSensorPrecision.
+                
+                However, you can directly compare entSensorValue with the threshold values given in entSensorThresholdTable without any semantic knowledge.
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#SNMPVALUE}'
+                - tag: element
+                  value: threshold
+            - uuid: b8d75f86cc384990b6a1663cf3273f8d
+              name: 'Optical "{#SNMPVALUE}" Threshold | Warning Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.3'
+              key: 'entSensorThresholdRxTxValueLowWarn["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#SNMPVALUE}'
+                - tag: element
+                  value: threshold
+            - uuid: 40a93fc4546540089ec71d5dac3ed778
+              name: 'Optical "{#SNMPVALUE}" Threshold | Alarm Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.4'
+              key: 'entSensorThresholdRxTxValueLow["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#SNMPVALUE}'
+                - tag: element
+                  value: threshold
+            - uuid: ff91221fc8bb454094543d9b1794fc57
+              name: 'Optical "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.1.1.1.4.{#SNMPINDEX}'
+              key: 'entSensorValue["{#SNMPVALUE}"]'
+              history: 30d
+              value_type: FLOAT
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#SNMPVALUE}'
+                - tag: element
+                  value: value
+          trigger_prototypes:
+            - uuid: 80f219be2b91483d92597199131a78b8
+              expression: 'last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorValue["{#SNMPVALUE}"])>last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorThresholdRxTxValueHigh["{#SNMPVALUE}"])'
+              name: 'High signal ALARM for {#SNMPVALUE}'
+              priority: HIGH
+              manual_close: 'YES'
+            - uuid: bc2f24f6f2924c14819a91f3ab3f7aca
+              expression: 'last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorThresholdRxTxValueHigh["{#SNMPVALUE}"])>last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorValue["{#SNMPVALUE}"]) and last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorValue["{#SNMPVALUE}"])>last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorThresholdRxTxValueHighWarn["{#SNMPVALUE}"])'
+              name: 'High signal WARNING for {#SNMPVALUE}'
+              priority: WARNING
+              manual_close: 'YES'
+              dependencies:
+                - name: 'High signal ALARM for {#SNMPVALUE}'
+                  expression: 'last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorValue["{#SNMPVALUE}"])>last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorThresholdRxTxValueHigh["{#SNMPVALUE}"])'
+            - uuid: 5c013baf592b47dabf5ea8b2c63ee9ea
+              expression: 'last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorValue["{#SNMPVALUE}"])<last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorThresholdRxTxValueLow["{#SNMPVALUE}"])'
+              name: 'Low signal ALARM for {#SNMPVALUE}'
+              priority: HIGH
+              manual_close: 'YES'
+            - uuid: 11ef92a62b6e49c6a5157c9708da920f
+              expression: 'last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorThresholdRxTxValueLow["{#SNMPVALUE}"])>last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorValue["{#SNMPVALUE}"]) and last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorValue["{#SNMPVALUE}"])>last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorThresholdRxTxValueLowWarn["{#SNMPVALUE}"])'
+              name: 'Low signal WARNING for {#SNMPVALUE}'
+              priority: WARNING
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Low signal ALARM for {#SNMPVALUE}'
+                  expression: 'last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorValue["{#SNMPVALUE}"])<last(/Template Cisco Catalyst 4948E Optical Monitor  SNMP/entSensorThresholdRxTxValueLow["{#SNMPVALUE}"])'
+          graph_prototypes:
+            - uuid: 4ff4d5ace440412bbb5c871f11fda773
+              name: 'Optical "{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco Catalyst 4948E Optical Monitor  SNMP'
+                    key: 'entSensorValue["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Cisco Catalyst 4948E Optical Monitor  SNMP'
+                    key: 'entSensorThresholdRxTxValueHigh["{#SNMPVALUE}"]'
+                - sortorder: '2'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Cisco Catalyst 4948E Optical Monitor  SNMP'
+                    key: 'entSensorThresholdRxTxValueLow["{#SNMPVALUE}"]'
+                - sortorder: '3'
+                  color: FF8000
+                  item:
+                    host: 'Template Cisco Catalyst 4948E Optical Monitor  SNMP'
+                    key: 'entSensorThresholdRxTxValueHighWarn["{#SNMPVALUE}"]'
+                - sortorder: '4'
+                  color: FF8000
+                  item:
+                    host: 'Template Cisco Catalyst 4948E Optical Monitor  SNMP'
+                    key: 'entSensorThresholdRxTxValueLowWarn["{#SNMPVALUE}"]'
+      tags:
+        - tag: class
+          value: optical
+      dashboards:
+        - uuid: 101880cb932942eca2c9f57eb5370103
+          name: 'Screen Optical'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Cisco Catalyst 4948E Optical Monitor  SNMP'
+                        name: 'Optical "{#SNMPVALUE}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'

@@ -1,0 +1,26 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 4c6d50997e8242828764449e850e4171
+      name: Templates/Devices
+  templates:
+    - uuid: 245ea2bc02644577a65f81c5b77336b1
+      template: 'Template Cisco ASR 1001-X'
+      name: 'Template Cisco ASR 1001-X'
+      description: 'Template for device Cisco ASR 1001-X'
+      templates:
+        - name: 'Template Cisco ASR 1000 Health SNMP'
+        - name: 'Template Cisco ASR 1000 Inventory SNMP'
+        - name: 'Template Cisco ASR 1000 Optical Monitor SNMP'
+        - name: 'Template Cisco BGP SNMP'
+        - name: 'Template Cisco Pseudowire Monitor SNMP'
+        - name: 'Template MPLS LDP SNMP'
+        - name: 'Template Network interface SNMP'
+        - name: 'Template OSPF SNMP'
+        - name: 'Template System Status'
+      groups:
+        - name: Templates/Devices
+      macros:
+        - macro: '{$NET.IF.IFTYPE.MATCHES}'
+          value: ^6$
+          description: 'just ethernetCsmacd'

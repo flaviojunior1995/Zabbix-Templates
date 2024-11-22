@@ -1,0 +1,937 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 0f28bff8f14544d59debf0d08913b49b
+      template: 'Template Nokia IXR-e Optical Monitor SNMP'
+      name: 'Template Nokia IXR-e Optical Monitor SNMP'
+      description: |
+        Template Nokia IXR-e Optical Monitor 
+        -RX Treshould
+        -TX Treshould
+        -Rx Signal
+        -Tx Signal
+        OBS: Error on discovery is normal, because the number of itens on discovery is not equal on all walks
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        TIMETRA-PORT-MIB.mib
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: f13c63ed5e2248399ab78ac0ffdd606b
+          name: 'Optical Sensor Discovery QSFP'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFNAME},.1.3.6.1.4.1.6527.3.1.2.2.4.2.1.6.1,{#IFPRESENT},.1.3.6.1.4.1.6527.3.1.2.2.4.2.1.34.1,{#IFTYPE},.1.3.6.1.4.1.6527.3.1.2.2.4.2.1.25.1,{#IFCONNECTOR},.1.3.6.1.4.1.6527.3.1.2.2.4.2.1.30.1]'
+          key: 'tmnxPortNameQSFP["Optical"]'
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#IFCONNECTOR}'
+                value: '7'
+                formulaid: A
+              - macro: '{#IFPRESENT}'
+                value: '1'
+                formulaid: B
+              - macro: '{#IFTYPE}'
+                value: (17)$
+                formulaid: C
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: TIMETRA-PORT-MIB
+          item_prototypes:
+            - uuid: c665878ea9ff4b55abf68d716a64fdf8
+              name: 'Optical "{#IFNAME}" Tranceiver Rx Lane1'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.17.1.{#SNMPINDEX}.1'
+              key: 'tmnxDDMLane1RxOpticalPowerQSFP["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: d2eccbf9ca614963bb9aa8918875ceb6
+              name: 'Optical "{#IFNAME}" Tranceiver Tx Lane1'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.12.1.{#SNMPINDEX}.1'
+              key: 'tmnxDDMLane1TxOutputPowerQSFP["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: f8c953841cab44658490cbdf4d096220
+              name: 'Optical "{#IFNAME}" Tranceiver Rx Lane2'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.17.1.{#SNMPINDEX}.2'
+              key: 'tmnxDDMLane2RxOpticalPowerQSFP["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 028b8922893f4f639e14aa096ade616a
+              name: 'Optical "{#IFNAME}" Tranceiver Tx Lane2'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.12.1.{#SNMPINDEX}.2'
+              key: 'tmnxDDMLane2TxOutputPowerQSFP["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 38fd12688e1c41a6a050f7e12f47af6a
+              name: 'Optical "{#IFNAME}" Tranceiver Rx Lane3'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.17.1.{#SNMPINDEX}.3'
+              key: 'tmnxDDMLane3RxOpticalPowerQSFP["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 8582991d218d48e1a44e1d97d5ef1663
+              name: 'Optical "{#IFNAME}" Tranceiver Tx Lane3'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.12.1.{#SNMPINDEX}.3'
+              key: 'tmnxDDMLane3TxOutputPowerQSFP["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 93566edb782b44c598d9a27e952b96c2
+              name: 'Optical "{#IFNAME}" Tranceiver Rx Lane4'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.17.1.{#SNMPINDEX}.4'
+              key: 'tmnxDDMLane4RxOpticalPowerQSFP["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: e536dd5ce2324bfea5ba472a092de7c5
+              name: 'Optical "{#IFNAME}" Tranceiver Tx Lane4'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.12.1.{#SNMPINDEX}.4'
+              key: 'tmnxDDMLane4TxOutputPowerQSFP["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 02a4ae04a9b34dcca5fb3c5c0c6b52a4
+              name: 'Optical "{#IFNAME}" Threshold | Rx Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.21.1.{#SNMPINDEX}.1'
+              key: 'tmnxDDMRxOpticalPowerHiAlarmQSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 4a542d89422c4fb9b5cc5f3edda9c7ab
+              name: 'Optical "{#IFNAME}" Threshold | Rx Warning High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.20.1.{#SNMPINDEX}.1'
+              key: 'tmnxDDMRxOpticalPowerHiWarningQSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 0964769415074172a01d840d1c1c7f2d
+              name: 'Optical "{#IFNAME}" Threshold | Rx Alarm Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.19.1.{#SNMPINDEX}.1'
+              key: 'tmnxDDMRxOpticalPowerLowAlarmQSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 91d84863ac214441b5333a753c7c54d6
+              name: 'Optical "{#IFNAME}" Threshold | Rx Warning Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.18.1.{#SNMPINDEX}.1'
+              key: 'tmnxDDMRxOpticalPowerLowWarningQSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: ae78da0080944dab8455b4d53036751c
+              name: 'Optical "{#IFNAME}" Rx'
+              type: CALCULATED
+              key: 'tmnxDDMRxOpticalPowerQSFP["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              units: dBm
+              params: '( last(//tmnxDDMLane1RxOpticalPowerQSFP["{#IFNAME}"]) + last(//tmnxDDMLane2RxOpticalPowerQSFP["{#IFNAME}"]) + last(//tmnxDDMLane3RxOpticalPowerQSFP["{#IFNAME}"]) + last(//tmnxDDMLane1RxOpticalPowerQSFP["{#IFNAME}"]) ) / 4'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 29ebae114b4b4d2d85edc76f931441a4
+              name: 'Optical "{#IFNAME}" Threshold | Tx Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.16.1.{#SNMPINDEX}.1'
+              key: 'tmnxDDMTxOutputPowerHiAlarmQSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 46a16d33b7f14acf99d6ffa5387697d6
+              name: 'Optical "{#IFNAME}" Threshold | Tx Warning High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.15.1.{#SNMPINDEX}.1'
+              key: 'tmnxDDMTxOutputPowerHiWarningQSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 30872dbd55744435b4cd1e1cbc866fc9
+              name: 'Optical "{#IFNAME}" Threshold | Tx Alarm Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.14.1.{#SNMPINDEX}.1'
+              key: 'tmnxDDMTxOutputPowerLowAlarmQSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 5922a4bb341e4571b3cc4b8f980f41ca
+              name: 'Optical "{#IFNAME}" Threshold | Tx Warning Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.66.1.13.1.{#SNMPINDEX}.1'
+              key: 'tmnxDDMTxOutputPowerLowWarningQSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: d5ed631d3b78471f8d2cddfd6ab549f3
+              name: 'Optical "{#IFNAME}" Tx'
+              type: CALCULATED
+              key: 'tmnxDDMTxOutputPowerQSFP["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              units: dBm
+              params: '( last(//tmnxDDMLane1TxOutputPowerQSFP["{#IFNAME}"]) + last(//tmnxDDMLane2TxOutputPowerQSFP["{#IFNAME}"]) + last(//tmnxDDMLane3TxOutputPowerQSFP["{#IFNAME}"]) + last(//tmnxDDMLane4TxOutputPowerQSFP["{#IFNAME}"]) ) / 4'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+          graph_prototypes:
+            - uuid: d00ede2f0f6945609fff8c6466785c02
+              name: 'Optical "{#IFNAME}" Rx QSFP'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMRxOpticalPowerQSFP["{#IFNAME}"]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMRxOpticalPowerHiAlarmQSFP["{#IFNAME}"]'
+                - sortorder: '2'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMRxOpticalPowerLowAlarmQSFP["{#IFNAME}"]'
+                - sortorder: '3'
+                  color: FF8000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMRxOpticalPowerHiWarningQSFP["{#IFNAME}"]'
+                - sortorder: '4'
+                  color: FF8000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMRxOpticalPowerLowWarningQSFP["{#IFNAME}"]'
+            - uuid: a352b71ae31f4fa494ea57a1bc43e2b6
+              name: 'Optical "{#IFNAME}" Tx QSFP'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMTxOutputPowerQSFP["{#IFNAME}"]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMTxOutputPowerHiAlarmQSFP["{#IFNAME}"]'
+                - sortorder: '2'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMTxOutputPowerLowAlarmQSFP["{#IFNAME}"]'
+                - sortorder: '3'
+                  color: FF8000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMTxOutputPowerHiWarningQSFP["{#IFNAME}"]'
+                - sortorder: '4'
+                  color: FF8000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMTxOutputPowerLowWarningQSFP["{#IFNAME}"]'
+        - uuid: e81546f96d1e492298975b75e22291b8
+          name: 'Optical Sensor Discovery SFP'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFNAME},.1.3.6.1.4.1.6527.3.1.2.2.4.2.1.6.1,{#IFPRESENT},.1.3.6.1.4.1.6527.3.1.2.2.4.2.1.34.1,{#IFTYPE},.1.3.6.1.4.1.6527.3.1.2.2.4.2.1.25.1,{#IFCONNECTOR},.1.3.6.1.4.1.6527.3.1.2.2.4.2.1.30.1]'
+          key: 'tmnxPortNameSFP["Optical"]'
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#IFCONNECTOR}'
+                value: '7'
+                formulaid: A
+              - macro: '{#IFPRESENT}'
+                value: '1'
+                formulaid: B
+              - macro: '{#IFTYPE}'
+                value: (3)$
+                formulaid: C
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: TIMETRA-PORT-MIB
+          item_prototypes:
+            - uuid: 7a6eb8987bcd466c86df12a0861c8f9f
+              name: 'Optical "{#IFNAME}" Threshold | Rx Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.31.1.25.1.{#SNMPINDEX}'
+              key: 'tmnxDDMRxOpticalPowerHiAlarmSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              description: |
+                This variable indicates the value of the threshold.
+                
+                However, you can directly compare entSensorValue with the threshold values given in entSensorThresholdTable without any semantic knowledge.
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 614d3393af8a42879cb1604300c59424
+              name: 'Optical "{#IFNAME}" Threshold | Rx Warning High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.31.1.24.1.{#SNMPINDEX}'
+              key: 'tmnxDDMRxOpticalPowerHiWarningSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: ff7abef058604171ac220d396151507c
+              name: 'Optical "{#IFNAME}" Threshold | Rx Alarm Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.31.1.23.1.{#SNMPINDEX}'
+              key: 'tmnxDDMRxOpticalPowerLowAlarmSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: e40fa8409e77492f993ac0729eeb8987
+              name: 'Optical "{#IFNAME}" Threshold | Rx Warning Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.31.1.22.1.{#SNMPINDEX}'
+              key: 'tmnxDDMRxOpticalPowerLowWarningSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 5b42c289826a4fc3ac58bf30a702be4a
+              name: 'Optical "{#IFNAME}" Tranceiver Rx'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.31.1.21.1.{#SNMPINDEX}'
+              key: 'tmnxDDMRxOpticalPowerSFP["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: d804163004a144469efd199be41d860d
+              name: 'Optical "{#IFNAME}" Threshold | Tx Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.31.1.20.1.{#SNMPINDEX}'
+              key: 'tmnxDDMTxOutputPowerHiAlarmSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              description: |
+                This variable indicates the value of the threshold.
+                
+                However, you can directly compare entSensorValue with the threshold values given in entSensorThresholdTable without any semantic knowledge.
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 1d346ec8c6554967a48045b9cf59eeb7
+              name: 'Optical "{#IFNAME}" Threshold | Tx Warning High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.31.1.19.1.{#SNMPINDEX}'
+              key: 'tmnxDDMTxOutputPowerHiWarningSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 3c6adb65dae6416d8017bf73f07b4d97
+              name: 'Optical "{#IFNAME}" Threshold | Tx Alarm Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.31.1.18.1.{#SNMPINDEX}'
+              key: 'tmnxDDMTxOutputPowerLowAlarmSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 04cd0f9c217e43a9a8b7b98a5db641a9
+              name: 'Optical "{#IFNAME}" Threshold | Tx Warning Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.31.1.17.1.{#SNMPINDEX}'
+              key: 'tmnxDDMTxOutputPowerLowWarningSFP["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 275cc5679d6d4c46ab63f4896d5ac8d0
+              name: 'Optical "{#IFNAME}" Tranceiver Tx'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.6527.3.1.2.2.4.31.1.16.1.{#SNMPINDEX}'
+              key: 'tmnxDDMTxOutputPowerSFP["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.0001'
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return 10 * Math.log10(value / 1)'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+          trigger_prototypes:
+            - uuid: 88e020559b9940ddb85a6e6a54fcecbf
+              expression: 'last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMRxOpticalPowerSFP["{#IFNAME}"]) > last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMRxOpticalPowerHiAlarmSFP["{#IFNAME}"])'
+              name: 'Optical Rx High signal ALARM for "{#IFNAME}"'
+              priority: HIGH
+            - uuid: 639d3565194242e281bf6b6cca32852c
+              expression: 'last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMRxOpticalPowerSFP["{#IFNAME}"]) > last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMRxOpticalPowerHiAlarmSFP["{#IFNAME}"])'
+              name: 'Optical Rx High signal WARNING for "{#IFNAME}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Optical Rx High signal ALARM for "{#IFNAME}"'
+                  expression: 'last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMRxOpticalPowerSFP["{#IFNAME}"]) > last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMRxOpticalPowerHiAlarmSFP["{#IFNAME}"])'
+            - uuid: f295e44a1d074d3b94942bd871561035
+              expression: 'last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMRxOpticalPowerSFP["{#IFNAME}"]) < last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMRxOpticalPowerLowAlarmSFP["{#IFNAME}"])'
+              name: 'Optical Rx Low signal ALARM for "{#IFNAME}"'
+              priority: HIGH
+            - uuid: d5cdd561d1e14946a201306aa6545cdc
+              expression: 'last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMRxOpticalPowerSFP["{#IFNAME}"]) < last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMRxOpticalPowerLowWarningSFP["{#IFNAME}"])'
+              name: 'Optical Rx Low signal WARNING for "{#IFNAME}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Optical Rx Low signal ALARM for "{#IFNAME}"'
+                  expression: 'last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMRxOpticalPowerSFP["{#IFNAME}"]) < last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMRxOpticalPowerLowAlarmSFP["{#IFNAME}"])'
+            - uuid: c1df058869ad45debe5a1ea5f4536281
+              expression: 'last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMTxOutputPowerSFP["{#IFNAME}"]) > last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMTxOutputPowerHiAlarmSFP["{#IFNAME}"])'
+              name: 'Optical Tx High signal ALARM for "{#IFNAME}"'
+              priority: HIGH
+            - uuid: 545a3da1440744a5a31bceedae36a8a3
+              expression: 'last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMTxOutputPowerSFP["{#IFNAME}"]) > last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMTxOutputPowerHiAlarmSFP["{#IFNAME}"])'
+              name: 'Optical Tx High signal WARNING for "{#IFNAME}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Optical Tx High signal ALARM for "{#IFNAME}"'
+                  expression: 'last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMTxOutputPowerSFP["{#IFNAME}"]) > last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMTxOutputPowerHiAlarmSFP["{#IFNAME}"])'
+            - uuid: 9e152d17a2b94ea9b2df49505bcd5b3f
+              expression: 'last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMTxOutputPowerSFP["{#IFNAME}"]) < last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMTxOutputPowerLowAlarmSFP["{#IFNAME}"])'
+              name: 'Optical Tx Low signal ALARM for "{#IFNAME}"'
+              priority: HIGH
+            - uuid: 9c4535cdc6f449a28f3608f71584f3a5
+              expression: 'last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMTxOutputPowerSFP["{#IFNAME}"]) < last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMTxOutputPowerLowWarningSFP["{#IFNAME}"])'
+              name: 'Optical Tx Low signal WARNING for "{#IFNAME}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Optical Tx Low signal ALARM for "{#IFNAME}"'
+                  expression: 'last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMTxOutputPowerSFP["{#IFNAME}"]) < last(/Template Nokia IXR-e Optical Monitor SNMP/tmnxDDMTxOutputPowerLowAlarmSFP["{#IFNAME}"])'
+          graph_prototypes:
+            - uuid: 4088c354886349d6b2ad97f4de3aa6b5
+              name: 'Optical "{#IFNAME}" Rx SFP'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMRxOpticalPowerSFP["{#IFNAME}"]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMRxOpticalPowerHiAlarmSFP["{#IFNAME}"]'
+                - sortorder: '2'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMRxOpticalPowerLowAlarmSFP["{#IFNAME}"]'
+                - sortorder: '3'
+                  color: FF8000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMRxOpticalPowerHiWarningSFP["{#IFNAME}"]'
+                - sortorder: '4'
+                  color: FF8000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMRxOpticalPowerLowWarningSFP["{#IFNAME}"]'
+            - uuid: e6dce48dd7b54b06b1cb7a0d2a15a0e7
+              name: 'Optical "{#IFNAME}" Tx SFP'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMTxOutputPowerSFP["{#IFNAME}"]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMTxOutputPowerHiAlarmSFP["{#IFNAME}"]'
+                - sortorder: '2'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMTxOutputPowerLowAlarmSFP["{#IFNAME}"]'
+                - sortorder: '3'
+                  color: FF8000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMTxOutputPowerHiWarningSFP["{#IFNAME}"]'
+                - sortorder: '4'
+                  color: FF8000
+                  item:
+                    host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                    key: 'tmnxDDMTxOutputPowerLowWarningSFP["{#IFNAME}"]'
+      tags:
+        - tag: class
+          value: optical
+      dashboards:
+        - uuid: 668626027e1a42a0a22280b217313355
+          name: 'Screen Optical'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                        name: 'Optical "{#IFNAME}" Rx SFP'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+                - type: graphprototype
+                  x: '36'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Nokia IXR-e Optical Monitor SNMP'
+                        name: 'Optical "{#IFNAME}" Tx SFP'
+                    - type: STRING
+                      name: reference
+                      value: AAAAB
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'

@@ -1,0 +1,202 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: c23c0854d5df454bb34aaa0e5ce4fbee
+      template: 'Template Cisco ME 3800X Optical Monitor SNMP'
+      name: 'Template Cisco ME 3800X Optical Monitor SNMP'
+      description: |
+        Template Cisco ME 3800X Optical Monitor
+        -RX Treshould
+        -TX Treshould
+        -Optical Power
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        ENTITY-MIB.mib
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: 0979c8e23a6249828010175df95e558a
+          name: 'Optical Sensor Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.47.1.1.1.1.7]'
+          key: entPhysicalName
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: '(Transmit|Receive) Power Sensor'
+                formulaid: A
+          lifetime: 30d
+          description: |
+            ENTITY-MIB::entPhysicalDescr (.1.3.6.1.2.1.47.1.1.1.1.2)
+            
+            ENTITY-MIB::entPhysicalName (.1.3.6.1.2.1.47.1.1.1.1.7)
+            
+            A textual description of physical entity.  This object should contain a string that identifies the manufacturer's name for the physical entity, and should be set to a distinct value for each version or model of the physical entity.
+          item_prototypes:
+            - uuid: 97614be7864c45f9beed3b4d26bf89bf
+              name: 'Optical "{#SNMPVALUE}" Threshold | Warning High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.2'
+              key: 'entSensorThresholdRxTxValueHighWarn["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#SNMPVALUE}'
+                - tag: element
+                  value: threshold
+            - uuid: 34418efbd94846b3b4451d512fad6c01
+              name: 'Optical "{#SNMPVALUE}" Threshold | Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.1'
+              key: 'entSensorThresholdRxTxValueHigh["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#SNMPVALUE}'
+                - tag: element
+                  value: threshold
+            - uuid: 07ac84f5c0484f7cb50c0dfe0b603916
+              name: 'Optical "{#SNMPVALUE}" Threshold | Warning Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.3'
+              key: 'entSensorThresholdRxTxValueLowWarn["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#SNMPVALUE}'
+                - tag: element
+                  value: threshold
+            - uuid: d681b3dfb9294d4aaef60e3df28c4c54
+              name: 'Optical "{#SNMPVALUE}" Threshold | Alarm Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.4'
+              key: 'entSensorThresholdRxTxValueLow["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#SNMPVALUE}'
+                - tag: element
+                  value: threshold
+            - uuid: fb8dc116a2df4035b280e9f264dabd16
+              name: 'Optical "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.1.1.1.4.{#SNMPINDEX}'
+              key: 'entSensorValue["{#SNMPVALUE}"]'
+              history: 30d
+              value_type: FLOAT
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#SNMPVALUE}'
+                - tag: element
+                  value: value
+          trigger_prototypes:
+            - uuid: acc3ffe930f64900b35a1a75eda55140
+              expression: 'last(/Template Cisco ME 3800X Optical Monitor SNMP/entSensorValue["{#SNMPVALUE}"]) > last(/Template Cisco ME 3800X Optical Monitor SNMP/entSensorThresholdRxTxValueHigh["{#SNMPVALUE}"])'
+              name: 'High signal ALARM for "{#SNMPVALUE}"'
+              priority: HIGH
+            - uuid: 350ddf8d31494a7daaa586b0be7c96d2
+              expression: 'last(/Template Cisco ME 3800X Optical Monitor SNMP/entSensorValue["{#SNMPVALUE}"]) > last(/Template Cisco ME 3800X Optical Monitor SNMP/entSensorThresholdRxTxValueHighWarn["{#SNMPVALUE}"])'
+              name: 'High signal WARNING for "{#SNMPVALUE}"'
+              priority: WARNING
+              dependencies:
+                - name: 'High signal ALARM for "{#SNMPVALUE}"'
+                  expression: 'last(/Template Cisco ME 3800X Optical Monitor SNMP/entSensorValue["{#SNMPVALUE}"]) > last(/Template Cisco ME 3800X Optical Monitor SNMP/entSensorThresholdRxTxValueHigh["{#SNMPVALUE}"])'
+            - uuid: f59ee364394645538da617779fc94384
+              expression: 'last(/Template Cisco ME 3800X Optical Monitor SNMP/entSensorValue["{#SNMPVALUE}"]) < last(/Template Cisco ME 3800X Optical Monitor SNMP/entSensorThresholdRxTxValueLow["{#SNMPVALUE}"])'
+              name: 'Low signal ALARM for "{#SNMPVALUE}"'
+              priority: HIGH
+            - uuid: f01fa554d9534b049839ae30ad57c140
+              expression: 'last(/Template Cisco ME 3800X Optical Monitor SNMP/entSensorValue["{#SNMPVALUE}"]) < last(/Template Cisco ME 3800X Optical Monitor SNMP/entSensorThresholdRxTxValueLowWarn["{#SNMPVALUE}"])'
+              name: 'Low signal WARNING for "{#SNMPVALUE}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Low signal ALARM for "{#SNMPVALUE}"'
+                  expression: 'last(/Template Cisco ME 3800X Optical Monitor SNMP/entSensorValue["{#SNMPVALUE}"]) < last(/Template Cisco ME 3800X Optical Monitor SNMP/entSensorThresholdRxTxValueLow["{#SNMPVALUE}"])'
+          graph_prototypes:
+            - uuid: 021ac162a27f4ca1ab232a62a5204301
+              name: 'Optical "{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco ME 3800X Optical Monitor SNMP'
+                    key: 'entSensorValue["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Cisco ME 3800X Optical Monitor SNMP'
+                    key: 'entSensorThresholdRxTxValueHigh["{#SNMPVALUE}"]'
+                - sortorder: '2'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Cisco ME 3800X Optical Monitor SNMP'
+                    key: 'entSensorThresholdRxTxValueLow["{#SNMPVALUE}"]'
+                - sortorder: '3'
+                  color: FF8000
+                  item:
+                    host: 'Template Cisco ME 3800X Optical Monitor SNMP'
+                    key: 'entSensorThresholdRxTxValueHighWarn["{#SNMPVALUE}"]'
+                - sortorder: '4'
+                  color: FF8000
+                  item:
+                    host: 'Template Cisco ME 3800X Optical Monitor SNMP'
+                    key: 'entSensorThresholdRxTxValueLowWarn["{#SNMPVALUE}"]'
+      tags:
+        - tag: class
+          value: optical

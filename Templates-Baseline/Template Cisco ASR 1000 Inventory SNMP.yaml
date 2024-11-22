@@ -1,0 +1,142 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 7af5a267916e42869bb4272b86717724
+      template: 'Template Cisco ASR 1000 Inventory SNMP'
+      name: 'Template Cisco ASR 1000 Inventory SNMP'
+      description: |
+        Template Cisco ASR 1000 Inventory
+        -Uptime
+        -Hardware model
+        -Hostname
+        -Contact
+        -Location
+        -Serial Number
+        -Software Version
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        SNMPv2-MIB.mib
+        ENTITY-MIB.mib
+        CISCO-IMAGE-MIB.mib
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: cdbd37424de84e46aefea1054fa058a7
+          name: Hardware
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.9.3.6.11.1.3.1
+          key: 'cardTable["cardDescr"]'
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: HARDWARE
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 21b42558858543c592b5373e8108fe32
+          name: 'Software Full Detail'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.9.9.25.1.1.1.2.7
+          key: 'ciscoImageString["Detail"]'
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SOFTWARE_FULL
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 57fd02cc8a73410bba9d7e8158ae61d5
+          name: 'Software Version'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.9.9.25.1.1.1.2.5
+          key: 'ciscoImageString["Version"]'
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SOFTWARE
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - '\$(.*)\$$'
+                - \1
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: e86bbbbfdf5c4b2897acf4a738575439
+          name: 'Serial Number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.47.1.1.1.1.11.1
+          key: entPhysicalSerialNum
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SERIALNO_A
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 69f71c7bb33b4297a1cb154543a7e0c5
+          name: Model
+          type: SCRIPT
+          key: scriptModel
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "ASR 1000 Series";'
+          inventory_link: MODEL
+        - uuid: 7bb94a16a79e4cf3a6e7972dd1f5bb82
+          name: OS
+          type: SCRIPT
+          key: scriptOS
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "IOS-XE";'
+          inventory_link: OS
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 6950d7d7561f470ba812169158cfe639
+          name: Type
+          type: SCRIPT
+          key: scriptType
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "Router";'
+          inventory_link: TYPE
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 051fca8ad76e4c9b81296a36e0460e7e
+          name: Vendor
+          type: SCRIPT
+          key: scriptVendor
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "Cisco";'
+          inventory_link: VENDOR
+          tags:
+            - tag: application
+              value: inventory
+      tags:
+        - tag: class
+          value: inventory
+      macros:
+        - macro: '{$UPTIME_ALARM}'
+          value: '86400'
+          description: 'alarm uptime 1 day'

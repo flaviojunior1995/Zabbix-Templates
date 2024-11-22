@@ -1,0 +1,51 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 4c6d50997e8242828764449e850e4171
+      name: Templates/Devices
+  templates:
+    - uuid: 5f01dbbc8f744b4691ca972121d43a3f
+      template: 'Template Mikrotik RB760iGS'
+      name: 'Template Mikrotik RB760iGS'
+      templates:
+        - name: 'Template Network interface SNMP'
+        - name: 'Template RouterOS Health SNMP'
+        - name: 'Template RouterOS Inventory SNMP'
+        - name: 'Template RouterOS Optical Monitor SNMP'
+        - name: 'Template RouterOS Tunnel Monitor SNMP'
+        - name: 'Template System Status'
+      groups:
+        - name: Templates/Devices
+      items:
+        - uuid: d353dc808572406cbd814eb2ea7287af
+          name: Model
+          type: SCRIPT
+          key: scriptModel
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "Router Board";'
+          inventory_link: MODEL
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 8502463be22e4a2ab1d52804a240d44b
+          name: Type
+          type: SCRIPT
+          key: scriptType
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "Router";'
+          inventory_link: TYPE
+      macros:
+        - macro: '{$NET.IF.IFTYPE.MATCHES}'
+          value: ^6$
+        - macro: '{$TEMP_HIGH_ALARM}'
+          value: '80'
+          description: 'alarm temperature high'
+        - macro: '{$TEMP_LOW_ALARM}'
+          value: '-40'
+          description: 'alarm temperature low'

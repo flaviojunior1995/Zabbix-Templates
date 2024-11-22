@@ -1,0 +1,421 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: cc42a285fb424f418661f4c75f131627
+      template: 'Template Cisco Catalyst 4948E Health SNMP'
+      name: 'Template Cisco Catalyst 4948E Health SNMP'
+      description: |
+        Template Cisco Catalyst 4948E Health
+        -CPU
+        -Memory
+        -PowerSupply
+        -Fan ( Fan and FanTray )
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        CISCO-MEMORY-POOL-MIB.mib
+        CISCO-PROCESS-MIB.mib
+        CISCO-ENVMON-MIB.mib
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: b8d10d9716694370aefaf40554180322
+          name: 'Software Full Detail'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.9.9.25.1.1.1.2.7
+          key: 'ciscoImageString["Detail"]'
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SOFTWARE_FULL
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 05f212b560e54c8ea9dfa9072128c7b9
+          name: 'Software Version'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.9.9.25.1.1.1.2.5
+          key: 'ciscoImageString["Version"]'
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SOFTWARE
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 5b1818189db147c79d3581c7086988a9
+          name: 'Serial Number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.47.1.1.1.1.11.1
+          key: entPhysicalSerialNum
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          description: ENTITY-MIB
+          inventory_link: SERIALNO_A
+          tags:
+            - tag: application
+              value: inventory
+      discovery_rules:
+        - uuid: 2624be49ed054c569aacb863cdd67177
+          name: 'FAN Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.13.1.4.1.2]'
+          key: 'ciscoEnvMonFanStatusDescr["FAN"]'
+          delay: 1h
+          lifetime: 30d
+          item_prototypes:
+            - uuid: 1f648f4eac7e472792f2ec60caa13912
+              name: 'Operational Status of "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.13.1.4.1.3.{#SNMPINDEX}'
+              key: 'ciscoEnvMonFanState["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'CISCO-ENVMON-MIB::CiscoEnvMonState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 88665ad414d84ffcbf9f79c7936d9a2d
+                  expression: 'last(/Template Cisco Catalyst 4948E Health SNMP/ciscoEnvMonFanState["{#SNMPVALUE}"])=3'
+                  name: '"{#SNMPVALUE}" is critical Failure'
+                  priority: HIGH
+                - uuid: 4ee2949109244240acf8533fc8a856f5
+                  expression: 'last(/Template Cisco Catalyst 4948E Health SNMP/ciscoEnvMonFanState["{#SNMPVALUE}"])=6'
+                  name: '"{#SNMPVALUE}" is not Functioning'
+                  priority: HIGH
+                - uuid: ce21cf9b324c486c96efc4aa177a8687
+                  expression: 'last(/Template Cisco Catalyst 4948E Health SNMP/ciscoEnvMonFanState["{#SNMPVALUE}"])=5'
+                  name: '"{#SNMPVALUE}" is not Present'
+                  priority: INFO
+                - uuid: 05afb2e7250e47b5a88d8da42de21ecb
+                  expression: 'last(/Template Cisco Catalyst 4948E Health SNMP/ciscoEnvMonFanState["{#SNMPVALUE}"])=4'
+                  name: '"{#SNMPVALUE}" is shutdown'
+                  priority: INFO
+                - uuid: 87708a0afbb3452bbdfc933f4c87f9a3
+                  expression: 'last(/Template Cisco Catalyst 4948E Health SNMP/ciscoEnvMonFanState["{#SNMPVALUE}"])=2'
+                  name: '"{#SNMPVALUE}" is warned'
+                  priority: WARNING
+        - uuid: aba62f9fcf9f4cbd9d4c5c04f984a1a7
+          name: 'Power Supply Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.13.1.5.1.2]'
+          key: 'ciscoEnvMonSupplyStatusDescr["Power Supply"]'
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: '^Power Supply (1|2)$'
+                formulaid: A
+          lifetime: 30d
+          description: 'The textual name of the physical entity.'
+          item_prototypes:
+            - uuid: 4f6faa6d738e475793fa1d89f8440abe
+              name: 'State of "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.13.1.5.1.3.{#SNMPINDEX}'
+              key: 'ciscoEnvMonSupplyState["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              description: |
+                CISCO-ENTITY-FRU-CONTROL-MIB::cefcFRUPowerOperStatus
+                
+                Operational FRU power state.
+              valuemap:
+                name: 'CISCO-ENVMON-MIB::CiscoEnvMonState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 0dfea47a55aa40b0a3b633a87836b210
+                  expression: 'last(/Template Cisco Catalyst 4948E Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=3'
+                  name: '"{#SNMPVALUE}" Critical State'
+                  priority: HIGH
+                - uuid: d5f2e5fea4884bf0955592cfc5768a62
+                  expression: 'last(/Template Cisco Catalyst 4948E Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=4'
+                  name: '"{#SNMPVALUE}" is shutdown'
+                  priority: WARNING
+                - uuid: e737aa63c7b44a879d30ac342568a10a
+                  expression: 'last(/Template Cisco Catalyst 4948E Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=6'
+                  name: '"{#SNMPVALUE}" not Functioning'
+                  priority: AVERAGE
+                - uuid: 99e99692ce484e5bb6e4c9161c66fa0c
+                  expression: 'last(/Template Cisco Catalyst 4948E Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=5'
+                  name: '"{#SNMPVALUE}" not Present'
+                  priority: WARNING
+                - uuid: 4dd64208324a44519a3215d61c6656bd
+                  expression: 'last(/Template Cisco Catalyst 4948E Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=2'
+                  name: '"{#SNMPVALUE}" Warning'
+                  priority: WARNING
+        - uuid: e99cb64a80ab4354b2010ab17257ef1c
+          name: 'Memory Pool Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.48.1.1.1.2]'
+          key: 'ciscoMemoryPoolName["Memory"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: |
+            CISCO-MEMORY-POOL-MIB::ciscoMemoryPoolName
+            
+            A textual name assigned to the memory pool.
+          item_prototypes:
+            - uuid: 2eaa1c1ddaa84cd28593039343fc00d8
+              name: 'Free memory on Memory Pool "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.48.1.1.1.6.{#SNMPINDEX}'
+              key: 'ciscoMemoryPoolFree["{#SNMPVALUE}"]'
+              history: 30d
+              units: B
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 49eba2aa85974c328988a9faf640a335
+              name: 'Total Memory Pool "{#SNMPVALUE}"'
+              type: CALCULATED
+              key: 'ciscoMemoryPoolTotal["{#SNMPVALUE}"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              units: B
+              params: 'last(//ciscoMemoryPoolFree["{#SNMPVALUE}"]) + last(//ciscoMemoryPoolUsed["{#SNMPVALUE}"])'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 42b9f82229bc4375ac2061f89fc19f63
+              name: 'Used memory on Memory Pool "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.48.1.1.1.5.{#SNMPINDEX}'
+              key: 'ciscoMemoryPoolUsed["{#SNMPVALUE}"]'
+              history: 30d
+              units: B
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: '{#SNMPVALUE}'
+          trigger_prototypes:
+            - uuid: 2b08aaf20d3348e6ad73264940862e58
+              expression: '(last(/Template Cisco Catalyst 4948E Health SNMP/ciscoMemoryPoolUsed["{#SNMPVALUE}"])*100 ) / last(/Template Cisco Catalyst 4948E Health SNMP/ciscoMemoryPoolTotal["{#SNMPVALUE}"]) > {$MEMORY_HIGH_ALARM}'
+              name: 'High memory utilizarion alarm on Pool "{#SNMPVALUE}"'
+              priority: HIGH
+            - uuid: df9532f466dd4bb68e09b8b7d641503b
+              expression: '(last(/Template Cisco Catalyst 4948E Health SNMP/ciscoMemoryPoolUsed["{#SNMPVALUE}"])*100 ) / last(/Template Cisco Catalyst 4948E Health SNMP/ciscoMemoryPoolTotal["{#SNMPVALUE}"]) > {$MEMORY_HIGH_WARNING}'
+              name: 'High memory utilizarion warning on Pool "{#SNMPVALUE}"'
+              priority: AVERAGE
+              dependencies:
+                - name: 'High memory utilizarion alarm on Pool "{#SNMPVALUE}"'
+                  expression: '(last(/Template Cisco Catalyst 4948E Health SNMP/ciscoMemoryPoolUsed["{#SNMPVALUE}"])*100 ) / last(/Template Cisco Catalyst 4948E Health SNMP/ciscoMemoryPoolTotal["{#SNMPVALUE}"]) > {$MEMORY_HIGH_ALARM}'
+          graph_prototypes:
+            - uuid: c7dbba7c05d845aab57edd604b33ef23
+              name: 'Memory {#SNMPVALUE}'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco Catalyst 4948E Health SNMP'
+                    key: 'ciscoMemoryPoolTotal["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  drawtype: GRADIENT_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Cisco Catalyst 4948E Health SNMP'
+                    key: 'ciscoMemoryPoolUsed["{#SNMPVALUE}"]'
+        - uuid: 32658034bcdc46fea0af6185ad171181
+          name: 'CPU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.109.1.1.1.1.2]'
+          key: 'cpmCPUTotalPhysicalIndex["CPU"]'
+          delay: 1h
+          lifetime: 30d
+          description: |
+            CISCO-PROCESS-MIB::cpmCPUTotalPhysicalIndex
+            
+            The entPhysicalIndex of the physical entity for which the CPU statistics in this entry are maintained. The physical entity can be a CPU chip, a group of CPUs, a CPU card etc. The exact type of this entity is described by its entPhysicalVendorType value. If the CPU statistics in this entry correspond to more than one physical entity (or to no physical entity), or if the entPhysicalTable is not supported on the SNMP agent, the value of this object must be zero.
+          item_prototypes:
+            - uuid: 2073fead656041d6888e6cd9922cdd0e
+              name: 'CPU #"{#SNMPINDEX}" Usage 1min Rev'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.109.1.1.1.1.7.{#SNMPINDEX}'
+              key: 'cpmCPUTotal1minRev[{#SNMPINDEX}]'
+              history: 30d
+              units: '%'
+              description: |
+                CISCO-PROCESS-MIB::cpmCPUTotal1minRev
+                
+                The overall CPU busy percentage in the last 1 minute period. This object deprecates the object cpmCPUTotal1min and increases the value range to (0..100).
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 33496ce018f047b5998c114ba5819bfb
+                  expression: 'last(/Template Cisco Catalyst 4948E Health SNMP/cpmCPUTotal1minRev[{#SNMPINDEX}])>{$CPU_UTIL_MAX}'
+                  name: 'High CPU #{#SNMPINDEX} Usage'
+                  priority: HIGH
+            - uuid: c25ff7587b4b4c4490be9e10100d5ad2
+              name: 'CPU #"{#SNMPINDEX}" Usage 5min Rev'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.109.1.1.1.1.8.{#SNMPINDEX}'
+              key: 'cpmCPUTotal5minRev[{#SNMPINDEX}]'
+              delay: 5m
+              history: 30d
+              units: '%'
+              description: |
+                CISCO-PROCESS-MIB::cpmCPUTotal5minRev
+                
+                The overall CPU busy percentage in the last 5 minute period. This object deprecates the object cpmCPUTotal5min and increases the value range to (0..100).
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+                - tag: element
+                  value: '{#SNMPVALUE}'
+          graph_prototypes:
+            - uuid: bf157dbed55147fe86c31da084c5df6e
+              name: 'CPU #"{#SNMPINDEX}" 1min Usage'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco Catalyst 4948E Health SNMP'
+                    key: 'cpmCPUTotal1minRev[{#SNMPINDEX}]'
+            - uuid: e8611875dcb04368906e496cfa17bb8c
+              name: 'CPU #"{#SNMPINDEX}" 5min Usage'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco Catalyst 4948E Health SNMP'
+                    key: 'cpmCPUTotal5minRev[{#SNMPINDEX}]'
+      tags:
+        - tag: class
+          value: health
+      macros:
+        - macro: '{$CPU_UTIL_MAX}'
+          value: '80'
+          description: '% maximum alarm cpu'
+        - macro: '{$MEMORY_UTIL_MAX}'
+          value: '70'
+          description: '% maximum alarm memory'
+      dashboards:
+        - uuid: dadebbf102504242af9d7f8341e9ccc3
+          name: 'Screen CPU'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Cisco Catalyst 4948E Health SNMP'
+                        name: 'CPU #"{#SNMPINDEX}" 1min Usage'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+                - type: graphprototype
+                  'y': '5'
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Cisco Catalyst 4948E Health SNMP'
+                        name: 'CPU #"{#SNMPINDEX}" 5min Usage'
+                    - type: STRING
+                      name: reference
+                      value: AAAAB
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+        - uuid: 2a2e58663be042bb9eec2a46854650c6
+          name: 'Screen Memory'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Cisco Catalyst 4948E Health SNMP'
+                        name: 'Memory {#SNMPVALUE}'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+      valuemaps:
+        - uuid: 5e3861aea1eb46a6afef6595eeddc0da
+          name: 'CISCO-ENVMON-MIB::CiscoEnvMonState'
+          mappings:
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: warning
+            - value: '3'
+              newvalue: critical
+            - value: '4'
+              newvalue: shutdown
+            - value: '5'
+              newvalue: notPresent
+            - value: '6'
+              newvalue: notFunctioning

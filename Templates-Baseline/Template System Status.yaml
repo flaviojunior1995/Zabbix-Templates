@@ -1,0 +1,103 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 608a42ed79f34e83b7b5ba7f0e38b31b
+      template: 'Template System Status'
+      name: 'Template System Status'
+      description: |
+        Template Status
+        -ICMP
+        -System Contact
+        -System Name
+        -System Description
+        -System Location
+        -System Uptime
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Dependency:
+        ICMP Ping
+        
+        Base:
+        SNMPv2-MIB.mib
+      templates:
+        - name: 'ICMP Ping'
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: 8eeb046427cf44beb6d81da6df31f679
+          name: 'System Contact'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.4.0
+          key: sysContact
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          description: SNMPv2-MIB
+          inventory_link: CONTACT
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: c4810a69f18d46d6aca9eea93ae326e5
+          name: 'System Description'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.1.0
+          key: sysDescr
+          delay: 1d
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: f8526301f3cc48b79976920bd87685ec
+          name: 'System Location'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.6.0
+          key: sysLocation
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: LOCATION
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: cb0eae559dde4896bc338850988fee99
+          name: 'System Name'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.5.0
+          key: sysName
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: NAME
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 8476666353ef43d2b8b7fd9420e0d414
+          name: 'System Uptime'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.3.0
+          key: sysUpTime
+          history: 30d
+          trends: '0'
+          units: uptime
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: application
+              value: inventory
+          triggers:
+            - uuid: 1a6b6fdc44ba4d36adc77519cc18e1dd
+              expression: 'last(/Template System Status/sysUpTime)<86400'
+              name: 'System uptime lower then 1 day'
+              priority: INFO

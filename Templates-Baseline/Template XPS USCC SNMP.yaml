@@ -1,0 +1,465 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: c38655ce64714313892d93c4dc14ca42
+      template: 'Template XPS USCC SNMP'
+      name: 'Template XPS USCC SNMP'
+      description: |
+        Template XPS USCC 
+        -Alarmes
+        -Corrente URs
+        -Falhas Fusíveis
+        -Corrente Consumidor
+        -Temperatura Sensor 1 e Sensor 2
+        -VCC Bateria
+        -Irregularidade das URs
+        -Bateria em Carga
+        -Bateria em Descarga
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        XPS-MIB
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: 7312f5ba6f9e4ae59ce802fbed780c13
+          name: 'Estado Fusível Bateria'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.41.5.0
+          key: register_fus_bateria
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS-MIB::XPS-aberto-normal'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 9c8dcfc214ab40f9a033992ce001b0c8
+              expression: 'last(/Template XPS USCC SNMP/register_fus_bateria)=0'
+              name: 'Fusivel Bateria Aberto'
+              priority: HIGH
+        - uuid: 7bb21116176c427fb37600bfcce6009e
+          name: 'Estado Fusível Consumidor'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.41.2.0
+          key: register_fus_cons
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS-MIB::XPS-aberto-normal'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: bcd61431b0864657a03d318ba45e65d8
+              expression: 'last(/Template XPS USCC SNMP/register_fus_cons)=0'
+              name: 'Fusivel Consumidor Aberto'
+              priority: HIGH
+        - uuid: c1187e51386f4cea9cd216ed3c66ce71
+          name: 'I (A) Bateria em Carga'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.36.0
+          key: register_ibatc
+          history: 30d
+          value_type: FLOAT
+          trends: '0'
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 20fba8144f8c480cb007f0ed486f5c0f
+          name: 'I (A) Bateria em Descarga'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.37.0
+          key: register_ibatd
+          history: 30d
+          value_type: FLOAT
+          trends: '0'
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+        - uuid: d1f88c3292124d0bb79e5c7354c9d7c4
+          name: 'I (A) Consumidor'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.35.0
+          key: register_icons
+          history: 30d
+          value_type: FLOAT
+          trends: '0'
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 05ebc509d7e34ee5bb7004a8487ac097
+          name: 'Corrente de UR1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.1.0
+          key: register_iur1
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: application
+              value: power
+        - uuid: a03be1ddbdca43f2b287054093bb4d20
+          name: 'Corrente de UR2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.2.0
+          key: register_iur2
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 44e5db4cb84f4203866c0b08b193291e
+          name: 'Corrente de UR3'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.3.0
+          key: register_iur3
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: application
+              value: power
+        - uuid: f1f0444ce03a4ca0820a9a4183609b44
+          name: 'Corrente de UR4'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.4.0
+          key: register_iur4
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 6beacef05542409095a70fec131f75e7
+          name: 'Status Rele de Bateria em Carga'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.43.5.0
+          key: register_rl_bat_carga
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS-MIB::XPS-USCC-falso-verdadeiro'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: ff33f557859244b7a8b35046ca63e188
+              expression: 'last(/Template XPS USCC SNMP/register_rl_bat_carga)=1'
+              name: 'Rele Bateria em Carga'
+              priority: INFO
+        - uuid: 764ec40119514383aa16aeb06a557623
+          name: 'Status Rele de Bateria Desconectada'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.43.6.0
+          key: register_rl_bat_desco
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS-MIB::XPS-USCC-falso-verdadeiro'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: ca7d291b776b42c791cbb08c88571831
+              expression: 'last(/Template XPS USCC SNMP/register_rl_bat_desco)=1'
+              name: 'Rele Bateria Desconectada'
+              priority: HIGH
+        - uuid: 4cb0dbe70ca64797b027cb6d207d4a14
+          name: 'Status Rele de Bateria em Descarga'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.43.3.0
+          key: register_rl_bat_descrg
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS-MIB::XPS-USCC-falso-verdadeiro'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 985dc8c46ced4747844ef6b3b5a9c5ba
+              expression: 'last(/Template XPS USCC SNMP/register_rl_bat_descrg)=1'
+              name: 'Rele Bateria em Descarga'
+              priority: AVERAGE
+        - uuid: 254de3a583604a8a9680353e363dd459
+          name: 'Status Rele de Tensão CA anormal'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.43.7.0
+          key: register_rl_ca_anormal
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS-MIB::XPS-USCC-falso-verdadeiro'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 5e73ba523a3b4408a30e985153aef9bb
+              expression: 'last(/Template XPS USCC SNMP/register_rl_ca_anormal)=1'
+              name: 'Rele Tenção CA anormal'
+              priority: AVERAGE
+        - uuid: 8f4a2784aed4408e8bc4e3703d7c0b5a
+          name: 'Status Rele de Tensão de Consumidor Alta'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.43.4.0
+          key: register_rl_cons_alto
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS-MIB::XPS-USCC-falso-verdadeiro'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 2739b866792e49bbb85c2a8c98643a71
+              expression: 'last(/Template XPS USCC SNMP/register_rl_cons_alto)=1'
+              name: 'Rele Tenção Consumidor Alta'
+              priority: HIGH
+        - uuid: 3a203cf11dc64d25b25423c4f9652307
+          name: 'Status Rele de Falha UR'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.43.1.0
+          key: register_rl_falha_ur
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS-MIB::XPS-USCC-falso-verdadeiro'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: f8d6c7a529a64fbbb0c9b3a484ed2035
+              expression: 'last(/Template XPS USCC SNMP/register_rl_falha_ur)=1'
+              name: 'Rele Falha UR'
+              priority: AVERAGE
+        - uuid: 9b3e481690c7406088fb3dbff3bb4cc1
+          name: 'Status Rele de Disjuntor/Fusível Aberto'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.43.2.0
+          key: register_rl_fus_aberto
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS-MIB::XPS-USCC-falso-verdadeiro'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 3390a96b2a554b078e9dbcaee0417b29
+              expression: 'last(/Template XPS USCC SNMP/register_rl_fus_aberto)=1'
+              name: 'Rele de Disjuntor/Fusível Aberto'
+              priority: HIGH
+        - uuid: 85b96afa3f6d49359568999c2b2825cc
+          name: 'Status Rele de Manutenção'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.43.8.0
+          key: register_rl_manut
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS-MIB::XPS-USCC-falso-verdadeiro'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 541ace75df534b0a839d7f185d089ffc
+              expression: 'last(/Template XPS USCC SNMP/register_rl_manut)=1'
+              name: 'Rele Manutenção'
+              priority: INFO
+        - uuid: 47a94a46c3be4a5182ee319502d96d24
+          name: 'Temperatura Bateria (Sensor 1)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.38.0
+          key: register_temp1
+          history: 30d
+          value_type: FLOAT
+          units: ºC
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 472beb5166db47a387f63892564b7734
+              expression: 'last(/Template XPS USCC SNMP/register_temp1)>{$TEMP_ALARM_SENSOR1}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Template XPS USCC SNMP/register_temp1)<{$TEMP_ALARM_SENSOR1}'
+              name: 'Temperatura Bateria Elevada (Sensor 1)'
+              priority: HIGH
+              description: 'Temperatura bateria elevada ( Sensor 1 )'
+        - uuid: eadc32c1c6394570ae16184f084c8329
+          name: 'Temperatura Ambiente (Sensor 2)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.1.1.39.0
+          key: register_temp2
+          history: 30d
+          value_type: FLOAT
+          units: ºC
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 8c211cb05428421987c4caaa19d9ce49
+              expression: 'last(/Template XPS USCC SNMP/register_temp2)>{$TEMP_ALARM_SENSOR2}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Template XPS USCC SNMP/register_temp2)<{$TEMP_ALARM_SENSOR2}'
+              name: 'Temperatura Ambiente Elevada (Sensor 2)'
+              priority: HIGH
+              description: 'Temperatura ambiente elevada ( Sensor 2 )'
+      macros:
+        - macro: '{$NUMBER_URS}'
+          value: '4'
+          description: 'quantidade de URs instaladas'
+        - macro: '{$TEMP_ALARM_SENSOR1}'
+          value: '40'
+          description: 'alarm ºC temperatura sensor1'
+        - macro: '{$TEMP_ALARM_SENSOR2}'
+          value: '40'
+          description: 'alarm ºC temperatura sensor2'
+        - macro: '{$TEMP_ALARM_URS}'
+          value: '40'
+          description: 'alarm ºC temperatura urs'
+      valuemaps:
+        - uuid: cf190eb5b8c54871a27dc4996e6b7a4b
+          name: 'XPS-MIB::XPS-aberto-normal'
+          mappings:
+            - value: '0'
+              newvalue: aberto
+            - value: '1'
+              newvalue: normal
+        - uuid: 450f3aa52bdd4bdc9ef3ebd0a624b141
+          name: 'XPS-MIB::XPS-USCC-falso-verdadeiro'
+          mappings:
+            - value: '0'
+              newvalue: falso
+            - value: '1'
+              newvalue: verdadeiro
+  triggers:
+    - uuid: 966a50d5a47b47e2afd7606653978349
+      expression: |
+        last(/Template XPS USCC SNMP/register_iur1)>((last(/Template XPS USCC SNMP/register_iur2)+last(/Template XPS USCC SNMP/register_iur3)+last(/Template XPS USCC SNMP/register_iur4))/({$NUMBER_URS}-1))*1.2
+        or
+        last(/Template XPS USCC SNMP/register_iur1)<((last(/Template XPS USCC SNMP/register_iur2)+last(/Template XPS USCC SNMP/register_iur3)+last(/Template XPS USCC SNMP/register_iur4))/({$NUMBER_URS}-1))*0.8
+      name: 'Corrente Irregular UR1'
+      priority: HIGH
+      description: 'Corrent irregular UR1'
+    - uuid: 9ac55eaade0145fc81b1d46423f6acff
+      expression: |
+        last(/Template XPS USCC SNMP/register_iur2)>((last(/Template XPS USCC SNMP/register_iur1)+last(/Template XPS USCC SNMP/register_iur3)+last(/Template XPS USCC SNMP/register_iur4))/({$NUMBER_URS}-1))*1.2
+        or
+        last(/Template XPS USCC SNMP/register_iur2)<((last(/Template XPS USCC SNMP/register_iur1)+last(/Template XPS USCC SNMP/register_iur3)+last(/Template XPS USCC SNMP/register_iur4))/({$NUMBER_URS}-1))*0.8
+      name: 'Corrente Irregular UR2'
+      priority: HIGH
+      description: 'Corrente irregular UR2'
+    - uuid: 94706736de164de18468f7db14d14581
+      expression: |
+        last(/Template XPS USCC SNMP/register_iur3)>((last(/Template XPS USCC SNMP/register_iur2)+last(/Template XPS USCC SNMP/register_iur1)+last(/Template XPS USCC SNMP/register_iur4))/({$NUMBER_URS}-1))*1.2
+        or
+        last(/Template XPS USCC SNMP/register_iur3)<((last(/Template XPS USCC SNMP/register_iur2)+last(/Template XPS USCC SNMP/register_iur1)+last(/Template XPS USCC SNMP/register_iur4))/({$NUMBER_URS}-1))*0.8
+      name: 'Corrente Irregular UR3'
+      priority: HIGH
+      description: 'Corrente irregular UR3'
+    - uuid: bc85e32b8a874bbea23c8b816ce082ae
+      expression: |
+        last(/Template XPS USCC SNMP/register_iur4)>((last(/Template XPS USCC SNMP/register_iur2)+last(/Template XPS USCC SNMP/register_iur3)+last(/Template XPS USCC SNMP/register_iur1))/({$NUMBER_URS}-1))*1.2
+        or
+        last(/Template XPS USCC SNMP/register_iur4)<((last(/Template XPS USCC SNMP/register_iur2)+last(/Template XPS USCC SNMP/register_iur3)+last(/Template XPS USCC SNMP/register_iur1))/({$NUMBER_URS}-1))*0.8
+      name: 'Corrente Irregular UR4'
+      priority: HIGH
+      description: 'Corrente irregular UR4'
+  graphs:
+    - uuid: ce72a19bbab445439be40896c83999bf
+      name: 'Corrente I (A) Bateria Carga/Descarga'
+      graph_items:
+        - color: 00FF00
+          item:
+            host: 'Template XPS USCC SNMP'
+            key: register_ibatc
+        - sortorder: '1'
+          color: FF0000
+          item:
+            host: 'Template XPS USCC SNMP'
+            key: register_ibatd
+    - uuid: ec91cbb9a4c146708438b13fa275f935
+      name: 'Corrente I (A) Consumidor'
+      graph_items:
+        - color: 00FF00
+          item:
+            host: 'Template XPS USCC SNMP'
+            key: register_icons
+    - uuid: 977123889eca4247bb45d60be8b57600
+      name: 'Corrente nas URs'
+      graph_items:
+        - color: 00FF00
+          item:
+            host: 'Template XPS USCC SNMP'
+            key: register_iur1
+        - sortorder: '1'
+          color: FF0000
+          item:
+            host: 'Template XPS USCC SNMP'
+            key: register_iur2
+        - sortorder: '2'
+          color: 0000FF
+          item:
+            host: 'Template XPS USCC SNMP'
+            key: register_iur3
+        - sortorder: '3'
+          color: FFFF00
+          item:
+            host: 'Template XPS USCC SNMP'
+            key: register_iur4
+    - uuid: 572e0d47519a48b69e3b0356089fb780
+      name: 'Temperatura Ambiente/Bateria'
+      graph_items:
+        - color: 00FF00
+          item:
+            host: 'Template XPS USCC SNMP'
+            key: register_temp1
+        - sortorder: '1'
+          color: FF0000
+          item:
+            host: 'Template XPS USCC SNMP'
+            key: register_temp2

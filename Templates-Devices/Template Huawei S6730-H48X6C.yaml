@@ -1,0 +1,63 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 4c6d50997e8242828764449e850e4171
+      name: Templates/Devices
+  templates:
+    - uuid: 9ef3247f83ad41eca031d46e3cb7e062
+      template: 'Template Huawei S6730-H48X6C'
+      name: 'Template Huawei S6730-H48X6C'
+      templates:
+        - name: 'Template Huawei BGP SNMP'
+        - name: 'Template Huawei S6730 Health SNMP'
+        - name: 'Template Huawei S6730 Optical Monitor SNMP'
+        - name: 'Template Huawei VRP Inventory SNMP'
+        - name: 'Template MPLS LDP SNMP'
+        - name: 'Template Network interface SNMP'
+        - name: 'Template OSPF SNMP'
+        - name: 'Template System Status'
+      groups:
+        - name: Templates/Devices
+      items:
+        - uuid: 3f8b059f44a34a5cba35925b7849e850
+          name: Hardware
+          type: SCRIPT
+          key: scriptHardware
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "Switches CloudEngine S6730-H";'
+          inventory_link: HARDWARE
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 3c121c326167488daf86b00beeb09e3d
+          name: Model
+          type: SCRIPT
+          key: scriptModel
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "S6730-H48X6C";'
+          inventory_link: MODEL
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 8555bc70fa0342da8c0cb33f987e58d9
+          name: Type
+          type: SCRIPT
+          key: scriptType
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "Switch";'
+          inventory_link: TYPE
+          tags:
+            - tag: application
+              value: inventory
+      macros:
+        - macro: '{$NET.IF.IFTYPE.MATCHES}'
+          value: ^6$

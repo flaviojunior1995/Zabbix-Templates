@@ -1,0 +1,44 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 4c6d50997e8242828764449e850e4171
+      name: Templates/Devices
+  templates:
+    - uuid: 75c100227f63439ba263969c80565a11
+      template: 'Template Mikrotik RB2011iLS'
+      name: 'Template Mikrotik RB2011iLS'
+      templates:
+        - name: 'Template Network interface SNMP'
+        - name: 'Template RouterOS Inventory SNMP'
+        - name: 'Template RouterOS Optical Monitor SNMP'
+        - name: 'Template RouterOS Tunnel Monitor SNMP'
+        - name: 'Template System Status'
+      groups:
+        - name: Templates/Devices
+      items:
+        - uuid: b9ba0c75d3ec41cf8d8df6b177ba1be4
+          name: Model
+          type: SCRIPT
+          key: scriptModel
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "Router Board";'
+          inventory_link: MODEL
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 6c7b304093f94b6f8c3ef590f72be579
+          name: Type
+          type: SCRIPT
+          key: scriptType
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "Router";'
+          inventory_link: TYPE
+      macros:
+        - macro: '{$NET.IF.IFTYPE.MATCHES}'
+          value: ^6$

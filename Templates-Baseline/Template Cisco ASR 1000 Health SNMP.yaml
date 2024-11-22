@@ -1,0 +1,545 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 3921ba1004b64706a628bf2aaa132a0e
+      template: 'Template Cisco ASR 1000 Health SNMP'
+      name: 'Template Cisco ASR 1000 Health SNMP'
+      description: |
+        Template Cisco ASR 1001-X Health 
+        -CPU
+        -Memory
+        -PowerSupply
+        -PowerConsumption
+        -Temperature
+        -FAN
+        -CEF
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        ENTITY-MIB.mib
+        CISCO-ENTITY-SENSOR-MIB.mib
+        CISCO-ENTITY-FRU-CONTROL-MIB.mib
+        CISCO-ENHANCED-MEMPOOL-MIB.mib
+        CISCO-ENVMON-MIB.mib 
+        CISCO-PROCESS-MIB.mib
+        CISCO-CEF-MIB.mib
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: 2b03d440633640aab8f8947d305212fa
+          name: 'CEF Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.492.1.4.2.1.2]'
+          key: 'cefResourceFailureReason["CEF"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'CISCO-CEF-MIB::cefResourceFailureReason'
+          item_prototypes:
+            - uuid: 2f65d59f54bd4fba947fa6b905f1fc77
+              name: 'CEF Failure Reason "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.492.1.4.2.1.2.{#SNMPINDEX}'
+              key: 'cefResourceFailureReason["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              units: cefResourceFailureReason
+              valuemap:
+                name: 'CISCO-CEF-TC-MIB::CefFailureReason'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cef
+              trigger_prototypes:
+                - uuid: d6a8e51929804812ace2c90266401bb1
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/cefResourceFailureReason["{#SNMPINDEX}"])<>1'
+                  name: 'CEF Failure'
+                  priority: DISASTER
+            - uuid: 9b5d605f642d44c78f5bc58a90f3beb9
+              name: 'CEF Memory Used "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.492.1.4.2.1.1.{#SNMPINDEX}'
+              key: 'cefResourceMemoryUsed["{#SNMPINDEX}"]'
+              history: 30d
+              units: B
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cef
+          graph_prototypes:
+            - uuid: 2655145832db4eaea7e956d9d0052429
+              name: 'CEF Memory Used "{#SNMPINDEX}"'
+              graph_items:
+                - drawtype: GRADIENT_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco ASR 1000 Health SNMP'
+                    key: 'cefResourceMemoryUsed["{#SNMPINDEX}"]'
+        - uuid: de00f3c071ef4c6eb4e99ba0a990c51e
+          name: 'Memory Pool Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.221.1.1.1.1.3]'
+          key: 'cempMemPoolName["Memory"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'CISCO-ENHANCED-MEMPOOL-MIB::cempMemPoolName'
+          item_prototypes:
+            - uuid: a7e15a8d08c24178b64273b0e9d70363
+              name: 'Free memory on Memory Pool "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.221.1.1.1.1.20.{#SNMPINDEX}'
+              key: 'cempMemPoolHCFree["{#SNMPVALUE}"]'
+              history: 90d
+              units: B
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 651dafe9ca3e46159901c1271eaf5cab
+              name: 'Used memory on Memory Pool "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.221.1.1.1.1.18.{#SNMPINDEX}'
+              key: 'cempMemPoolHCUsed["{#SNMPVALUE}"]'
+              history: 90d
+              units: B
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 121051a711174a4593ab167a739bfc52
+              name: 'Total Memory Pool "{#SNMPVALUE}"'
+              type: CALCULATED
+              key: 'ciscoMemoryPoolTotal["{#SNMPVALUE}"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              units: B
+              params: 'last(//cempMemPoolHCFree["{#SNMPVALUE}"]) + last(//cempMemPoolHCUsed["{#SNMPVALUE}"])'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: '{#SNMPVALUE}'
+          trigger_prototypes:
+            - uuid: f87372c224e743ed8b9e6f9e65248bfb
+              expression: 'last(/Template Cisco ASR 1000 Health SNMP/cempMemPoolHCUsed["{#SNMPVALUE}"]) * 100 /last(/Template Cisco ASR 1000 Health SNMP/ciscoMemoryPoolTotal["{#SNMPVALUE}"]) > {$MEMORY_HIGH_ALARM}'
+              name: 'High memory utilizarion alarm on Pool "{#SNMPVALUE}"'
+              priority: HIGH
+            - uuid: 453393c0a3984a1fa3dfb664bfa82182
+              expression: 'last(/Template Cisco ASR 1000 Health SNMP/cempMemPoolHCUsed["{#SNMPVALUE}"]) * 100 /last(/Template Cisco ASR 1000 Health SNMP/ciscoMemoryPoolTotal["{#SNMPVALUE}"]) > {$MEMORY_HIGH_WARNING}'
+              name: 'High memory utilizarion warning on Pool "{#SNMPVALUE}"'
+              priority: AVERAGE
+              dependencies:
+                - name: 'High memory utilizarion alarm on Pool "{#SNMPVALUE}"'
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/cempMemPoolHCUsed["{#SNMPVALUE}"]) * 100 /last(/Template Cisco ASR 1000 Health SNMP/ciscoMemoryPoolTotal["{#SNMPVALUE}"]) > {$MEMORY_HIGH_ALARM}'
+        - uuid: 454538cca6de4f07909f935d6a527bf5
+          name: 'FAN Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.13.1.4.1.2]'
+          key: 'ciscoEnvMonFanStatusDescr["FAN"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'CISCO-ENVMON-MIB::ciscoEnvMonFanStatusDescr'
+          item_prototypes:
+            - uuid: fdd18f3d03fa49edac033cbf005f4fc6
+              name: '"{#SNMPVALUE}": FAN status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.13.1.4.1.3.{#SNMPINDEX}'
+              key: 'ciscoEnvMonFanState["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'CISCO-ENVMON-MIB::CiscoEnvMonState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 8888b93ee6fc49e5959eca200c14821e
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/ciscoEnvMonFanState["{#SNMPINDEX}"])=3'
+                  name: '"{#SNMPVALUE}": FAN is critical'
+                  priority: HIGH
+                - uuid: 5cff2fae91854f919359a9a20cb177d5
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/ciscoEnvMonFanState["{#SNMPINDEX}"])=6'
+                  name: '"{#SNMPVALUE}": FAN is notFunctioning'
+                  priority: AVERAGE
+                - uuid: 9792e1c69d474ae4ba2b256ecba74e69
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/ciscoEnvMonFanState["{#SNMPINDEX}"])=5'
+                  name: '"{#SNMPVALUE}": FAN is notPresent'
+                  priority: INFO
+                - uuid: b7c2b140695d42578af5a00e947c78a1
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/ciscoEnvMonFanState["{#SNMPINDEX}"])=4'
+                  name: '"{#SNMPVALUE}": Fan is shutdown'
+                  priority: INFO
+                - uuid: 399e6b7e760a4c01ada055859e3f4c62
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/ciscoEnvMonFanState["{#SNMPINDEX}"])=2'
+                  name: '"{#SNMPVALUE}": FAN is warning'
+                  priority: WARNING
+        - uuid: 51b1024906864c388663602429ec3811
+          name: 'CPU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.109.1.1.1.1.2]'
+          key: 'cpmCPUTotalPhysicalIndex["CPU"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'CISCO-PROCESS-MIB::cpmCPUTotalPhysicalIndex'
+          item_prototypes:
+            - uuid: ffb01497956048a2b561c0144759b6b1
+              name: 'CPU #"{#SNMPINDEX}" Usage 1min Rev'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.109.1.1.1.1.7.{#SNMPINDEX}'
+              key: 'cpmCPUTotal1minRev["{#SNMPINDEX}"]'
+              history: 30d
+              units: '%'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+              trigger_prototypes:
+                - uuid: 61dd47071e744e71917736e4dcd7fea1
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/cpmCPUTotal1minRev["{#SNMPINDEX}"])>{$CPU_HIGH_ALARM}'
+                  name: 'High CPU Alarm #"{#SNMPINDEX}" 1min Usage'
+                  priority: HIGH
+                - uuid: f4a44d0656cb49e0a3c069a9045c5fe7
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/cpmCPUTotal1minRev["{#SNMPINDEX}"])>{$CPU_HIGH_WARNING}'
+                  name: 'High CPU Warning #"{#SNMPINDEX}" 1min Usage'
+                  priority: AVERAGE
+                  dependencies:
+                    - name: 'High CPU Alarm #"{#SNMPINDEX}" 1min Usage'
+                      expression: 'last(/Template Cisco ASR 1000 Health SNMP/cpmCPUTotal1minRev["{#SNMPINDEX}"])>{$CPU_HIGH_ALARM}'
+            - uuid: 5673a26b2ad6498a9523be318d97c95b
+              name: 'CPU #"{#SNMPINDEX}" Usage 5min Rev'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.109.1.1.1.1.8.{#SNMPINDEX}'
+              key: 'cpmCPUTotal5minRev["{#SNMPINDEX}"]'
+              delay: 5m
+              history: 30d
+              units: '%'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+              trigger_prototypes:
+                - uuid: 09fadb5ec8f04877b71beb90348c9827
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/cpmCPUTotal5minRev["{#SNMPINDEX}"])>{$CPU_HIGH_ALARM}'
+                  name: 'High CPU Alarm #"{#SNMPINDEX}" 5min Usage'
+                  priority: HIGH
+                - uuid: 0ff498a8a7ef47b788a430ee458c39ac
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/cpmCPUTotal5minRev["{#SNMPINDEX}"])>{$CPU_HIGH_WARNING}'
+                  name: 'High CPU Warning #"{#SNMPINDEX}" 5min Usage'
+                  priority: AVERAGE
+                  dependencies:
+                    - name: 'High CPU Alarm #"{#SNMPINDEX}" 5min Usage'
+                      expression: 'last(/Template Cisco ASR 1000 Health SNMP/cpmCPUTotal5minRev["{#SNMPINDEX}"])>{$CPU_HIGH_ALARM}'
+          graph_prototypes:
+            - uuid: ed22950befe94943a3b4651d559539d0
+              name: 'CPU #"{#SNMPINDEX}" 1min Usage'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 80FF00
+                  item:
+                    host: 'Template Cisco ASR 1000 Health SNMP'
+                    key: 'cpmCPUTotal1minRev["{#SNMPINDEX}"]'
+            - uuid: 8989421bfeb3428db46f362b6b37b88e
+              name: 'CPU #"{#SNMPINDEX}" 5min Usage'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco ASR 1000 Health SNMP'
+                    key: 'cpmCPUTotal5minRev["{#SNMPINDEX}"]'
+        - uuid: 326d548f44d847edb4f000d1eccf13a3
+          name: 'Power Supply Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.2.1.47.1.1.1.1.7]'
+          key: 'entPhysicalName["Power Supply"]'
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: '^Power Supply Module (0|1)$'
+                formulaid: A
+          lifetime: 30d
+          description: 'ENTITY-MIB::entPhysicalName'
+          item_prototypes:
+            - uuid: 3b342e1460144ea9842be21edbaa1400
+              name: 'Current of "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.117.1.1.2.1.3.{#SNMPINDEX}'
+              key: 'cefcFRUCurrent["{#SNMPVALUE}"]'
+              history: 30d
+              units: A
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 29ebae6475774b87b636cd2ff2fc5bd4
+              name: 'Operational Status of "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.117.1.1.2.1.2.{#SNMPINDEX}'
+              key: 'cefcFRUPowerOperStatus["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'CISCO-ENTITY-FRU-CONTROL-MIB::PowerOperType'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 914eec4046794a75a5229a4e2ce9948c
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/cefcFRUPowerOperStatus["{#SNMPVALUE}"])<> 2'
+                  name: 'PSU "{#SNMPVALUE}" Failure'
+                  priority: HIGH
+            - uuid: d81d5b8510d848d287abdda7f8cad40f
+              name: 'Power Comsumption "{#SNMPVALUE}" (W)'
+              type: CALCULATED
+              key: 'moduleComsumption["{#SNMPINDEX}"]'
+              history: 30d
+              units: W
+              params: 'last(//cefcFRUCurrent["{#SNMPVALUE}"]) * 12'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+                - tag: element
+                  value: '{#SNMPVALUE}'
+          graph_prototypes:
+            - uuid: ade27cd114b747a897d63abdcb2436a8
+              name: 'Power Comsumption {#SNMPINDEX} (W)'
+              graph_items:
+                - drawtype: GRADIENT_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Cisco ASR 1000 Health SNMP'
+                    key: 'moduleComsumption["{#SNMPINDEX}"]'
+        - uuid: 7ff7872b03d54f649a0171c6c0e09f4f
+          name: 'Temperature Sensors Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.2.1.47.1.1.1.1.7]'
+          key: 'entPhysicalName["Temperature"]'
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: '^Temp:'
+                formulaid: A
+          lifetime: 30d
+          description: 'ENTITY-MIB::entPhysicalName'
+          item_prototypes:
+            - uuid: f39a0cbebe4e40aea5a4066a550c2cda
+              name: 'Status Temperature Sensor "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.1.1.1.5.{#SNMPINDEX}'
+              key: 'entSensorStatus["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'CISCO-ENTITY-SENSOR-MIB::SensorStatus'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 28181ddc40814178a21211f8133e36ba
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/entSensorStatus["{#SNMPVALUE}"])=3'
+                  name: 'Temperature Sensor "{#SNMPVALUE}" is nonoperational'
+                  priority: HIGH
+                - uuid: fd80ab77574d4226bcfe4e349b4c327b
+                  expression: 'last(/Template Cisco ASR 1000 Health SNMP/entSensorStatus["{#SNMPVALUE}"])=2'
+                  name: 'Temperature Sensor "{#SNMPVALUE}" is unavailable'
+                  priority: INFO
+            - uuid: 8965e2d03b1c49e68d9bb30626bc3c47
+              name: 'Threshold "{#SNMPVALUE}" | High Temperature Alarm'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.2'
+              key: 'entSensorThresholdValue["{#SNMPVALUE}","Alarm"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: ºC
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 32ab00d6fdc946eebcd5b671adebdfd5
+              name: 'Threshold "{#SNMPVALUE}" | High Temperature Warning'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.1'
+              key: 'entSensorThresholdValue["{#SNMPVALUE}","Warning"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: ºC
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 5da6c0efc0634030a67b59c2b52e885f
+              name: 'Temperature on Sensor "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.1.1.1.4.{#SNMPINDEX}'
+              key: 'entSensorValue["{#SNMPVALUE}"]'
+              history: 30d
+              value_type: FLOAT
+              units: ºC
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: '{#SNMPVALUE}'
+          trigger_prototypes:
+            - uuid: 9dad87be03f848eb9ba95e8533da2f93
+              expression: 'last(/Template Cisco ASR 1000 Health SNMP/entSensorValue["{#SNMPVALUE}"]) > last(/Template Cisco ASR 1000 Health SNMP/entSensorThresholdValue["{#SNMPVALUE}","Alarm"])'
+              name: 'High Temperature Alarm "{#SNMPVALUE}"'
+              priority: DISASTER
+            - uuid: f5d223ce499f483b90287839acbd91dc
+              expression: 'last(/Template Cisco ASR 1000 Health SNMP/entSensorValue["{#SNMPVALUE}"]) > last(/Template Cisco ASR 1000 Health SNMP/entSensorThresholdValue["{#SNMPVALUE}","Warning"])'
+              name: 'High Temperature Warning "{#SNMPVALUE}"'
+              priority: WARNING
+          graph_prototypes:
+            - uuid: eff910936c584302823c0bfcf49cfef8
+              name: 'Temperature "{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: GRADIENT_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco ASR 1000 Health SNMP'
+                    key: 'entSensorValue["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Cisco ASR 1000 Health SNMP'
+                    key: 'entSensorThresholdValue["{#SNMPVALUE}","Alarm"]'
+                - sortorder: '2'
+                  drawtype: BOLD_LINE
+                  color: FFFF00
+                  item:
+                    host: 'Template Cisco ASR 1000 Health SNMP'
+                    key: 'entSensorThresholdValue["{#SNMPVALUE}","Warning"]'
+      tags:
+        - tag: class
+          value: health
+      macros:
+        - macro: '{$CPU_HIGH_ALARM}'
+          value: '90'
+          description: '% cpu alarm'
+        - macro: '{$CPU_HIGH_WARNING}'
+          value: '80'
+          description: '% cpu warning'
+        - macro: '{$MEMORY_HIGH_ALARM}'
+          value: '80'
+          description: '% memory alarm'
+        - macro: '{$MEMORY_HIGH_WARNING}'
+          value: '70'
+          description: '% memoty warning'
+      valuemaps:
+        - uuid: 0a6777fd52e24027a1a3ae742f64930c
+          name: 'CISCO-CEF-TC-MIB::CefFailureReason'
+          mappings:
+            - value: '1'
+              newvalue: none
+            - value: '2'
+              newvalue: mallocFailure
+            - value: '3'
+              newvalue: mallocFailure
+            - value: '4'
+              newvalue: keepaliveFailure
+            - value: '5'
+              newvalue: noMsgBuffer
+            - value: '6'
+              newvalue: invalidMsgSize
+            - value: '7'
+              newvalue: internalError
+        - uuid: 3c1a2f1c94d2477c823078d02d9041ab
+          name: 'CISCO-ENTITY-FRU-CONTROL-MIB::PowerOperType'
+          mappings:
+            - value: '1'
+              newvalue: offEnvOther
+            - value: '2'
+              newvalue: 'on'
+            - value: '3'
+              newvalue: offAdmin
+            - value: '4'
+              newvalue: offDenied
+            - value: '5'
+              newvalue: offEnvPower
+            - value: '6'
+              newvalue: offEnvTemp
+            - value: '7'
+              newvalue: offEnvFan
+            - value: '8'
+              newvalue: failed
+            - value: '9'
+              newvalue: onButFanFail
+            - value: '10'
+              newvalue: offCooling
+            - value: '11'
+              newvalue: offConnectorRating
+            - value: '12'
+              newvalue: onButInlinePowerFail
+        - uuid: f7c7cd7542d44db89e5923adcbedd4dd
+          name: 'CISCO-ENTITY-SENSOR-MIB::SensorStatus'
+          mappings:
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: unavailable
+            - value: '3'
+              newvalue: nonoperational
+        - uuid: c925b02686d24019a18e37c140995144
+          name: 'CISCO-ENVMON-MIB::CiscoEnvMonState'
+          mappings:
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: warning
+            - value: '3'
+              newvalue: critical
+            - value: '4'
+              newvalue: shutdown
+            - value: '5'
+              newvalue: notPresent
+            - value: '6'
+              newvalue: notFunctioning

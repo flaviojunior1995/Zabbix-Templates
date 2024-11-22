@@ -1,0 +1,516 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: bef40e9e6a834a1fb1d6950a60ff689a
+      template: 'Template Dell PowerConnect N4000 Health SNMP'
+      name: 'Template Dell PowerConnect N4000 Health SNMP'
+      description: |
+        Template Dell PowerConnect N4000 Health
+        -PSU
+        -Temperature
+        -Fan
+        -CPU
+        -Memory
+        -DNOS Version
+        -Power Consumption
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        DNOS-BOXSERVICES-PRIVATE-MIB.mib
+        DNOS-SWITCHING-MIB.mib
+        Dell-Vendor-MIB.mib
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: 1ce5a6106a004a0d84516d783fbf6509
+          name: 'CPU Load 1min'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.674.10895.5000.2.6132.1.1.1.1.4.11.0
+          key: agentSwitchCpuProcessGroup
+          history: 30d
+          units: '%'
+          tags:
+            - tag: application
+              value: health
+            - tag: component
+              value: cpu
+          triggers:
+            - uuid: 44cfb5115c5847e78e61f2c782605a7e
+              expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/agentSwitchCpuProcessGroup)>{$CPU_HIGH_WARNING}'
+              name: 'High System CPU Load'
+              priority: WARNING
+              dependencies:
+                - name: 'Very High System CPU Load'
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/agentSwitchCpuProcessGroup)>{$CPU_HIGH_ALARM}'
+            - uuid: 77c9cc614908401ea5f8e503ffd45dfa
+              expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/agentSwitchCpuProcessGroup)>{$CPU_HIGH_ALARM}'
+              name: 'Very High System CPU Load'
+              priority: HIGH
+        - uuid: 30463b1d774749019046c0b40b1c64dc
+          name: 'Total Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.674.10895.5000.2.6132.1.1.1.1.4.2.0
+          key: 'agentSwitchCpuProcessMemAvailable[Memory]'
+          delay: 1d
+          history: 30d
+          trends: '0'
+          units: B
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '1000'
+          tags:
+            - tag: application
+              value: health
+            - tag: component
+              value: memory
+        - uuid: 5f5d722f9085463cac729549d8e86ea6
+          name: 'Free Memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.674.10895.5000.2.6132.1.1.1.1.4.1.0
+          key: 'agentSwitchCpuProcessMemFree[Memory]'
+          history: 30d
+          units: B
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '1000'
+          tags:
+            - tag: application
+              value: health
+            - tag: component
+              value: memory
+        - uuid: 4a7da9fa2cc94ad8af0f4c7022749d4c
+          name: 'Memory Utilization'
+          type: CALCULATED
+          key: 'MemoryUtilization[Memory]'
+          history: 30d
+          units: '%'
+          params: '((last(//agentSwitchCpuProcessMemAvailable[Memory])-last(//agentSwitchCpuProcessMemFree[Memory]))/last(//agentSwitchCpuProcessMemAvailable[Memory]))*100'
+          tags:
+            - tag: application
+              value: health
+            - tag: component
+              value: memory
+          triggers:
+            - uuid: 4a7d404cfe084bf1aaccdbded70b25b4
+              expression: 'avg(/Template Dell PowerConnect N4000 Health SNMP/MemoryUtilization[Memory],5m)>{$MEMORY_HIGH_ALARM}'
+              name: 'High Memory Utilization'
+              priority: AVERAGE
+        - uuid: cb7774d930ff45c3af3c7cd11fbbc242
+          name: 'Serial Number Stack:1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.674.10895.3000.1.2.100.8.1.2.1
+          key: 'productIdentificationSerialNumber["1"]'
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SERIALNO_A
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: c80ecf6cbf194f6cae5ed7c55e4c0325
+          name: 'Serial Number Stack:2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.674.10895.3000.1.2.100.8.1.2.2
+          key: 'productIdentificationSerialNumber["2"]'
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SERIALNO_B
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: f19ddf13930a40b29a5353446e7f6d1b
+          name: 'Service Tag Stack:1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.674.10895.3000.1.2.100.8.1.4.1
+          key: 'productIdentificationServiceTag["1"]'
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: TAG
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 8f8a81ca2276441799361c69670a674b
+          name: 'Service Tag Stack:2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.674.10895.3000.1.2.100.8.1.4.2
+          key: 'productIdentificationServiceTag["2"]'
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: ASSET_TAG
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 9b69cf91a58b408284c7cc0c9b34a9b8
+          name: 'Dell DNOS Version'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.674.10895.3000.1.2.100.4.0
+          key: productIdentificationVersion
+          delay: 1d
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          inventory_link: SOFTWARE
+          tags:
+            - tag: application
+              value: inventory
+          triggers:
+            - uuid: 457e55e1fd5e4631832640c0f2d21c92
+              expression: 'find(/Template Dell PowerConnect N4000 Health SNMP/productIdentificationVersion,,"like","{$DNOS_VERSION}")=0'
+              name: 'DNOS out of date'
+              priority: INFO
+      discovery_rules:
+        - uuid: 880754231697465da37fffa58fe06aca
+          name: 'Stack Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.674.10895.5000.2.6132.1.1.13.1.4]'
+          key: agentInventoryStackReplicateStkStatus
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discovery Stack Dell PowerConnect 4000'
+          item_prototypes:
+            - uuid: 16cb98335fe44239bb1906e994a17881
+              name: 'Stack Status ["{#SNMPINDEX}"]'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.674.10895.5000.2.6132.1.1.13.1.4.{#SNMPINDEX}'
+              key: 'agentInventoryStackReplicateStkStatus[{#SNMPINDEX}]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'DNOS-INVENTORY-MIB::ReplicateStackStatus'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: stack
+                - tag: element
+                  value: status
+              trigger_prototypes:
+                - uuid: f813c4e7f0f345e8b6f1d7c2078f1167
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/agentInventoryStackReplicateStkStatus[{#SNMPINDEX}])<>3'
+                  name: 'Problem on Stack Replication'
+                  priority: AVERAGE
+        - uuid: 26c2ba202e934bc883a2b55c0ef675ac
+          name: 'Temperature Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.674.10895.5000.2.6132.1.1.43.1.15.1.1]'
+          key: 'boxServicesTempUnitIndex["Temperature"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discovery Temperature Sensor Dell PowerConnect 4000'
+          item_prototypes:
+            - uuid: 6a27ad0af36842bcb3e699917ffde4d2
+              name: 'Temperature Status Stack:"{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.674.10895.5000.2.6132.1.1.43.1.15.1.2.{#SNMPINDEX}'
+              key: 'boxServicesTempUnitState["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'DNOS-BOXSERVICES-PRIVATE-MIB::BoxsTemperatureStatus'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: status
+              trigger_prototypes:
+                - uuid: ce05b6371ac347449ff2e094726fcc06
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/boxServicesTempUnitState["{#SNMPINDEX}"])=3'
+                  name: 'Status Temp Sensor Stack:"{#SNMPVALUE}" critical'
+                  priority: AVERAGE
+                - uuid: 87b573c893b94ba8a73db3e591cccbff
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/boxServicesTempUnitState["{#SNMPINDEX}"])=0'
+                  name: 'Status Temp Sensor Stack:"{#SNMPVALUE}" low temperature'
+                  priority: AVERAGE
+                - uuid: 7fedfdbdcbb04947b02ba7f054dfb372
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/boxServicesTempUnitState["{#SNMPINDEX}"])=6'
+                  name: 'Status Temp Sensor Stack:"{#SNMPVALUE}" notoperational'
+                  priority: AVERAGE
+                - uuid: 48227677eeb2440b9c4204dff5cf9c14
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/boxServicesTempUnitState["{#SNMPINDEX}"])=5'
+                  name: 'Status Temp Sensor Stack:"{#SNMPVALUE}" notpresent'
+                  priority: INFO
+                - uuid: 2d0b23e1113b43b1b28659fc3809a9ff
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/boxServicesTempUnitState["{#SNMPINDEX}"])=4'
+                  name: 'Status Temp Sensor Stack:"{#SNMPVALUE}" shutdown'
+                  priority: INFO
+                - uuid: fca64b2bf1224b509b3202c1700ecd49
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/boxServicesTempUnitState["{#SNMPINDEX}"])=2'
+                  name: 'Status Temp Sensor Stack:"{#SNMPVALUE}" warning'
+                  priority: WARNING
+            - uuid: 99833baadf734f72b145638c3c5ce5d4
+              name: 'Temperature Stack:"{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.674.10895.5000.2.6132.1.1.43.1.15.1.3.{#SNMPINDEX}'
+              key: 'boxServicesTempUnitTemperature["{#SNMPINDEX}"]'
+              history: 30d
+              value_type: FLOAT
+              units: °C
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: value
+              trigger_prototypes:
+                - uuid: 6ab188b4206d49e98b3834561c92c5ab
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/boxServicesTempUnitTemperature["{#SNMPINDEX}"])>{$TEMPERATURE_HIGH_WARNING}'
+                  name: 'Temperature High Critical Stack:"{#SNMPVALUE}"'
+                  priority: HIGH
+                - uuid: 8c1f7aa8b8db4399989b4a85027a85bb
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/boxServicesTempUnitTemperature["{#SNMPINDEX}"])>{$TEMPERATURE_HIGH_WARNING}'
+                  name: 'Temperature High Warning Stack:"{#SNMPVALUE}"'
+                  priority: WARNING
+                  dependencies:
+                    - name: 'Temperature High Critical Stack:"{#SNMPVALUE}"'
+                      expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/boxServicesTempUnitTemperature["{#SNMPINDEX}"])>{$TEMPERATURE_HIGH_WARNING}'
+          graph_prototypes:
+            - uuid: 69eeab35389944acb917eb0de22664d2
+              name: 'Temperature Stack:{#SNMPVALUE}'
+              type: STACKED
+              graph_items:
+                - color: 199C0D
+                  item:
+                    host: 'Template Dell PowerConnect N4000 Health SNMP'
+                    key: 'boxServicesTempUnitTemperature["{#SNMPINDEX}"]'
+        - uuid: 6c4719009eb544a3b734943e57c5a364
+          name: 'Fan Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.674.10895.3000.1.2.110.7.1.1.2]'
+          key: 'envMonFanStatusDescr["FAN"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discovery FAN Dell PowerConnect 4000'
+          item_prototypes:
+            - uuid: dbcee92d22474b4f8344b54ffc101d87
+              name: 'Speed "{#SNMPVALUE}" ID:"{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.674.10895.3000.1.2.110.7.1.1.4.{#SNMPINDEX}'
+              key: 'envMonFanSpeed["{#SNMPINDEX}"]'
+              history: 30d
+              units: RPM
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: speed
+            - uuid: fc0a67c9cda74bc4bdfb67da3da8e09c
+              name: 'Status "{#SNMPVALUE}" ID:"{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.674.10895.3000.1.2.110.7.1.1.3.{#SNMPINDEX}'
+              key: 'envMonFanState["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'Dell-Vendor-MIB::EnvMonState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: status
+              trigger_prototypes:
+                - uuid: 4c36a035cd1f4d418e6c458c142e12c8
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/envMonFanState["{#SNMPINDEX}"])=3'
+                  name: 'Status "{#SNMPVALUE}" ID:"{#SNMPINDEX}" Critical'
+                  priority: AVERAGE
+                - uuid: 19cfc20794e04280879d02afd21dcdd9
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/envMonFanState["{#SNMPINDEX}"])=6'
+                  name: 'Status "{#SNMPVALUE}" ID:"{#SNMPINDEX}" notFunctioning'
+                  priority: AVERAGE
+                - uuid: ba305fcf817b45468e7cd97329250e55
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/envMonFanState["{#SNMPINDEX}"])=5'
+                  name: 'Status "{#SNMPVALUE}" ID:"{#SNMPINDEX}" notPresent'
+                  priority: INFO
+                - uuid: 9eebb7314d2744b3a49262660535b8d8
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/envMonFanState["{#SNMPINDEX}"])=4'
+                  name: 'Status "{#SNMPVALUE}" ID:"{#SNMPINDEX}" Shutdown'
+                  priority: INFO
+                - uuid: 0dbe80f0ba114e329bdfe2826364c475
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/envMonFanState["{#SNMPINDEX}"])=2'
+                  name: 'Status "{#SNMPVALUE}" ID:"{#SNMPINDEX}" Warning'
+                  priority: WARNING
+          graph_prototypes:
+            - uuid: aef352cd88e24646921b10986cf35576
+              name: 'Speed FAN "{#SNMPVALUE}" ID:"{#SNMPINDEX}"'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Dell PowerConnect N4000 Health SNMP'
+                    key: 'envMonFanSpeed["{#SNMPINDEX}"]'
+        - uuid: d360871bbb1a4c3292c63b77c790424e
+          name: 'PSU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.674.10895.3000.1.2.110.7.2.1.2]'
+          key: 'envMonSupplyStatusDescr["PSU"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discovery PSU Dell PowerConnect 4000'
+          item_prototypes:
+            - uuid: e88b3ddbb2f04060a137a64c93ec6ed6
+              name: 'Current Power Consumption "{#SNMPVALUE}" ID:"{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.674.10895.3000.1.2.110.7.2.1.5.{#SNMPINDEX}'
+              key: 'envMonSupplyCurrentPower["{#SNMPINDEX}"]'
+              history: 30d
+              units: W
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+                - tag: element
+                  value: consumption
+            - uuid: 9cda867cb4d74a2f95045977cecc0614
+              name: 'Status PowerSupply "{#SNMPVALUE}" ID:"{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.674.10895.3000.1.2.110.7.2.1.3.{#SNMPINDEX}'
+              key: 'envMonSupplyState["{#SNMPINDEX}"]'
+              history: 7d
+              trends: '0'
+              valuemap:
+                name: 'Dell-Vendor-MIB::EnvMonState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+                - tag: element
+                  value: status
+              trigger_prototypes:
+                - uuid: 9671698d41d54a328e693f5bcf08f8c0
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/envMonSupplyState["{#SNMPINDEX}"])=3'
+                  name: 'Status PowerSupply "{#SNMPVALUE}" ID:"{#SNMPINDEX}" Critical'
+                  priority: AVERAGE
+                - uuid: 535930af4a374e2fbf1e129f6e422993
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/envMonSupplyState["{#SNMPINDEX}"])=6'
+                  name: 'Status PowerSupply "{#SNMPVALUE}" ID:"{#SNMPINDEX}" notFunctioning'
+                  priority: AVERAGE
+                - uuid: bde15a4fdc774c8ca006e5e0ec2a7739
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/envMonSupplyState["{#SNMPINDEX}"])=5'
+                  name: 'Status PowerSupply "{#SNMPVALUE}" ID:"{#SNMPINDEX}" notPresent'
+                  priority: INFO
+                - uuid: 913024e62d4b40c2b8caa35936ecca91
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/envMonSupplyState["{#SNMPINDEX}"])=4'
+                  name: 'Status PowerSupply "{#SNMPVALUE}" ID:"{#SNMPINDEX}" Shutdown'
+                  priority: INFO
+                - uuid: e0bbc055ad7e4241a2bd613231533a1c
+                  expression: 'last(/Template Dell PowerConnect N4000 Health SNMP/envMonSupplyState["{#SNMPINDEX}"])=2'
+                  name: 'Status PowerSupply "{#SNMPVALUE}" ID:"{#SNMPINDEX}" Warning'
+                  priority: WARNING
+          graph_prototypes:
+            - uuid: 0df365ef949448ff9491b66a58e82fcb
+              name: 'Power Consumption "{#SNMPVALUE}" ID:"{#SNMPINDEX}"'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Dell PowerConnect N4000 Health SNMP'
+                    key: 'envMonSupplyCurrentPower["{#SNMPINDEX}"]'
+      tags:
+        - tag: class
+          value: health
+      macros:
+        - macro: '{$CPU_HIGH_ALARM}'
+          value: '80'
+          description: '% maximum alarm critical cpu'
+        - macro: '{$CPU_HIGH_WARNING}'
+          value: '60'
+          description: '% maximum alarm warning cpu'
+        - macro: '{$DNOS_VERSION}'
+          value: 6.5.3.7
+          description: 'version DNOS'
+        - macro: '{$MEMORY_HIGH_ALARM}'
+          value: '80'
+          description: '% maximum alarm memory'
+        - macro: '{$TEMPERATURE_HIGH_ALARM}'
+          value: '55'
+          description: 'alarm ºC temperature critical'
+        - macro: '{$TEMPERATURE_HIGH_WARNING}'
+          value: '50'
+          description: 'alarm ºC temperature warning'
+      valuemaps:
+        - uuid: 8d07225d543940c6900413e550fa4aff
+          name: 'Dell-Vendor-MIB::EnvMonState'
+          mappings:
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: warning
+            - value: '3'
+              newvalue: critical
+            - value: '4'
+              newvalue: shutdown
+            - value: '5'
+              newvalue: notPresent
+            - value: '6'
+              newvalue: notFunctioning
+        - uuid: 0c7a76f9b0e94f2ab4a39c55d1694272
+          name: 'DNOS-BOXSERVICES-PRIVATE-MIB::BoxsTemperatureStatus'
+          mappings:
+            - value: '0'
+              newvalue: low
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: warning
+            - value: '3'
+              newvalue: critical
+            - value: '4'
+              newvalue: shutdown
+            - value: '5'
+              newvalue: notpresent
+            - value: '6'
+              newvalue: notoperational
+        - uuid: 25cee3b141214e838c77db57ac9f069c
+          name: 'DNOS-INVENTORY-MIB::ReplicateStackStatus'
+          mappings:
+            - value: '1'
+              newvalue: inProgress
+            - value: '2'
+              newvalue: notInProgress
+            - value: '3'
+              newvalue: finishedWithSuccess
+            - value: '4'
+              newvalue: finishedWithError
+  graphs:
+    - uuid: c85d09aa889c49fbab70ea10290c845a
+      name: 'CPU Load'
+      graph_items:
+        - drawtype: FILLED_REGION
+          color: 199C0D
+          item:
+            host: 'Template Dell PowerConnect N4000 Health SNMP'
+            key: agentSwitchCpuProcessGroup
+    - uuid: b12e1cef6ca14dee8e6cba5c6103d3c5
+      name: 'Memory Utilization'
+      graph_items:
+        - drawtype: GRADIENT_LINE
+          color: 199C0D
+          item:
+            host: 'Template Dell PowerConnect N4000 Health SNMP'
+            key: 'MemoryUtilization[Memory]'

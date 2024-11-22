@@ -1,0 +1,366 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: c58dde905083408a821abf5371ec4029
+      template: 'Template OSPF SNMP'
+      name: 'Template OSPF SNMP'
+      description: |
+        Template OSPF
+        -RouterID
+        -Neighbor Status
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        OSPFV3-MIB.mib
+        OSPF-MIB.mib
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: 2abb53b596184c50b34a61f876f4b739
+          name: 'OSPFv2 Admin Status Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.14.1.2]'
+          key: ospfAdminStat
+          delay: 1h
+          lifetime: 30d
+          description: 'OSPF-MIB::ospfAdminStat'
+          item_prototypes:
+            - uuid: c7ec625688d140e1a644b429c1867da2
+              name: 'OSPFv2 Router Admin Status Discovery "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.14.1.2.{#SNMPINDEX}'
+              key: 'ospfAdminStat["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'OSPF-MIB::OspfIfAdminStat'
+              tags:
+                - tag: application
+                  value: ospf
+                - tag: component
+                  value: ospfv2
+                - tag: element
+                  value: '{#SNMPINDEX}'
+              trigger_prototypes:
+                - uuid: b5f86a66cd284c2e9c0cd24d09b9adfe
+                  expression: 'last(/Template OSPF SNMP/ospfAdminStat["{#SNMPINDEX}"])<>1'
+                  name: 'OSPF Admin Status Disable "{#SNMPINDEX}"'
+                  priority: INFO
+        - uuid: c9c9a68ff3944cd4853c22be582d4f63
+          name: 'OSPFv2 Areas Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.2.1.14.2.1.1]'
+          key: ospfAreaId
+          delay: 1h
+          lifetime: 30d
+          description: 'OSPF-MIB::ospfAdminStat'
+          item_prototypes:
+            - uuid: 9039c455509242b98139da08a9f88a1e
+              name: 'OSPFv2 Area Status "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.14.2.1.10.{#SNMPINDEX}'
+              key: 'ospfAreaStatus["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'OSPF-MIB::OspfAreaStatus'
+              tags:
+                - tag: application
+                  value: ospf
+                - tag: component
+                  value: ospfv2
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: fe9f46b2aaed453bb690fb01ddd25711
+                  expression: 'last(/Template OSPF SNMP/ospfAreaStatus["{#SNMPVALUE}"])<>1'
+                  name: 'OSPF Area Status "{#SNMPVALUE}"'
+                  priority: INFO
+        - uuid: 48b3a63aafc74339997a23b101cfef19
+          name: 'OSPFv2 Interfaces Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.2.1.14.7.1.1]'
+          key: ospfIfIpAddress
+          delay: 1h
+          lifetime: 30d
+          description: 'OSPF-MIB::ospfIfIpAddress'
+          item_prototypes:
+            - uuid: 3f926e15f1954413b2600e52b9c3338c
+              name: 'OSPFv2 Interface Admin Status "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.14.7.1.5.{#SNMPINDEX}'
+              key: 'ospfIfAdminStat["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'OSPF-MIB::OspfIfAdminStat'
+              tags:
+                - tag: application
+                  value: ospf
+                - tag: component
+                  value: ospfv2
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 21251410651c4758b3200c992ecf57fa
+                  expression: 'last(/Template OSPF SNMP/ospfIfAdminStat["{#SNMPVALUE}"])<>1'
+                  name: 'OSPFv2 Interface Admin Status disable "{#SNMPVALUE}"'
+                  priority: INFO
+        - uuid: 226ee2e1c0274d97b54f28603f66065b
+          name: 'OSPFv2 Neighbor Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.2.1.14.10.1.1]'
+          key: ospfNbrIpAddr
+          delay: 1h
+          lifetime: 30d
+          description: 'OSPF-MIB::ospfNbrIpAddr'
+          item_prototypes:
+            - uuid: dcfa213a09264e5baf4bb279f372cb26
+              name: 'OSPFv2 Neighbor "{#SNMPVALUE}" Router ID'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.14.10.1.3.{#SNMPVALUE}.0'
+              key: 'ospfNbrRtrId["{#SNMPVALUE}"]'
+              delay: 1d
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              tags:
+                - tag: application
+                  value: ospf
+                - tag: component
+                  value: ospfv2
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 3b46df931898477cb6b056b87eaf6a62
+              name: 'OSPFv2 Neighbor "{#SNMPVALUE}" State'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.14.10.1.6.{#SNMPINDEX}'
+              key: 'ospfNbrState["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'OSPF-MIB::OspfNbrState'
+              trigger_prototypes:
+                - uuid: 1131fa4db03a41009759f9e559076b1a
+                  expression: 'last(/Template OSPF SNMP/ospfNbrState["{#SNMPVALUE}"])<>8'
+                  name: 'OSPFv2 Neighbor "{#SNMPVALUE}" State Down'
+                  priority: HIGH
+        - uuid: 6988f0e4054a485db7142102449bc86a
+          name: 'OSPFv2 Router ID Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.14.1.1]'
+          key: ospfRouterID
+          delay: 1h
+          lifetime: 30d
+          description: 'OSPF-MIB::ospfRouterID'
+          item_prototypes:
+            - uuid: f48661c0c0d24c4d9c25e92d1159d407
+              name: 'OSPFv2 Router ID "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.14.1.1.{#SNMPINDEX}'
+              key: 'ospfRouterId["{#SNMPVALUE}"]'
+              delay: 1d
+              history: 30d
+              value_type: TEXT
+              trends: '0'
+              tags:
+                - tag: application
+                  value: ospf
+                - tag: component
+                  value: ospfv2
+                - tag: element
+                  value: '{#SNMPVALUE}'
+        - uuid: ba639a909b8b4797b15e7640edc9d89b
+          name: 'OSPFv3 Admin Status Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.191.1.1.2]'
+          key: ospfv3AdminStatus
+          delay: 1h
+          lifetime: 30d
+          description: 'OSPFV3-MIB::ospfv3AdminStatus'
+          item_prototypes:
+            - uuid: 02799d13d41f474589331dcb17d56078
+              name: 'OSPFv3 Router Admin Status Discovery "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.191.1.1.2.{#SNMPINDEX}'
+              key: 'ospfv3AdminStat["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: ospf
+                - tag: component
+                  value: ospfv3
+                - tag: element
+                  value: '{#SNMPINDEX}'
+              trigger_prototypes:
+                - uuid: 215cfb6f178746499acbdb5bd9e01288
+                  expression: 'last(/Template OSPF SNMP/ospfv3AdminStat["{#SNMPINDEX}"])<>1'
+                  name: 'OSPF Admin Status Disable "{#SNMPINDEX}"'
+                  priority: INFO
+        - uuid: 136a58b9a62e42ec85d32467c3f437f4
+          name: 'OSPFv3 Interfaces Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.2.1.191.1.7.1.5]'
+          key: ospfv3IfAdminStatus
+          delay: 1h
+          lifetime: 30d
+          description: 'OSPFV3-MIB::ospfv3IfAdminStatus'
+          item_prototypes:
+            - uuid: 905afd03d551426ea60beecf55c219e7
+              name: 'OSPFv3 Interface Admin Status "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.191.1.7.1.5.{#SNMPINDEX}'
+              key: 'ospfv3IfAdminStat["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: ospf
+                - tag: component
+                  value: ospfv3
+                - tag: element
+                  value: '{#SNMPINDEX}'
+              trigger_prototypes:
+                - uuid: 2ec12f69ec884eb4b11fd2518162efa7
+                  expression: 'last(/Template OSPF SNMP/ospfv3IfAdminStat["{#SNMPINDEX}"])<>1'
+                  name: 'OSPFv3 Interface Admin Status disable "{#SNMPINDEX}"'
+                  priority: INFO
+        - uuid: 0a14bf25006b4dd3b35abe326315d648
+          name: 'OSPFv3 Neighbor Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.2.1.191.1.9.1.5]'
+          key: ospfv3NbrAddress
+          delay: 1h
+          lifetime: 30d
+          description: 'OSPFV3-MIB::ospfv3NbrAddress'
+          item_prototypes:
+            - uuid: bba8a65825d448989407c67bac873fb9
+              name: 'OSPFv3 Neighbor "{#SNMPVALUE}" Router ID'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.191.1.9.1.3.{#SNMPVALUE}'
+              key: 'ospfv3NbrRtrId["{#SNMPVALUE}"]'
+              delay: 1d
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              tags:
+                - tag: application
+                  value: ospf
+                - tag: component
+                  value: ospfv3
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: f18a16cabcf0478cb073086c1d367704
+              name: 'OSPFv3 Neighbor "{#SNMPVALUE}" State'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.191.1.9.1.8.{#SNMPINDEX}'
+              key: 'ospfv3NbrState["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'OSPFV3-MIB::Ospfv3NbrState'
+              tags:
+                - tag: application
+                  value: ospf
+                - tag: component
+                  value: ospfv3
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 470a39674911496c8b0a29fb67118945
+                  expression: 'last(/Template OSPF SNMP/ospfv3NbrState["{#SNMPVALUE}"])<>8'
+                  name: 'OSPFv2 Neighbor "{#SNMPVALUE}" State Down'
+                  priority: HIGH
+        - uuid: 4eb1ecd8f3294c1f872ddc2ad5f6cd38
+          name: 'OSPFv3 Router ID Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.191.1.1.1]'
+          key: ospfv3RouterID
+          delay: 1h
+          lifetime: 30d
+          description: 'OSPFV3-MIB::ospfv3RouterID'
+          item_prototypes:
+            - uuid: 5c2b114c18d4441c99b6cb74fbc6717d
+              name: 'OSPFv3 Router ID "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.191.1.1.1.{#SNMPINDEX}'
+              key: 'ospfv3RouterId["{#SNMPVALUE}"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: ospf
+                - tag: component
+                  value: ospfv3
+                - tag: element
+                  value: '{#SNMPVALUE}'
+      tags:
+        - tag: class
+          value: ospf
+      valuemaps:
+        - uuid: f6828a4bd75d46d5b2b595f9c4d66479
+          name: 'OSPF-MIB::OspfAreaStatus'
+          mappings:
+            - value: '1'
+              newvalue: active
+            - value: '2'
+              newvalue: disable
+        - uuid: 0eb191f6cad846bdb910c056eee1c69c
+          name: 'OSPF-MIB::OspfIfAdminStat'
+          mappings:
+            - value: '1'
+              newvalue: enable
+            - value: '2'
+              newvalue: disable
+        - uuid: fcb915fce2464feebe68c823037c3950
+          name: 'OSPF-MIB::OspfNbrState'
+          mappings:
+            - value: '1'
+              newvalue: down
+            - value: '2'
+              newvalue: attempt
+            - value: '3'
+              newvalue: init
+            - value: '4'
+              newvalue: twoWay
+            - value: '5'
+              newvalue: exchangeStart
+            - value: '6'
+              newvalue: exchange
+            - value: '7'
+              newvalue: loading
+            - value: '8'
+              newvalue: full
+        - uuid: 26ffcbc39c674b8d920960d1bac15489
+          name: 'OSPFV3-MIB::Ospfv3IfAdminStat'
+          mappings:
+            - value: '1'
+              newvalue: enable
+            - value: '2'
+              newvalue: disable
+        - uuid: c8f8a9a1a28b4608acfffbf5b27acd49
+          name: 'OSPFV3-MIB::Ospfv3NbrState'
+          mappings:
+            - value: '1'
+              newvalue: down
+            - value: '2'
+              newvalue: attempt
+            - value: '3'
+              newvalue: init
+            - value: '4'
+              newvalue: twoWay
+            - value: '5'
+              newvalue: exchangeStart
+            - value: '6'
+              newvalue: exchange
+            - value: '7'
+              newvalue: loading
+            - value: '8'
+              newvalue: full

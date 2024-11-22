@@ -1,0 +1,458 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: e7cc4049f6ac42b0a0a28b082ee96d0f
+      template: 'Template Huawei S6730 Health SNMP'
+      name: 'Template Huawei S6730 Health SNMP'
+      description: |
+        Template Huawei S6730 Health
+        -CPU MPU
+        -Memory MPU
+        -PSU
+        -PowerConsumption
+        -Temperature MPU
+        -FAN
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        HUAWEI-CPU-MIB.mib
+        HUAWEI-ENTITY-EXTENT-MIB.mib
+        HUAWEI-ENERGYMNGT-MIB
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: 0d276dd79ed048f3a31155669fbd0bdb
+          name: 'CPU Usage'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2011.6.3.4.1.2.0.0.0
+          key: hwCpuDevDuty
+          history: 30d
+          units: '%'
+          description: HUAWEI-CPU-MIB.mib
+          tags:
+            - tag: application
+              value: health
+            - tag: component
+              value: cpu
+            - tag: element
+              value: usage
+          triggers:
+            - uuid: 557bf3ce84304cf69383848f22b020a2
+              expression: 'last(/Template Huawei S6730 Health SNMP/hwCpuDevDuty)>={$CPU_HIGH_ALARM}'
+              name: 'High CPU Alarm'
+              priority: HIGH
+            - uuid: 64a33956f2b049aeb848897f78d45a6a
+              expression: 'last(/Template Huawei S6730 Health SNMP/hwCpuDevDuty)>={$CPU_HIGH_WARNING}'
+              name: 'High CPU Warning'
+              priority: AVERAGE
+              dependencies:
+                - name: 'High CPU Alarm'
+                  expression: 'last(/Template Huawei S6730 Health SNMP/hwCpuDevDuty)>={$CPU_HIGH_ALARM}'
+        - uuid: 0ddd5b84ad904e2baf2b1bf456c07bcb
+          name: 'CPU Usage 1min'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2011.6.3.4.1.2.0.0.0
+          key: hwCpuDevDuty1min
+          history: 30d
+          units: '%'
+          description: HUAWEI-CPU-MIB.mib
+          tags:
+            - tag: application
+              value: health
+            - tag: component
+              value: cpu
+            - tag: element
+              value: usage
+          triggers:
+            - uuid: f1b48eedf4f741b39243c05d364b4950
+              expression: 'last(/Template Huawei S6730 Health SNMP/hwCpuDevDuty1min)>={$CPU_HIGH_ALARM}'
+              name: 'High CPU Alarm 1min Usage'
+              priority: HIGH
+            - uuid: 25c50c7eab994559b5eafec99d0bc797
+              expression: 'last(/Template Huawei S6730 Health SNMP/hwCpuDevDuty1min)>={$CPU_HIGH_WARNING}'
+              name: 'High CPU Warning 1min Usage'
+              priority: AVERAGE
+              dependencies:
+                - name: 'High CPU Alarm 1min Usage'
+                  expression: 'last(/Template Huawei S6730 Health SNMP/hwCpuDevDuty1min)>={$CPU_HIGH_ALARM}'
+        - uuid: baa98623bbc64c44a76bde77c0434e1d
+          name: 'CPU Usage 5min'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2011.6.3.4.1.4.0.0.0
+          key: hwCpuDevDuty5min
+          delay: 5m
+          history: 30d
+          units: '%'
+          description: HUAWEI-CPU-MIB.mib
+          tags:
+            - tag: application
+              value: health
+            - tag: component
+              value: cpu
+            - tag: element
+              value: usage
+          triggers:
+            - uuid: 0b5119a44cad4a90add32070090f6816
+              expression: 'last(/Template Huawei S6730 Health SNMP/hwCpuDevDuty5min)>={$CPU_HIGH_ALARM}'
+              name: 'High CPU Alarm 5min Usage'
+              priority: HIGH
+            - uuid: d15fafafac0d4981808ebe6d55c9ef86
+              expression: 'last(/Template Huawei S6730 Health SNMP/hwCpuDevDuty5min)>={$CPU_HIGH_WARNING}'
+              name: 'High CPU Warning 5min Usage'
+              priority: AVERAGE
+              dependencies:
+                - name: 'High CPU Alarm 5min Usage'
+                  expression: 'last(/Template Huawei S6730 Health SNMP/hwCpuDevDuty5min)>={$CPU_HIGH_ALARM}'
+        - uuid: 5693b459672a4c7697728e03b4d7c30c
+          name: 'Total Power Consumption'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2011.6.157.1.6.0
+          key: hwCurrentPower
+          history: 30d
+          value_type: FLOAT
+          units: W
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.001'
+          tags:
+            - tag: application
+              value: health
+            - tag: component
+              value: 'power supply'
+            - tag: element
+              value: consumption
+          triggers:
+            - uuid: 7117b1a9c07a4dc692620a515aebc177
+              expression: 'last(/Template Huawei S6730 Health SNMP/hwCurrentPower)>={$POWER_USAGE_HIGH}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: '{$POWER_USAGE_HIGH} > last(/Template Huawei S6730 Health SNMP/hwCurrentPower)'
+              name: 'High Power Usage'
+              priority: HIGH
+      discovery_rules:
+        - uuid: 7b345feef32a460ba41af176a870a0b4
+          name: 'MPU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.47.1.1.1.1.7]'
+          key: 'entPhysicalName["MPU"]'
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: '^MPU Board'
+                formulaid: A
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'The textual name of the physical entity.'
+          item_prototypes:
+            - uuid: 49d02c04c9a44ac7951b1936a98ab179
+              name: 'Memory Usage "{#SNMPVALUE}" Threshold | Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.8.{#SNMPINDEX}'
+              key: 'hwEntityMemUsageThreshold["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              trends: '0'
+              units: '%'
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB::hwEntityMemUsage
+                
+                This variable reports the most recent measurement seen by the sensor.
+              tags:
+                - tag: Application
+                  value: Memory
+            - uuid: d780d43faf764faba8a72b5835754435
+              name: 'Memory "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.7.{#SNMPINDEX}'
+              key: 'hwEntityMemUsage["{#SNMPVALUE}"]'
+              history: 30d
+              units: '%'
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB::hwEntityMemUsage
+                
+                This variable reports the most recent measurement seen by the sensor.
+              tags:
+                - tag: Application
+                  value: Memory
+            - uuid: 1ac8d709916b4688ac7647d72ddfaf3f
+              name: 'Temperature "{#SNMPVALUE}" Threshold | Alarm Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.16.{#SNMPINDEX}'
+              key: 'hwEntityTemperatureLowThreshold["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: ºC
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB::hwEntityTemperatureLowThreshold
+                
+                This variable indicates the present operational status of the sensor.
+              tags:
+                - tag: Application
+                  value: Temperature
+            - uuid: 76db15db7ed444bba4541ea4fa6cde6e
+              name: 'Temperature "{#SNMPVALUE}" Threshold | Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.12.{#SNMPINDEX}'
+              key: 'hwEntityTemperatureThreshold["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: ºC
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB::hwEntityTemperatureLowThreshold
+                
+                This variable indicates the present operational status of the sensor.
+              tags:
+                - tag: Application
+                  value: Temperature
+            - uuid: 7340c507f7d64c4b94a203884a854320
+              name: 'Temperature "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.11.{#SNMPINDEX}'
+              key: 'hwEntityTemperature["{#SNMPVALUE}"]'
+              history: 30d
+              value_type: FLOAT
+              units: ºC
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB::hwEntityTemperature
+                
+                This variable indicates the present operational status of the sensor.
+              tags:
+                - tag: Application
+                  value: Temperature
+          trigger_prototypes:
+            - uuid: c83247b2999d45ae8765d387de747dbf
+              expression: 'last(/Template Huawei S6730 Health SNMP/hwEntityMemUsage["{#SNMPVALUE}"])>=last(/Template Huawei S6730 Health SNMP/hwEntityMemUsageThreshold["{#SNMPVALUE}"])'
+              name: 'High Memory Utilization "{#SNMPVALUE}"'
+              priority: HIGH
+            - uuid: a0b9cbecd12a42b3afd8a2be09fabcb7
+              expression: 'last(/Template Huawei S6730 Health SNMP/hwEntityTemperature["{#SNMPVALUE}"])>=last(/Template Huawei S6730 Health SNMP/hwEntityTemperatureThreshold["{#SNMPVALUE}"])'
+              name: 'High Temperature "{#SNMPVALUE}"'
+              priority: HIGH
+            - uuid: 55959dd3a61e411eb61a6199a65d25df
+              expression: 'last(/Template Huawei S6730 Health SNMP/hwEntityTemperature["{#SNMPVALUE}"])<=last(/Template Huawei S6730 Health SNMP/hwEntityTemperatureLowThreshold["{#SNMPVALUE}"])'
+              name: 'Low Temperature "{#SNMPVALUE}"'
+              priority: HIGH
+          graph_prototypes:
+            - uuid: 9d6266c048574bf09b07ae284c286638
+              name: 'Memory Usage "{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Huawei S6730 Health SNMP'
+                    key: 'hwEntityMemUsage["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei S6730 Health SNMP'
+                    key: 'hwEntityMemUsageThreshold["{#SNMPVALUE}"]'
+            - uuid: 31ccb00f0d6543a9b98938bf8d655de7
+              name: 'Temperature "{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: FF8000
+                  item:
+                    host: 'Template Huawei S6730 Health SNMP'
+                    key: 'hwEntityTemperature["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei S6730 Health SNMP'
+                    key: 'hwEntityTemperatureThreshold["{#SNMPVALUE}"]'
+                - sortorder: '2'
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei S6730 Health SNMP'
+                    key: 'hwEntityTemperatureLowThreshold["{#SNMPVALUE}"]'
+        - uuid: 13086fd1c10345948a08d84067a1b348
+          name: 'FAN Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.2011.5.25.31.1.1.10.1.1.0]'
+          key: 'hwEntityFanSlot["FAN"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: HUAWEI-ENTITY-EXTENT-MIB
+          item_prototypes:
+            - uuid: 66ba7300f6d94097b3fe990c6c8f333f
+              name: 'FAN Speed #"{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.10.1.5.0.{#SNMPINDEX}'
+              key: 'hwEntityFanSpeed["{#SNMPINDEX}"]'
+              history: 30d
+              units: '%'
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB
+                
+                This variable reports the most recent measurement seen by the sensor.
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: speed
+              trigger_prototypes:
+                - uuid: 06828cfd224f49928aa62f09daa2de77
+                  expression: 'last(/Template Huawei S6730 Health SNMP/hwEntityFanSpeed["{#SNMPINDEX}"])>=80'
+                  name: 'FAN Speed "{#SNMPINDEX}" is over 80%'
+                  priority: WARNING
+            - uuid: c31cb1c3d88d4aceb413fe7d966fab84
+              name: 'FAN State #"{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.10.1.7.0.{#SNMPINDEX}'
+              key: 'hwEntityFanState["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB
+                
+                This variable indicates the present operational status of the sensor.
+              valuemap:
+                name: 'HUAWEI-ENTITY-EXTENT-MIB::hwEntityFanState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: state
+              trigger_prototypes:
+                - uuid: 323591bc703a477f89ef40fd51c4887e
+                  expression: 'last(/Template Huawei S6730 Health SNMP/hwEntityFanState["{#SNMPINDEX}"])=2'
+                  name: 'FAN State "{#SNMPINDEX}" is abnormal'
+                  priority: HIGH
+          graph_prototypes:
+            - uuid: 57d30b1fc8f942fc9bb4abe712a612dc
+              name: 'FAN Speed "{#SNMPINDEX}"'
+              show_work_period: 'NO'
+              show_triggers: 'NO'
+              ymin_type_1: FIXED
+              ymax_type_1: FIXED
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 199C0D
+                  item:
+                    host: 'Template Huawei S6730 Health SNMP'
+                    key: 'hwEntityFanSpeed["{#SNMPINDEX}"]'
+        - uuid: 7af60509815f4605be16879ee11f7299
+          name: 'PSU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.2011.5.25.31.1.1.18.1.1.0]'
+          key: 'hwEntityPwrSlot["PSU"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'The textual name of the physical entity.'
+          item_prototypes:
+            - uuid: 6cb67b84ba394d8da01302683c04af09
+              name: 'PowerSupply State #"{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.4.1.2011.5.25.31.1.1.18.1.6.0.{#SNMPINDEX}'
+              key: 'hwEntityPwrState["PSU","{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              description: |
+                HUAWEI-ENTITY-EXTENT-MIB::hwEntityPwrState
+                
+                State power supply
+              valuemap:
+                name: 'HUAWEI-ENTITY-EXTENT-MIB::hwEntityPwrState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+                - tag: element
+                  value: status
+              trigger_prototypes:
+                - uuid: 3eeed73ee80b484a8710a289e211c139
+                  expression: 'last(/Template Huawei S6730 Health SNMP/hwEntityPwrState["PSU","{#SNMPINDEX}"])=2'
+                  name: 'Power Supply #"{#SNMPVALUE}" is notSupply'
+                  priority: AVERAGE
+                - uuid: 164d02620c2844329e9c5cfc61ea5b1f
+                  expression: 'last(/Template Huawei S6730 Health SNMP/hwEntityPwrState["PSU","{#SNMPINDEX}"])=3'
+                  name: 'Power Supply #"{#SNMPVALUE}" is sleep'
+                  priority: INFO
+                - uuid: 53a1d329b8b34e1080b0b0befee4cef7
+                  expression: 'last(/Template Huawei S6730 Health SNMP/hwEntityPwrState["PSU","{#SNMPINDEX}"])=4'
+                  name: 'Power Supply #"{#SNMPVALUE}" is unknown'
+                  priority: HIGH
+      tags:
+        - tag: class
+          value: health
+      macros:
+        - macro: '{$CPU_HIGH_ALARM}'
+          value: '80'
+          description: '% maximum alarm cpu'
+        - macro: '{$CPU_HIGH_WARNING}'
+          value: '70'
+          description: '% maximum warning cpu'
+        - macro: '{$MEMORY_UTIL_MAX}'
+          value: '80'
+          description: '% maximum alarm memory'
+        - macro: '{$POWER_USAGE_HIGH}'
+          value: '130'
+          description: 'alarm power usage W high'
+        - macro: '{$TEMP_CRIT_HIGH}'
+          value: '60'
+          description: 'alarm ºC temperature high'
+        - macro: '{$TEMP_CRIT_LOW}'
+          value: '3'
+          description: 'alarm ºC temperature low'
+      valuemaps:
+        - uuid: 48fa2b03a3394888a125f328dfabc812
+          name: 'HUAWEI-ENTITY-EXTENT-MIB::hwEntityFanState'
+          mappings:
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: abnormal
+        - uuid: 855d00d5ed8d42eb980f184702af2498
+          name: 'HUAWEI-ENTITY-EXTENT-MIB::hwEntityPwrState'
+          mappings:
+            - value: '1'
+              newvalue: supply
+            - value: '2'
+              newvalue: notSupply
+            - value: '3'
+              newvalue: sleep
+            - value: '4'
+              newvalue: unknown
+  graphs:
+    - uuid: 1df6a54a7ad5469d9fd85a96fba8f437
+      name: 'CPU Usage'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Template Huawei S6730 Health SNMP'
+            key: hwCpuDevDuty
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Template Huawei S6730 Health SNMP'
+            key: hwCpuDevDuty1min
+        - sortorder: '2'
+          color: 2774A4
+          item:
+            host: 'Template Huawei S6730 Health SNMP'
+            key: hwCpuDevDuty5min
+    - uuid: 3ec0b4f9dbe147a59c6d0563b56fd3af
+      name: 'Power Consumption'
+      graph_items:
+        - drawtype: FILLED_REGION
+          color: FF0000
+          item:
+            host: 'Template Huawei S6730 Health SNMP'
+            key: hwCurrentPower

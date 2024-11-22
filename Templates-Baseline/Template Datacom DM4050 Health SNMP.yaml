@@ -1,0 +1,627 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 0c21b7963ec34bbb8c7d74e528eb80c4
+      template: 'Template Datacom DM4050 Health SNMP'
+      name: 'Template Datacom DM4050 Health SNMP'
+      description: |
+        Template Datacom DM4050 Health
+        -PSU
+        -Temperature
+        -FAN
+        -CPU
+        -Memory
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        
+        Require:
+        Firmware / Software
+        .DmOS 5.4.0
+        
+        ValueMap
+        .DMOS-HW-MONITOR-MIB::ReadError
+        .DMOS-HW-MONITOR-MIB::fanSpeedState
+        .DMOS-HW-MONITOR-MIB::psuStatus
+        
+        Base:
+        DMOS-MIB.txt
+        https://share.zabbix.com/network_devices/datacom/dmos-hardware-monitor
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: 34268ec858c74927a7d26ad7f295b7e8
+          name: 'CPU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.3709.3.6.4.1.3.1.10.1.1.49]'
+          key: 'dmOSCoreLoadActive["CPU"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discover CPU Load Active'
+          item_prototypes:
+            - uuid: caea03923461408e86d2f57c1f93947f
+              name: 'CPU "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.4.1.3.1.10.1.1.49.{#SNMPINDEX}'
+              key: 'dmOSCoreLoadActive1min["{#SNMPINDEX}"]'
+              history: 30d
+              units: '%'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+                - tag: element
+                  value: value
+              trigger_prototypes:
+                - uuid: d25bb656499e46878c600db96f87c1d6
+                  expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSCoreLoadActive1min["{#SNMPINDEX}"])>{$CPU_HIGH_ALARM}'
+                  name: 'High CPU Alarm #"{#SNMPINDEX}"'
+                  priority: HIGH
+                - uuid: e3e9f2b0e39f4dd98186aeb7ab543579
+                  expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSCoreLoadActive1min["{#SNMPINDEX}"])>{$CPU_HIGH_WARNING}'
+                  name: 'High CPU Warning #"{#SNMPINDEX}"'
+                  priority: WARNING
+                  dependencies:
+                    - name: 'High CPU Alarm #"{#SNMPINDEX}"'
+                      expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSCoreLoadActive1min["{#SNMPINDEX}"])>{$CPU_HIGH_ALARM}'
+          graph_prototypes:
+            - uuid: b738426a8ac24b0d8fbe88859f35d042
+              name: 'CPU "{#SNMPINDEX}"'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Datacom DM4050 Health SNMP'
+                    key: 'dmOSCoreLoadActive1min["{#SNMPINDEX}"]'
+        - uuid: 4cf48394ebdb4a3fb7f615e76829e59d
+          name: 'FAN Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.3709.3.6.6.1.4.1.2.1.1.49.1]'
+          key: 'dmOSFanDescription["FAN"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discovery FAN DM4050'
+          item_prototypes:
+            - uuid: d6b7b1baa0ac4b3eb4a87a39d9e7b0a1
+              name: 'Read Error Status FAN "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.6.1.4.1.5.1.1.49.1.{#SNMPINDEX}'
+              key: 'dmOSFANReadErrorStatus["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'DMOS-HW-MONITOR-MIB::ReadError'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: status
+              trigger_prototypes:
+                - uuid: c073d60f7e054a38910ca60968d94bed
+                  expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSFANReadErrorStatus["{#SNMPVALUE}"])=1'
+                  name: 'Read Error Status FAN "{#SNMPVALUE}"'
+                  priority: HIGH
+            - uuid: 55a33f75bd6a40ceb5a598f7460d0f48
+              name: 'Speed FAN "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.6.1.4.1.4.1.1.49.1.{#SNMPINDEX}'
+              key: 'dmOSFANSpeed["{#SNMPVALUE}"]'
+              history: 30d
+              units: RPM
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: speed
+            - uuid: 9a4d8526edb64db7bfab36b48c9325f6
+              name: 'Status FAN "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.6.1.4.1.6.1.1.49.1.{#SNMPINDEX}'
+              key: 'dmOSFANStatus["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'DMOS-HW-MONITOR-MIB::fanSpeedState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: status
+              trigger_prototypes:
+                - uuid: 122063ccfeef4403b8c5321978c76d6b
+                  expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSFANStatus["{#SNMPVALUE}"])<>0'
+                  name: 'Problem FAN "{#SNMPVALUE}"'
+                  priority: AVERAGE
+          graph_prototypes:
+            - uuid: 043d9321f7a94b5087816438eedea04f
+              name: 'Speed FAN "{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Datacom DM4050 Health SNMP'
+                    key: 'dmOSFANSpeed["{#SNMPVALUE}"]'
+        - uuid: 953174ff286a45a7bee41f9035a58aff
+          name: 'Hardware Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.3709.3.6.6.1.3.1.2.1.1.49.7.83.69.78.83.79.82]'
+          key: 'dmOSHwDescription["Hardware"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discovery CPU, CPU Core and Switch Fabric DM4050'
+          item_prototypes:
+            - uuid: 82a2a31d8fc04db99c89245738fa6079
+              name: 'Read Error Status "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.6.1.3.1.7.1.1.49.7.83.69.78.83.79.82.{#SNMPINDEX}'
+              key: 'dmOSHwReadErrorStatus["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'DMOS-HW-MONITOR-MIB::ReadError'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: hardware
+                - tag: element
+                  value: error
+              trigger_prototypes:
+                - uuid: c0d0575a99d44362804d4b1a5c5059c2
+                  expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSHwReadErrorStatus["{#SNMPVALUE}"])=1'
+                  name: 'Read Error Status "{#SNMPVALUE}"'
+                  priority: HIGH
+            - uuid: 58c1116df34142e093ae6c5100edd9de
+              name: 'Status Temperature "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.6.1.3.1.8.1.1.49.7.83.69.78.83.79.82.{#SNMPINDEX}'
+              key: 'dmOSHwStatus["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'DMOS-HW-MONITOR-MIB::fanSpeedState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: hardware
+                - tag: element
+                  value: status
+              trigger_prototypes:
+                - uuid: f511b5766b994ef79b438d5476d0d589
+                  expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSHwStatus["{#SNMPVALUE}"])<>0'
+                  name: 'Problem "{#SNMPVALUE}"'
+                  priority: AVERAGE
+            - uuid: d151738d3f384430bff89edd59324be1
+              name: 'Threshold Temp "{#SNMPINDEX}" High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.6.1.3.1.3.1.1.49.7.83.69.78.83.79.82.{#SNMPINDEX}'
+              key: 'dmOSHwTempThreshHigh["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              trends: '0'
+              units: ºC
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: hardware
+                - tag: element
+                  value: threshold
+            - uuid: 770bb56a64cf499e849dbb9b767c0a5c
+              name: 'Threshold Temp "{#SNMPINDEX}" Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.6.1.3.1.4.1.1.49.7.83.69.78.83.79.82.{#SNMPINDEX}'
+              key: 'dmOSHwTempThreshLow["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              trends: '0'
+              units: ºC
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: hardware
+                - tag: element
+                  value: threshold
+            - uuid: da387f38d9834f71be4432ddd4462df9
+              name: 'Temperature "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.6.1.3.1.6.1.1.49.7.83.69.78.83.79.82.{#SNMPINDEX}'
+              key: 'dmOSHwTemp["{#SNMPVALUE}"]'
+              history: 30d
+              units: ºC
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: hardware
+                - tag: element
+                  value: temperature
+          trigger_prototypes:
+            - uuid: 22dbfe7e00ca4261ad29f4dc7023cc7a
+              expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSHwTemp["{#SNMPVALUE}"])>last(/Template Datacom DM4050 Health SNMP/dmOSHwTempThreshHigh["{#SNMPVALUE}"])'
+              name: 'High temperature "{#SNMPVALUE}"'
+              priority: HIGH
+            - uuid: 2e5034eb6c1644deb8ce2df68cd4618b
+              expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSHwTemp["{#SNMPVALUE}"])<last(/Template Datacom DM4050 Health SNMP/dmOSHwTempThreshLow["{#SNMPVALUE}"])'
+              name: 'Low temperature "{#SNMPVALUE}"'
+              priority: AVERAGE
+          graph_prototypes:
+            - uuid: c3f9ab39767245bbb01605cb430598b4
+              name: 'Temperature Hardware "{#SNMPVALUE}"'
+              graph_items:
+                - color: F63100
+                  item:
+                    host: 'Template Datacom DM4050 Health SNMP'
+                    key: 'dmOSHwTempThreshHigh["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  color: 2774A4
+                  item:
+                    host: 'Template Datacom DM4050 Health SNMP'
+                    key: 'dmOSHwTempThreshLow["{#SNMPVALUE}"]'
+                - sortorder: '2'
+                  drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Datacom DM4050 Health SNMP'
+                    key: 'dmOSHwTemp["{#SNMPVALUE}"]'
+        - uuid: 1338d882c2cd428dbd8bfbcb53f0b7cc
+          name: 'Memory Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.3709.3.6.4.2.2.1.26.1.1]'
+          key: 'dmOSMemoryTotal["Memory"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: 16cc8ed38e2d456896843a0199f11a18
+              name: 'Memory Avaiable "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.4.2.2.1.31.1.1.{#SNMPINDEX}'
+              key: 'dmOSMemoryAvaiable["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              units: B
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+            - uuid: b27b09b90db243168857da5487ade778
+              name: 'Memory Total "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.4.2.2.1.26.1.1.{#SNMPINDEX}'
+              key: 'dmOSMemoryTotal["{#SNMPINDEX}"]'
+              history: 7d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+            - uuid: a21acf6667254552a7f09164c31b7ae8
+              name: 'Memory Utlization "{#SNMPINDEX}"'
+              type: CALCULATED
+              key: 'dmOSMemoryUtilization["{#SNMPINDEX}"]'
+              units: '%'
+              params: '((last(//dmOSMemoryTotal["{#SNMPINDEX}"])-last(//dmOSMemoryAvaiable["{#SNMPINDEX}"]))/last(//dmOSMemoryTotal["{#SNMPINDEX}"]))*100'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+              trigger_prototypes:
+                - uuid: ebc0100ce13b4781bea9cc6a4a704fec
+                  expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSMemoryUtilization["{#SNMPINDEX}"])>{$MEMORY_HIGH_ALARM}'
+                  name: 'High memory utilization Alarm "{#SNMPINDEX}"'
+                  priority: HIGH
+                - uuid: a4c43b43014b4c9e9810ab7112b9e078
+                  expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSMemoryUtilization["{#SNMPINDEX}"])>{$MEMORY_HIGH_WARNING}'
+                  name: 'High memory utilization Warning "{#SNMPINDEX}"'
+                  priority: WARNING
+                  dependencies:
+                    - name: 'High memory utilization Alarm "{#SNMPINDEX}"'
+                      expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSMemoryUtilization["{#SNMPINDEX}"])>{$MEMORY_HIGH_ALARM}'
+          graph_prototypes:
+            - uuid: 7b0959bacde74d6c94650f5f3796cbd8
+              name: 'Memory Utilization "{#SNMPINDEX}"'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Datacom DM4050 Health SNMP'
+                    key: 'dmOSMemoryUtilization["{#SNMPINDEX}"]'
+        - uuid: 75cc16c1ea624a988f1042e383453e89
+          name: 'PSU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.3709.3.6.6.1.2.1.1.1.4.80.83.85]'
+          key: 'dmOSPSUDescription["PSU"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discovery PSU DM4050'
+          item_prototypes:
+            - uuid: 4761800334c34ceb9db0eecec7532f69
+              name: 'Status "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.6.1.5.1.2.6.49.47.80.83.85.{#SNMPINDEX}'
+              key: 'dmOSPSUStatus["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'DMOS-HW-MONITOR-MIB::psuStatus'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+              trigger_prototypes:
+                - uuid: 5689812642534caab781db421f689b38
+                  expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSPSUStatus["{#SNMPVALUE}"])=3'
+                  name: '"{#SNMPVALUE}" error'
+                  priority: HIGH
+                - uuid: 11d888ec450f4aae921a33bea67cd03a
+                  expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSPSUStatus["{#SNMPVALUE}"])=2'
+                  name: '"{#SNMPVALUE}" fuseFailure'
+                  priority: AVERAGE
+                - uuid: fac023946436445787eae7a16326995d
+                  expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSPSUStatus["{#SNMPVALUE}"])=1'
+                  name: '"{#SNMPVALUE}" powerInputFailure'
+                  priority: WARNING
+        - uuid: eff9a7ee208143ca9f6123abd6d88a6e
+          name: 'Temperature Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.3709.3.6.6.1.3.1.2.1.4.80.83.85]'
+          key: 'dmOSPSUTemp["PSU"]'
+          delay: 1h
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discovery PSU Temperature DM4050'
+          item_prototypes:
+            - uuid: e82b7a1b96744d9ab6025b7832daa844
+              name: 'Threshold Temp "{#SNMPINDEX}" High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.6.1.3.1.3.1.4.80.83.85.{#SNMPINDEX}'
+              key: 'dmOSPSUTempThreshHigh["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              trends: '0'
+              units: ºC
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: threshold
+            - uuid: 4d6e466283144435bad3c0266c0a4091
+              name: 'Threshold Temp "{#SNMPINDEX}" Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.6.1.3.1.4.1.4.80.83.85.{#SNMPINDEX}'
+              key: 'dmOSPSUTempThreshLow["{#SNMPVALUE}"]'
+              delay: 30m
+              history: 30d
+              trends: '0'
+              units: ºC
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: threshold
+            - uuid: 6f9b7061f3e44770b3df5c3edc22ccd6
+              name: 'Temperature "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.3709.3.6.6.1.3.1.6.1.4.80.83.85.{#SNMPINDEX}'
+              key: 'dmOSPSUTemp["{#SNMPVALUE}"]'
+              history: 30d
+              units: ºC
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: value
+          trigger_prototypes:
+            - uuid: 32ffe4b92fd14624af08f881e4f2bca9
+              expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSPSUTemp["{#SNMPVALUE}"]) > last(/Template Datacom DM4050 Health SNMP/dmOSPSUTempThreshHigh["{#SNMPVALUE}"])'
+              name: '"{#SNMPVALUE}" Temperature too High'
+              priority: HIGH
+            - uuid: d512de82ffdd455cb2a6e8b5862f5c8d
+              expression: 'last(/Template Datacom DM4050 Health SNMP/dmOSPSUTemp["{#SNMPVALUE}"]) < last(/Template Datacom DM4050 Health SNMP/dmOSPSUTempThreshLow["{#SNMPVALUE}"])'
+              name: '"{#SNMPVALUE}" Temperature too Low'
+              priority: AVERAGE
+          graph_prototypes:
+            - uuid: 76fa0cdd8e90470fa7449ea242df2717
+              name: 'Temperature "{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Datacom DM4050 Health SNMP'
+                    key: 'dmOSPSUTemp["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  color: FF0000
+                  item:
+                    host: 'Template Datacom DM4050 Health SNMP'
+                    key: 'dmOSPSUTempThreshHigh["{#SNMPVALUE}"]'
+                - sortorder: '2'
+                  color: 0000FF
+                  item:
+                    host: 'Template Datacom DM4050 Health SNMP'
+                    key: 'dmOSPSUTempThreshLow["{#SNMPVALUE}"]'
+      tags:
+        - tag: class
+          value: health
+      macros:
+        - macro: '{$CPU_HIGH_ALARM}'
+          value: '80'
+          description: '% cpu alarm'
+        - macro: '{$CPU_HIGH_WARNING}'
+          value: '60'
+          description: '% cpu warning'
+        - macro: '{$MEMORY_HIGH_ALARM}'
+          value: '80'
+          description: '% memory alarm'
+        - macro: '{$MEMORY_HIGH_WARNING}'
+          value: '60'
+          description: '% memory warning'
+      dashboards:
+        - uuid: 2b7ec2531b494ed29c63c27813681df4
+          name: 'Screen CPU'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Datacom DM4050 Health SNMP'
+                        name: 'CPU "{#SNMPINDEX}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+        - uuid: df8121d7c2f8412c97e2bd6b34070b2f
+          name: 'Screen Memory'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Datacom DM4050 Health SNMP'
+                        name: 'Memory Utilization "{#SNMPINDEX}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+        - uuid: 535d0b5cda554685b8223f7eb591b9a4
+          name: 'Screen Temperature'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Datacom DM4050 Health SNMP'
+                        name: 'Temperature Hardware "{#SNMPVALUE}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+                - type: graphprototype
+                  'y': '5'
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Datacom DM4050 Health SNMP'
+                        name: 'Temperature "{#SNMPVALUE}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAB
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+      valuemaps:
+        - uuid: 6fe10c58cd76459ea1c22e99755c49f9
+          name: 'DMOS-HW-MONITOR-MIB::fanSpeedState'
+          mappings:
+            - value: '-1'
+              newvalue: error
+            - value: '-2'
+              newvalue: fail
+            - value: '0'
+              newvalue: normal
+            - value: '1'
+              newvalue: high
+            - value: '2'
+              newvalue: low
+            - value: '3'
+              newvalue: critical
+        - uuid: 8532d1c8c9d4406a860e2270931b8825
+          name: 'DMOS-HW-MONITOR-MIB::psuStatus'
+          mappings:
+            - value: '0'
+              newvalue: ok
+            - value: '1'
+              newvalue: powerInputFailure
+            - value: '2'
+              newvalue: fuseFailure
+            - value: '3'
+              newvalue: error
+        - uuid: b764f59e96854374b9576a2e339ee036
+          name: 'DMOS-HW-MONITOR-MIB::ReadError'
+          mappings:
+            - value: '1'
+              newvalue: 'true'
+            - value: '2'
+              newvalue: 'false'

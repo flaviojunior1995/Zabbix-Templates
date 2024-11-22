@@ -1,0 +1,987 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 1ff905764c664dcc8dc27fdfc2356d5f
+      template: 'Template Huawei NE8000 Optical Monitor SNMP'
+      name: 'Template Huawei NE8000 Optical Monitor SNMP'
+      description: |
+        Template Huawei NE8000 Optical Monitor
+        -RX Treshould
+        -TX Treshould
+        -Rx Signal
+        -Tx Signal
+        OBS: Error on discovery is normal, because the number of itens on discovery is not equal snmpwalk
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        HUAWEI-ENTITY-EXTENT-MIB.mib
+        ENTITY-MIB.mib
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: aef66e18e99d406ea0ecd508e929bd48
+          name: 'Optical Sensor QSFP Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFPRESENT},.1.3.6.1.4.1.2011.5.25.31.1.1.3.1.17,{#IFNAME},.1.3.6.1.2.1.47.1.1.1.1.7,{#IFCLASS},.1.3.6.1.2.1.47.1.1.1.1.5]'
+          key: 'hwEntityOpticalPlugQSFP["Optical"]'
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#IFCLASS}'
+                value: '10'
+                formulaid: A
+              - macro: '{#IFNAME}'
+                value: (^100GE)
+                formulaid: B
+              - macro: '{#IFPRESENT}'
+                value: '1'
+                formulaid: C
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: HUAWEI-ENTITY-EXTENT-MIB
+          item_prototypes:
+            - uuid: 65e54b9cc93045c180bda18f1fe1db43
+              name: 'Optical "{#IFNAME}" Rx Lane0'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.32.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPLane0RxPower["{#IFNAME}"]'
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: REGEX
+                  parameters:
+                    - '!?(^(-|)\d{1,4}),(-|)\d{1,4},(-|)\d{1,4},(-|)\d{1,4}'
+                    - \1
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var value = parseFloat(value)
+                      return (value / 100 )
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: d42226bbc4784fd49f6eb072561de7a0
+              name: 'Optical "{#IFNAME}" Tx Lane0'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.33.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPLane0TxPower["{#IFNAME}"]'
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: REGEX
+                  parameters:
+                    - '!?(^(-|)\d{1,4}),(-|)\d{1,4},(-|)\d{1,4},(-|)\d{1,4}'
+                    - \1
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var value = parseFloat(value)
+                      return (value / 100 )
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 58ca894e359c4d6c873bf4ef577d3d29
+              name: 'Optical "{#IFNAME}" Rx Lane1'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.32.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPLane1RxPower["{#IFNAME}"]'
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: REGEX
+                  parameters:
+                    - '^(-|)\d{1,4},!?((-|)\d{1,4}),(-|)\d{1,4},(-|)\d{1,4}'
+                    - \2
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var value = parseFloat(value)
+                      return (value / 100 )
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: e485ebe9918147bfa904c3015058dbb8
+              name: 'Optical "{#IFNAME}" Tx Lane1'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.33.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPLane1TxPower["{#IFNAME}"]'
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: REGEX
+                  parameters:
+                    - '^(-|)\d{1,4},!?((-|)\d{1,4}),(-|)\d{1,4},(-|)\d{1,4}'
+                    - \2
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var value = parseFloat(value)
+                      return (value / 100 )
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 3cfd63c069924c42ac92eafc19280e65
+              name: 'Optical "{#IFNAME}" Rx Lane2'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.32.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPLane2RxPower["{#IFNAME}"]'
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: REGEX
+                  parameters:
+                    - '^(-|)\d{1,4},(-|)\d{1,4},!?((-|)\d{1,4}),(-|)\d{1,4}'
+                    - \3
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var value = parseFloat(value)
+                      return (value / 100 )
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: b37a168578b34f9c87bdd5cbaf1a8af4
+              name: 'Optical "{#IFNAME}" Tx Lane2'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.33.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPLane2TxPower["{#IFNAME}"]'
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: REGEX
+                  parameters:
+                    - '^(-|)\d{1,4},(-|)\d{1,4},!?((-|)\d{1,4}),(-|)\d{1,4}'
+                    - \3
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var value = parseFloat(value)
+                      return (value / 100 )
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 59c452f88f8c459989da89257c9ea624
+              name: 'Optical "{#IFNAME}" Rx Lane3'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.32.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPLane3RxPower["{#IFNAME}"]'
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: REGEX
+                  parameters:
+                    - '^(-|)\d{1,4},(-|)\d{1,4},(-|)\d{1,4},!?((-|)\d{1,4})'
+                    - \4
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var value = parseFloat(value)
+                      return (value / 100 )
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 3ff0f075c63940ef82ee86cc68912bae
+              name: 'Optical "{#IFNAME}" Tx Lane3'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.33.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPLane3TxPower["{#IFNAME}"]'
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: REGEX
+                  parameters:
+                    - '^(-|)\d{1,4},(-|)\d{1,4},(-|)\d{1,4},!?((-|)\d{1,4})'
+                    - \4
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var value = parseFloat(value)
+                      return (value / 100 )
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 53450e4640914f62869310f0213c0e73
+              name: 'Optical "{#IFNAME}" Rx'
+              type: CALCULATED
+              key: 'hwEntityOpticalQSFPLanesRxPower["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              units: dBm
+              params: '( last(//hwEntityOpticalQSFPLane0RxPower["{#IFNAME}"]) + last(//hwEntityOpticalQSFPLane1RxPower["{#IFNAME}"]) + last(//hwEntityOpticalQSFPLane2RxPower["{#IFNAME}"]) + last(//hwEntityOpticalQSFPLane3RxPower["{#IFNAME}"]) ) / 4'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: b57b70e28cb04eb0b66c5ce2e41d4950
+              name: 'Optical "{#IFNAME}" Tx'
+              type: CALCULATED
+              key: 'hwEntityOpticalQSFPLanesTxPower["{#IFNAME}"]'
+              history: 30d
+              value_type: FLOAT
+              units: dBm
+              params: '( last(//hwEntityOpticalQSFPLane0TxPower["{#IFNAME}"]) + last(//hwEntityOpticalQSFPLane1TxPower["{#IFNAME}"]) + last(//hwEntityOpticalQSFPLane2TxPower["{#IFNAME}"]) + last(//hwEntityOpticalQSFPLane3TxPower["{#IFNAME}"]) ) / 4'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 44ce98128df447a092c4cc7b91542a72
+              name: 'Optical "{#IFNAME}" Threshold | Rx Alarm High'
+              type: ZABBIX_ACTIVE
+              key: 'hwEntityOpticalQSFPRxHighThreshold[{#IFNAME}]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 52616ba19a704e238292cead7b43c893
+              name: 'Optical "{#IFNAME}" Threshold | Rx Warning High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.21.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPRxHighWarnThreshold["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: d6fb5e265e9040feb922394bf317e464
+              name: 'Optical "{#IFNAME}" Threshold | Rx Alarm Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.13.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPRxLowThreshold["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 5ad7ecbe66754a46a430ce0c61bc9063
+              name: 'Optical "{#IFNAME}" Threshold | Rx Warning Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.20.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPRxLowWarnThreshold["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: bcefb7551460457794341d610d336c75
+              name: 'Optical "{#IFNAME}" Threshold | Tx Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.16.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPTxHighThreshold["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 8f0d1ba9106448cd93c620c1d3536a3e
+              name: 'Optical "{#IFNAME}" Threshold | Tx Warning High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.23.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPTxHighWarnThreshold["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 447b96b15f0045ecac006e062dac0395
+              name: 'Optical "{#IFNAME}" Threshold | Tx Alarm Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.15.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPTxLowThreshold["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 01869830e2674ffe90d3fad0d99dfa75
+              name: 'Optical "{#IFNAME}" Threshold | Tx Warning Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.22.{#SNMPINDEX}'
+              key: 'hwEntityOpticalQSFPTxLowWarnThreshold["{#IFNAME}"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+          trigger_prototypes:
+            - uuid: b9c0616837d84d24bf6b099b1a135a87
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPLanesRxPower["{#IFNAME}"]) > last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPRxHighThreshold[{#IFNAME}])'
+              name: 'Optical Rx High signal ALARM for "{#IFNAME}"'
+              priority: HIGH
+            - uuid: 699063928b064e759009db1ca3e30df6
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPLanesRxPower["{#IFNAME}"]) > last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPRxHighWarnThreshold["{#IFNAME}"])'
+              name: 'Optical Rx High signal WARNING for "{#IFNAME}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Optical Rx High signal ALARM for "{#IFNAME}"'
+                  expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPLanesRxPower["{#IFNAME}"]) > last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPRxHighThreshold[{#IFNAME}])'
+            - uuid: 4426f87871cd4f8287db9838a61f78a2
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPLanesRxPower["{#IFNAME}"]) < last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPRxLowThreshold["{#IFNAME}"])'
+              name: 'Optical Rx Low signal ALARM for "{#IFNAME}"'
+              priority: HIGH
+            - uuid: 4e87230de405499d8fbf203a5ce2a667
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPLanesRxPower["{#IFNAME}"]) < last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPRxLowWarnThreshold["{#IFNAME}"])'
+              name: 'Optical Rx Low signal WARNING for "{#IFNAME}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Optical Rx Low signal ALARM for "{#IFNAME}"'
+                  expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPLanesRxPower["{#IFNAME}"]) < last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPRxLowThreshold["{#IFNAME}"])'
+            - uuid: 756beb1c4fb0487185b122f9bfa7feb9
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPLanesTxPower["{#IFNAME}"]) > last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPTxHighThreshold["{#IFNAME}"])'
+              name: 'Optical Tx High signal ALARM for "{#IFNAME}"'
+              priority: HIGH
+            - uuid: fea05afc7aa8473b938b543404e3177b
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPLanesTxPower["{#IFNAME}"]) > last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPTxHighWarnThreshold["{#IFNAME}"])'
+              name: 'Optical Tx High signal WARNING for "{#IFNAME}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Optical Tx High signal ALARM for "{#IFNAME}"'
+                  expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPLanesTxPower["{#IFNAME}"]) > last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPTxHighThreshold["{#IFNAME}"])'
+            - uuid: 624ba16faa8147e4bd57a1dde8e9e913
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPLanesTxPower["{#IFNAME}"]) < last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPTxLowThreshold["{#IFNAME}"])'
+              name: 'Optical Tx Low signal ALARM for "{#IFNAME}"'
+              priority: HIGH
+            - uuid: 08f1098762824f00af7062ee03dbfbca
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPLanesTxPower["{#IFNAME}"]) < last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPTxLowWarnThreshold["{#IFNAME}"])'
+              name: 'Optical Tx Low signal WARNING for "{#IFNAME}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Optical Tx Low signal ALARM for "{#IFNAME}"'
+                  expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPLanesTxPower["{#IFNAME}"]) < last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalQSFPTxLowThreshold["{#IFNAME}"])'
+          graph_prototypes:
+            - uuid: 3f8613a79bb949e8a61b0acbcb367520
+              name: 'Optical Rx "{#IFNAME}"'
+              graph_items:
+                - color: 00FF00
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalQSFPLanesRxPower["{#IFNAME}"]'
+                - sortorder: '1'
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalQSFPRxHighThreshold[{#IFNAME}]'
+                - sortorder: '2'
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalQSFPRxLowThreshold["{#IFNAME}"]'
+                - sortorder: '3'
+                  color: FF8000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalQSFPRxHighWarnThreshold["{#IFNAME}"]'
+                - sortorder: '4'
+                  color: FF8000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalQSFPRxLowWarnThreshold["{#IFNAME}"]'
+            - uuid: b37fe16642c14864a088b4062bee5251
+              name: 'Optical Tx "{#IFNAME}"'
+              graph_items:
+                - color: 00FF00
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalQSFPLanesTxPower["{#IFNAME}"]'
+                - sortorder: '1'
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalQSFPTxHighThreshold["{#IFNAME}"]'
+                - sortorder: '2'
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalQSFPTxLowThreshold["{#IFNAME}"]'
+                - sortorder: '3'
+                  color: FF8000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalQSFPTxHighWarnThreshold["{#IFNAME}"]'
+                - sortorder: '4'
+                  color: FF8000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalQSFPTxLowWarnThreshold["{#IFNAME}"]'
+        - uuid: 466d70947a304925adde179641e27cff
+          name: 'Optical Sensor Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFPRESENT},.1.3.6.1.4.1.2011.5.25.31.1.1.3.1.17,{#IFNAME},.1.3.6.1.2.1.47.1.1.1.1.7,{#IFCLASS},.1.3.6.1.2.1.47.1.1.1.1.5,{#ENTITYDESC},.1.3.6.1.2.1.47.1.1.1.1.2]'
+          key: 'hwEntityOpticalPlug["Optical"]'
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#ENTITYDESC}'
+                value: (Copper)
+                operator: NOT_MATCHES_REGEX
+                formulaid: A
+              - macro: '{#IFCLASS}'
+                value: '10'
+                formulaid: B
+              - macro: '{#IFNAME}'
+                value: (^GigabitEthernet)
+                formulaid: C
+              - macro: '{#IFPRESENT}'
+                value: '1'
+                formulaid: D
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: HUAWEI-ENTITY-EXTENT-MIB
+          item_prototypes:
+            - uuid: 279ba3d53bf04e459aef2abfe69509fb
+              name: 'Optical "{#IFNAME}" Tranceiver Rx'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.32.{#SNMPINDEX}'
+              key: 'hwEntityOpticalLaneRxPower[{#IFNAME}]'
+              history: 30d
+              value_type: FLOAT
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: a691580af7ad4c5592f9e59fa3eefcb8
+              name: 'Optical "{#IFNAME}" Tranceiver Tx'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.33.{#SNMPINDEX}'
+              key: 'hwEntityOpticalLaneTxPower[{#IFNAME}]'
+              history: 30d
+              value_type: FLOAT
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: value
+            - uuid: 258ca8c5371543bbb916b5838eda4a0e
+              name: 'Optical "{#IFNAME}" Threshold | Rx Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.14.{#SNMPINDEX}'
+              key: 'hwEntityOpticalRxHighThreshold[{#IFNAME}]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              description: |
+                This variable indicates the value of the threshold.
+                
+                However, you can directly compare entSensorValue with the threshold values given in entSensorThresholdTable without any semantic knowledge.
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 112a42ed6efa4ecfaa59dc8afe3bdd17
+              name: 'Optical "{#IFNAME}" Threshold | Rx Warning High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.21.{#SNMPINDEX}'
+              key: 'hwEntityOpticalRxHighWarnThreshold[{#IFNAME}]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 4c42c132eb324772945eb5533d52f233
+              name: 'Optical "{#IFNAME}" Threshold | Rx Alarm Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.13.{#SNMPINDEX}'
+              key: 'hwEntityOpticalRxLowThreshold[{#IFNAME}]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: ae99e581405244d9969ac51264dc3d78
+              name: 'Optical "{#IFNAME}" Threshold | Rx Warning Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.20.{#SNMPINDEX}'
+              key: 'hwEntityOpticalRxLowWarnThreshold[{#IFNAME}]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: a536677b795548679fb84af3fc6ab036
+              name: 'Optical "{#IFNAME}" Threshold | Tx Alarm High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.16.{#SNMPINDEX}'
+              key: 'hwEntityOpticalTxHighThreshold[{#IFNAME}]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              description: |
+                This variable indicates the value of the threshold.
+                
+                However, you can directly compare entSensorValue with the threshold values given in entSensorThresholdTable without any semantic knowledge.
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: ce9e850ae7814fb991b9090256ee5554
+              name: 'Optical "{#IFNAME}" Threshold | Tx Warning High'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.23.{#SNMPINDEX}'
+              key: 'hwEntityOpticalTxHighWarnThreshold[{#IFNAME}]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 6120ee9a521c4aab971e65876866e909
+              name: 'Optical "{#IFNAME}" Threshold | Tx Alarm Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.15.{#SNMPINDEX}'
+              key: 'hwEntityOpticalTxLowThreshold[{#IFNAME}]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+            - uuid: 7a2340534966426c98e91090ce94bfe1
+              name: 'Optical "{#IFNAME}" Threshold | Tx Warning Low'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.31.1.1.3.1.22.{#SNMPINDEX}'
+              key: 'hwEntityOpticalTxLowWarnThreshold[{#IFNAME}]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: dBm
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: '{#IFNAME}'
+                - tag: element
+                  value: threshold
+          trigger_prototypes:
+            - uuid: 9bd3eef3a7444f27ae9c1c9cfa143b7e
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalLaneRxPower[{#IFNAME}]) > last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalRxHighThreshold[{#IFNAME}])'
+              name: 'Optical Rx High signal ALARM for "{#IFNAME}"'
+              priority: HIGH
+            - uuid: 72307d4003004a86ad453769a98f680c
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalLaneRxPower[{#IFNAME}]) > last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalRxHighWarnThreshold[{#IFNAME}])'
+              name: 'Optical Rx High signal WARNING for "{#IFNAME}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Optical Rx High signal ALARM for "{#IFNAME}"'
+                  expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalLaneRxPower[{#IFNAME}]) > last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalRxHighThreshold[{#IFNAME}])'
+            - uuid: df26e44fc8a042e4a00d1f6e85a14cb7
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalLaneRxPower[{#IFNAME}]) < last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalRxLowThreshold[{#IFNAME}])'
+              name: 'Optical Rx Low signal ALARM for "{#IFNAME}"'
+              priority: HIGH
+            - uuid: 83f45b07e08c4ef3af22b751d4006854
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalLaneRxPower[{#IFNAME}]) < last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalRxLowWarnThreshold[{#IFNAME}])'
+              name: 'Optical Rx Low signal WARNING for "{#IFNAME}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Optical Rx Low signal ALARM for "{#IFNAME}"'
+                  expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalLaneRxPower[{#IFNAME}]) < last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalRxLowThreshold[{#IFNAME}])'
+            - uuid: 98309bfa35d64e95ab38e0dec4b2aa43
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalLaneTxPower[{#IFNAME}]) > last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalTxHighThreshold[{#IFNAME}])'
+              name: 'Optical Tx High signal ALARM for "{#IFNAME}"'
+              priority: HIGH
+            - uuid: efe933756fd74ecab3f0b19213371818
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalLaneTxPower[{#IFNAME}]) > last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalTxHighWarnThreshold[{#IFNAME}])'
+              name: 'Optical Tx High signal WARNING for "{#IFNAME}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Optical Tx High signal ALARM for "{#IFNAME}"'
+                  expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalLaneTxPower[{#IFNAME}]) > last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalTxHighThreshold[{#IFNAME}])'
+            - uuid: 6572c6fcd05e4e6e868375fe1e7ae3b5
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalLaneTxPower[{#IFNAME}]) < last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalTxLowThreshold[{#IFNAME}])'
+              name: 'Optical Tx Low signal ALARM for "{#IFNAME}"'
+              priority: HIGH
+            - uuid: 0941b4cf2f774e5eac833c9d6152cccf
+              expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalLaneTxPower[{#IFNAME}]) < last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalTxLowWarnThreshold[{#IFNAME}])'
+              name: 'Optical Tx Low signal WARNING for "{#IFNAME}"'
+              priority: WARNING
+              dependencies:
+                - name: 'Optical Tx Low signal ALARM for "{#IFNAME}"'
+                  expression: 'last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalLaneTxPower[{#IFNAME}]) < last(/Template Huawei NE8000 Optical Monitor SNMP/hwEntityOpticalTxLowThreshold[{#IFNAME}])'
+          graph_prototypes:
+            - uuid: 23294c3c115749c48e3ffbe92ae21f70
+              name: 'Optical "{#IFNAME}" Rx'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: 80FF00
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalLaneRxPower[{#IFNAME}]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalRxHighThreshold[{#IFNAME}]'
+                - sortorder: '2'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalRxLowThreshold[{#IFNAME}]'
+                - sortorder: '3'
+                  color: FF8000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalRxHighWarnThreshold[{#IFNAME}]'
+                - sortorder: '4'
+                  color: FF8000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalRxLowWarnThreshold[{#IFNAME}]'
+            - uuid: 11616ef1ca6b44caa39baed58f5e694f
+              name: 'Optical "{#IFNAME}" Tx'
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalLaneTxPower[{#IFNAME}]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalTxHighThreshold[{#IFNAME}]'
+                - sortorder: '2'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalTxLowThreshold[{#IFNAME}]'
+                - sortorder: '3'
+                  color: FFFF00
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalTxHighWarnThreshold[{#IFNAME}]'
+                - sortorder: '4'
+                  color: FFFF00
+                  item:
+                    host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                    key: 'hwEntityOpticalTxLowWarnThreshold[{#IFNAME}]'
+      tags:
+        - tag: class
+          value: optical
+      dashboards:
+        - uuid: 2b5793578722451090e7699a6d43d0d1
+          name: 'Screen Optical'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                        name: 'Optical Rx "{#IFNAME}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+                - type: graphprototype
+                  'y': '5'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                        name: 'Optical "{#IFNAME}" Rx'
+                    - type: STRING
+                      name: reference
+                      value: AAAAC
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+                - type: graphprototype
+                  x: '36'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                        name: 'Optical Tx "{#IFNAME}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAB
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+                - type: graphprototype
+                  x: '36'
+                  'y': '5'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Huawei NE8000 Optical Monitor SNMP'
+                        name: 'Optical "{#IFNAME}" Tx'
+                    - type: STRING
+                      name: reference
+                      value: AAAAD
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'

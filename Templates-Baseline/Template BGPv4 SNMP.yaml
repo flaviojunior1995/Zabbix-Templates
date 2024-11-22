@@ -1,0 +1,169 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 8f4dad981f214aac8e6637ab02166cc7
+      template: 'Template BGPv4 SNMP'
+      name: 'Template BGPv4 SNMP'
+      description: |
+        Template BGPv4
+        -Admin Status
+        -Established Time
+        -Operation Status
+        -AS Name
+        -BGP last Error
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        ExternalScript:
+        .as_name
+        
+        Base: 
+        BGP4-MIB.mib
+        
+        OBS:
+        External Scripts on GitHub
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: 3929d5b9480c41c098ef7c7e67bfc7f1
+          name: 'BGPv4 Peers Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.2.1.15.3.1.7,{#SNMPASN},.1.3.6.1.2.1.15.3.1.9]'
+          key: 'BgpPeerDiscovery["BGPv4"]'
+          delay: 1h
+          lifetime: 30d
+          item_prototypes:
+            - uuid: 8e76c7ce0e4f4db68342c7d9dc5137b1
+              name: 'AS Name for IPv4 peer "{#SNMPVALUE}"'
+              type: EXTERNAL
+              key: 'as_name.sh["{#SNMPASN}","{#SNMPVALUE}"]'
+              delay: 1d
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: 'asn {#SNMPVALUE}'
+            - uuid: ab2f96109fba4cb49d0c5b62ca9c948f
+              name: 'Administrative status for peer "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.15.3.1.3.{#SNMPVALUE}'
+              key: 'bgpPeerAdminStatus["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'BGP4-MIB::bgpPeerAdminStatus'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: 'asn {#SNMPVALUE}'
+            - uuid: c3ffb4bbb73e4cc3b03093ad2c34dd84
+              name: 'Established time for peer "{#SNMPVALUE}"'
+              key: 'bgpPeerFsmEstablishedTime["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              units: uptime
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: 'asn {#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: be98b3d189124d28bae71828b5299118
+                  expression: 'last(/Template BGPv4 SNMP/bgpPeerFsmEstablishedTime["{#SNMPVALUE}"])<{$PEER_LOW_TIME}'
+                  name: 'BGP peer up time low "{#SNMPVALUE}" ASN "{#SNMPASN}"'
+                  priority: INFO
+            - uuid: 837826d5df9c4d96b1aa244862728a11
+              name: 'BGP peer last error "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.15.3.1.14.{#SNMPVALUE}'
+              key: 'bgpPeerLastError["{#SNMPVALUE}"]'
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: 'asn {#SNMPVALUE}'
+            - uuid: e0e4a798b6684cfab35dbfcb18cacf4d
+              name: 'Remote AS for peer "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.15.3.1.9.{#SNMPVALUE}'
+              key: 'bgpPeerRemoteAs["{#SNMPVALUE}"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: 'asn {#SNMPVALUE}'
+            - uuid: 8ac335a24c5d40618dcd1e6b5c0af8b7
+              name: 'Operational status for peer "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.15.3.1.2.{#SNMPVALUE}'
+              key: 'bgpPeerState["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'BGP4-MIB::bgpPeerState'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: 'asn {#SNMPVALUE}'
+          trigger_prototypes:
+            - uuid: d3cbc09cab8445b2a9577bc9370c9689
+              expression: 'last(/Template BGPv4 SNMP/bgpPeerState["{#SNMPVALUE}"],#3)<>6 and last(/Template BGPv4 SNMP/bgpPeerAdminStatus["{#SNMPVALUE}"])=2'
+              name: 'BGP peer "{#SNMPVALUE}" ASN "{#SNMPASN}" is DOWN'
+              priority: HIGH
+      tags:
+        - tag: class
+          value: bgpv4
+      macros:
+        - macro: '{$PEER_LOW_TIME}'
+          value: '14400'
+          description: 'time in sec alarm for low uptime bgp session'
+      valuemaps:
+        - uuid: ff63443af4b04eaf9f8df5081a05a8b3
+          name: 'BGP4-MIB::bgpPeerAdminStatus'
+          mappings:
+            - value: '1'
+              newvalue: stoped
+            - value: '2'
+              newvalue: started
+        - uuid: 6c9befb288fe4d19abd4d4b8e6bc5768
+          name: 'BGP4-MIB::bgpPeerState'
+          mappings:
+            - value: '1'
+              newvalue: idel
+            - value: '2'
+              newvalue: connect
+            - value: '3'
+              newvalue: active
+            - value: '4'
+              newvalue: opensent
+            - value: '5'
+              newvalue: openconfirm
+            - value: '6'
+              newvalue: established

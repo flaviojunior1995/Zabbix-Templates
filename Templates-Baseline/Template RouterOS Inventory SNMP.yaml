@@ -1,0 +1,115 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 8d7e7fe50cdb4addbcf99a19f9e88e77
+      template: 'Template RouterOS Inventory SNMP'
+      name: 'Template RouterOS Inventory SNMP'
+      description: |
+        Template RouterOS Inventory
+        -RouterOS Version
+        -Uptime
+        -Hardware model
+        -Hostname
+        -Contact
+        -Location
+        -Serial Number
+        -Software OS
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        SNMPv2-MIB.mib
+        MIKROTIK-MIB.mib
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: f6b544d49ccc4c7ea94ddc4ac2bada12
+          name: 'RouterOS Version'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.14988.1.1.4.4.0
+          key: mtxrLicVersion
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SOFTWARE
+          tags:
+            - tag: application
+              value: inventory
+          triggers:
+            - uuid: dc516fc315094884928d8a55b2c85bf1
+              expression: 'last(/Template RouterOS Inventory SNMP/mtxrLicVersion) <> {$ROUTEROS_VER}'
+              name: 'RouterOS out-of-date'
+              priority: INFO
+              manual_close: 'YES'
+        - uuid: 6cbb2903a8444f35b5b080e4bd13f7b9
+          name: 'Serial Number'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.14988.1.1.7.3.0
+          key: mtxrSerialNumber
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SERIALNO_A
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 9541dd95cf75444183c495ee792cc54d
+          name: 'Software OS'
+          type: SCRIPT
+          key: scriptOS
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "RouterOS";'
+          inventory_link: OS
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: db17f15eb1f74e3ba99f07095e86e205
+          name: Vendor
+          type: SCRIPT
+          key: scriptVendor
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "Mikrotik";'
+          inventory_link: VENDOR
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: c68c1acfb54d42d782de9ff529a0768c
+          name: Hardware
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.1.0
+          key: 'sysDesc["RouterBoard"]'
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: HARDWARE
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - '^RouterOS (.*)+?'
+                - \1
+          tags:
+            - tag: application
+              value: inventory
+      tags:
+        - tag: class
+          value: inventory
+      macros:
+        - macro: '{$ROUTEROS_VER}'
+          value: 7.15.3
+          description: 'routeros version'
+        - macro: '{$UPTIME_ALARM}'
+          value: '86400'
+          description: 'alarm uptime 1 day'

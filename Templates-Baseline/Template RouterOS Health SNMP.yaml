@@ -1,0 +1,656 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 4a43fa94bee349d39d62f10e1bda6910
+      template: 'Template RouterOS Health SNMP'
+      name: 'Template RouterOS Health SNMP'
+      description: |
+        Template RouterOS Health
+        -CPU
+        -Memory
+        -Disk
+        -Temperature
+        -PSU
+        -FAN State
+        -FAN Speed
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        MIKROTIK-MIB.mib
+        HOST-RESOURCES-MIB.mib
+        UCD-SNMP-MIB.mib
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: 03da64301f494cc58822a7408e8c82d3
+          name: 'CPU Load 1min'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.11.10.0
+          key: ssCpuSystem
+          history: 30d
+          units: '%'
+          tags:
+            - tag: application
+              value: health
+            - tag: component
+              value: cpu
+          triggers:
+            - uuid: c78af3e12c3440bd95c75f052c640e0d
+              expression: 'last(/Template RouterOS Health SNMP/ssCpuSystem) > {$CPU_HIGH_ALARM}'
+              name: 'High CPU Load 1min'
+              priority: HIGH
+            - uuid: c7e230cc686a49a0bf2db4afead5c4c2
+              expression: 'last(/Template RouterOS Health SNMP/ssCpuSystem) > {$CPU_HIGH_ALARM} - 10'
+              name: 'High CPU Load 1min Warning'
+              priority: WARNING
+              dependencies:
+                - name: 'High CPU Load 1min'
+                  expression: 'last(/Template RouterOS Health SNMP/ssCpuSystem) > {$CPU_HIGH_ALARM}'
+      discovery_rules:
+        - uuid: 7ea67854c5824695b22b2e447d3e3c2e
+          name: 'CPU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.25.3.3.1.1]'
+          key: 'hrProcessorFrwID["CPU"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'HOST-RESOURCES-MIB::hrProcessorFrwID'
+          item_prototypes:
+            - uuid: 13fe10ab827c4f658db4df60bf005fa8
+              name: '#"{#SNMPINDEX}": CPU utilization'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.25.3.3.1.2.{#SNMPINDEX}'
+              key: 'hrProcessorLoad["{#SNMPINDEX}"]'
+              history: 30d
+              value_type: FLOAT
+              units: '%'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+                - tag: element
+                  value: '{#SNMPINDEX}'
+              trigger_prototypes:
+                - uuid: a86db872b82a4a68afa9e6f915fcaf2e
+                  expression: 'avg(/Template RouterOS Health SNMP/hrProcessorLoad["{#SNMPINDEX}"],5m) > {$CPU_HIGH_ALARM}'
+                  name: '#"{#SNMPINDEX}": High CPU utilization'
+                  priority: WARNING
+          graph_prototypes:
+            - uuid: 18022e7439a74538b2cf35060ed85a3b
+              name: '#"{#SNMPINDEX}": CPU utilization'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template RouterOS Health SNMP'
+                    key: 'hrProcessorLoad["{#SNMPINDEX}"]'
+        - uuid: f84d9831872f46298bc8557b90b3fada
+          name: 'Disk Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.25.2.3.1.3,{#STORAGE_TYPE},.1.3.6.1.2.1.25.2.3.1.2]'
+          key: 'hrStorageDescr["hrStorageFixedDisk"]'
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#STORAGE_TYPE}'
+                value: .+4$
+                formulaid: A
+              - macro: '{#STORAGE_TYPE}'
+                value: .+hrStorageFixedDisk
+                formulaid: B
+          lifetime: 30d
+          description: 'HOST-RESOURCES-MIB::hrStorageDescr'
+          item_prototypes:
+            - uuid: 9de60988a1374d068b6ef4071aee5240
+              name: '"{#SNMPVALUE}" Size'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.25.2.3.1.5.{#SNMPINDEX}'
+              key: 'hrStorageSize["{#SNMPVALUE}","hrStorageFixedDisk"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              units: B
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '1024'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: disk
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 30112795dde74ac8be3ddfb8c8b9fc46
+              name: '"{#SNMPVALUE}" Used'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.25.2.3.1.6.{#SNMPINDEX}'
+              key: 'hrStorageUsed["{#SNMPVALUE}","hrStorageFixedDisk"]'
+              history: 30d
+              units: B
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '1024'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: disk
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 5bb62616c23f4852ad5660bf45ff0535
+              name: '"{#SNMPVALUE}" Utilization'
+              type: CALCULATED
+              key: 'memoryUsedPercent["{#SNMPVALUE}","hrStorageFixedDisk"]'
+              history: 30d
+              units: '%'
+              params: '( last(//hrStorageUsed["{#SNMPVALUE}","hrStorageFixedDisk"]) / last(//hrStorageSize["{#SNMPVALUE}","hrStorageFixedDisk"]) ) * 100'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: disk
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 4431a25951a54097b3a1b637a93ed78e
+                  expression: 'last(/Template RouterOS Health SNMP/memoryUsedPercent["{#SNMPVALUE}","hrStorageFixedDisk"]) > {$DISK_HIGH_ALARM}'
+                  name: '"{#SNMPVALUE}": High utilization'
+                  priority: HIGH
+                - uuid: 38825ab8857c486d85c4827d1a184164
+                  expression: 'last(/Template RouterOS Health SNMP/memoryUsedPercent["{#SNMPVALUE}","hrStorageFixedDisk"]) > {$DISK_HIGH_ALARM} - 10'
+                  name: '"{#SNMPVALUE}": High utilization'
+                  priority: WARNING
+                  dependencies:
+                    - name: '"{#SNMPVALUE}": High utilization'
+                      expression: 'last(/Template RouterOS Health SNMP/memoryUsedPercent["{#SNMPVALUE}","hrStorageFixedDisk"]) > {$DISK_HIGH_ALARM}'
+          graph_prototypes:
+            - uuid: fda5d187ec1f4131ad73aca2c2b4ca6b
+              name: '"{#SNMPVALUE}" DISK Utilization'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template RouterOS Health SNMP'
+                    key: 'memoryUsedPercent["{#SNMPVALUE}","hrStorageFixedDisk"]'
+        - uuid: b2563c1df9f645439645f5bd46456fe9
+          name: 'Memory Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.25.2.3.1.3]'
+          key: 'hrStorageDescr["hrStorageRam"]'
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: '^main memory$'
+                formulaid: A
+          lifetime: 30d
+          description: 'HOST-RESOURCES-MIB::hrStorageDescr'
+          item_prototypes:
+            - uuid: 530452d2b4f94b44b9f2057b17e172dc
+              name: '"{#SNMPVALUE}" Size'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.25.2.3.1.5.{#SNMPINDEX}'
+              key: 'hrStorageSize["{#SNMPVALUE}","hrStorageRam"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              units: B
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '1024'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 33c3fc4edc434901a403d95573b92a4c
+              name: '"{#SNMPVALUE}" Used'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.25.2.3.1.6.{#SNMPINDEX}'
+              key: 'hrStorageUsed["{#SNMPVALUE}","hrStorageRam"]'
+              history: 30d
+              units: B
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '1024'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 71bbe93ccd7b4302b083fd97bfe284a0
+              name: '"{#SNMPVALUE}" Utilization'
+              type: CALCULATED
+              key: 'memoryUsedPercent["{#SNMPVALUE}","hrStorageRam"]'
+              history: 30d
+              units: '%'
+              params: '( last(//hrStorageUsed["{#SNMPVALUE}","hrStorageRam"]) / last(//hrStorageSize["{#SNMPVALUE}","hrStorageRam"]) ) * 100'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 6ed7103380bd48bf82a7e8dea41733a0
+                  expression: 'last(/Template RouterOS Health SNMP/memoryUsedPercent["{#SNMPVALUE}","hrStorageRam"]) > {$MEMORY_HIGH_ALARM}'
+                  name: '"{#SNMPVALUE}": High utilization'
+                  priority: HIGH
+                - uuid: 9c57fb1da6624aa7893ba1ffe4bfeb4e
+                  expression: 'last(/Template RouterOS Health SNMP/memoryUsedPercent["{#SNMPVALUE}","hrStorageRam"]) > {$MEMORY_HIGH_ALARM} - 10'
+                  name: '"{#SNMPVALUE}": High utilization Warning'
+                  priority: WARNING
+                  dependencies:
+                    - name: '"{#SNMPVALUE}": High utilization'
+                      expression: 'last(/Template RouterOS Health SNMP/memoryUsedPercent["{#SNMPVALUE}","hrStorageRam"]) > {$MEMORY_HIGH_ALARM}'
+          graph_prototypes:
+            - uuid: 45d70906043c4c69975f3cbd0b67060a
+              name: '"{#SNMPVALUE}" RAM Utilization'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template RouterOS Health SNMP'
+                    key: 'memoryUsedPercent["{#SNMPVALUE}","hrStorageRam"]'
+        - uuid: 7df8b371f12146bc86eebae4a1d226c0
+          name: 'FAN State Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.3.100.1.2]'
+          key: 'mtxrGaugeName["FAN"]'
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: ^fan-state$
+                formulaid: A
+          lifetime: 30d
+          description: 'MIKROTIK-MIB::mtxrGaugeName'
+          item_prototypes:
+            - uuid: 596ebebf698c4bc782ad4ed1ef7b0426
+              name: '"{#SNMPVALUE}" unit'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.3.100.1.4.{#SNMPINDEX}'
+              key: 'mtxrGaugeUnit["{#SNMPVALUE}","FAN"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'MIKROTIK-MIB::mtxrGaugeUnit'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 37d842fd666d45f68af3e3e06558df98
+              name: '"{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.3.100.1.3.{#SNMPINDEX}'
+              key: 'mtxrGaugeValue["{#SNMPVALUE}","FAN"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'MIKROTIK-MIB::mtxrGaugeState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: e57d5ce9d35a47e5a65f05bb27a1ce44
+                  expression: 'last(/Template RouterOS Health SNMP/mtxrGaugeValue["{#SNMPVALUE}","FAN"]) <> 0'
+                  name: '"{#SNMPVALUE}" fail'
+                  priority: HIGH
+        - uuid: 10bd492bb4c441a08f8c02385202640a
+          name: 'FAN Speed Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.3.100.1.2]'
+          key: 'mtxrGaugeName["FANSpeed"]'
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: '^fan.*speed$'
+                formulaid: A
+          lifetime: 30d
+          description: 'MIKROTIK-MIB::mtxrGaugeName'
+          item_prototypes:
+            - uuid: 6c891a77bf124df886c659dbe8de497d
+              name: '"{#SNMPVALUE}" unit'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.3.100.1.4.{#SNMPINDEX}'
+              key: 'mtxrGaugeUnit["{#SNMPVALUE}","FAN Speed"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'MIKROTIK-MIB::mtxrGaugeUnit'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 6075d921199241a6a0eb939fb89bb7a9
+              name: '"{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.3.100.1.3.{#SNMPINDEX}'
+              key: 'mtxrGaugeValue["{#SNMPVALUE}","FAN Speed"]'
+              history: 30d
+              units: RPM
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: '{#SNMPVALUE}'
+        - uuid: 2d79ac3c42964fc89adf86a2d95022ce
+          name: 'PSU State Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.3.100.1.2]'
+          key: 'mtxrGaugeName["PSU"]'
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: '^psu[1-9]-state$'
+                formulaid: A
+          lifetime: 30d
+          description: 'MIKROTIK-MIB::mtxrGaugeName'
+          item_prototypes:
+            - uuid: 6e8b3c737471451ba709a21afde515f0
+              name: '"{#SNMPVALUE}" unit'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.3.100.1.4.{#SNMPINDEX}'
+              key: 'mtxrGaugeUnit["{#SNMPVALUE}","PSU"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'MIKROTIK-MIB::mtxrGaugeUnit'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: psu
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: eaa64eb3ad384160a17fcaec5fad41c5
+              name: '"{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.3.100.1.3.{#SNMPINDEX}'
+              key: 'mtxrGaugeValue["{#SNMPVALUE}","PSU"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'MIKROTIK-MIB::mtxrGaugeState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: psu
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 85134077ee0a40f19338e82ece523011
+                  expression: 'last(/Template RouterOS Health SNMP/mtxrGaugeValue["{#SNMPVALUE}","PSU"]) <> 0'
+                  name: '"{#SNMPVALUE}" down'
+                  priority: HIGH
+        - uuid: 6f99309faa4246a8b73d76d805d224bc
+          name: 'PSU Voltage Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.3.100.1.2]'
+          key: 'mtxrGaugeName["PSU Power"]'
+          delay: 1h
+          filter:
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: '^psu[1-9]-voltage$'
+                formulaid: A
+          lifetime: 30d
+          description: 'MIKROTIK-MIB::mtxrGaugeName'
+          item_prototypes:
+            - uuid: 031d18038dd94069b6640bd5dbaca43f
+              name: '"{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.3.100.1.3.{#SNMPINDEX}'
+              key: 'mtxrGaugeValue["{#SNMPVALUE}","PSU Voltage"]'
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: V
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: psu
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: da4dc4bb678845a48e6a3c4adce8dc55
+                  expression: 'last(/Template RouterOS Health SNMP/mtxrGaugeValue["{#SNMPVALUE}","PSU Voltage"])=0'
+                  name: '"{#SNMPVALUE}" down'
+                  priority: HIGH
+        - uuid: 1f46a6733d7d4955ba6a516fca72f7a2
+          name: 'Temperature Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.3.100.1.2]'
+          key: 'mtxrGaugeName["Temperature"]'
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: temperature
+                formulaid: A
+              - macro: '{#SNMPVALUE}'
+                value: ^sfp-temperature$
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+          lifetime: 30d
+          description: 'MIKROTIK-MIB::mtxrGaugeName'
+          item_prototypes:
+            - uuid: 9f732726c85a46718dc8ec46f8522e38
+              name: '"{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.3.100.1.3.{#SNMPINDEX}'
+              key: 'mtxrGaugeValue["{#SNMPVALUE}","Temperature"]'
+              history: 30d
+              units: ºC
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 77cf7cff3415488bb69c2c6c191b3008
+                  expression: 'last(/Template RouterOS Health SNMP/mtxrGaugeValue["{#SNMPVALUE}","Temperature"]) > {$TEMP_HIGH_ALARM}'
+                  name: '"{#SNMPVALUE}" high'
+                  priority: HIGH
+                - uuid: 1f25636b1a4e431188983f82dad57592
+                  expression: 'last(/Template RouterOS Health SNMP/mtxrGaugeValue["{#SNMPVALUE}","Temperature"]) > {$TEMP_HIGH_ALARM} - 5'
+                  name: '"{#SNMPVALUE}" high warning'
+                  priority: WARNING
+                - uuid: 51f6fffc9c0a4ca6b86183298aca38ae
+                  expression: 'last(/Template RouterOS Health SNMP/mtxrGaugeValue["{#SNMPVALUE}","Temperature"]) < {$TEMP_LOW_ALARM}'
+                  name: '"{#SNMPVALUE}" low'
+                  priority: HIGH
+                - uuid: 39de0deafbbb4dfd9d195556e6b95913
+                  expression: 'last(/Template RouterOS Health SNMP/mtxrGaugeValue["{#SNMPVALUE}","Temperature"]) < {$TEMP_LOW_ALARM} + 5'
+                  name: '"{#SNMPVALUE}" low warning'
+                  priority: WARNING
+          graph_prototypes:
+            - uuid: ecf7c57b150e40bdb0ff28cc4d80a09a
+              name: '"{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: FF0000
+                  item:
+                    host: 'Template RouterOS Health SNMP'
+                    key: 'mtxrGaugeValue["{#SNMPVALUE}","Temperature"]'
+      tags:
+        - tag: class
+          value: health
+      macros:
+        - macro: '{$CPU_HIGH_ALARM}'
+          value: '80'
+          description: '% maximum alarm cpu'
+        - macro: '{$DISK_HIGH_ALARM}'
+          value: '90'
+          description: '% maximum alarm critical storage'
+        - macro: '{$MEMORY_HIGH_ALARM}'
+          value: '80'
+          description: '% maximum alarm critical ram'
+        - macro: '{$ROUTEROS_VER}'
+          value: 7.15.3
+          description: 'routeros version'
+        - macro: '{$TEMP_HIGH_ALARM}'
+          value: '60'
+          description: 'alarm temperature high'
+        - macro: '{$TEMP_LOW_ALARM}'
+          value: '-20'
+          description: 'alarm temperature low'
+      dashboards:
+        - uuid: d4a88012a36f40deb1f51f3ea89db0d6
+          name: Health
+          pages:
+            - widgets:
+                - type: graph
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: GRAPH
+                      name: graphid.0
+                      value:
+                        host: 'Template RouterOS Health SNMP'
+                        name: 'CPU Load 1min'
+                    - type: STRING
+                      name: reference
+                      value: TMDQU
+                - type: graphprototype
+                  'y': '5'
+                  width: '18'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Template RouterOS Health SNMP'
+                        name: '"{#SNMPVALUE}" RAM Utilization'
+                    - type: STRING
+                      name: reference
+                      value: EXFYN
+                - type: graphprototype
+                  x: '18'
+                  'y': '5'
+                  width: '18'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Template RouterOS Health SNMP'
+                        name: '"{#SNMPVALUE}" DISK Utilization'
+                    - type: STRING
+                      name: reference
+                      value: CLHTB
+                - type: graphprototype
+                  x: '36'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Template RouterOS Health SNMP'
+                        name: '#"{#SNMPINDEX}": CPU utilization'
+                    - type: STRING
+                      name: reference
+                      value: KEILJ
+                - type: graphprototype
+                  x: '36'
+                  'y': '5'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Template RouterOS Health SNMP'
+                        name: '"{#SNMPVALUE}"'
+                    - type: STRING
+                      name: reference
+                      value: LNMFL
+      valuemaps:
+        - uuid: afae9ddc0cc74023a291a8a448f16c40
+          name: 'MIKROTIK-MIB::mtxrGaugeState'
+          mappings:
+            - value: '9'
+              newvalue: ok
+            - value: '1'
+              newvalue: fail
+        - uuid: 4199b724aef4464992d3a64095b79517
+          name: 'MIKROTIK-MIB::mtxrGaugeUnit'
+          mappings:
+            - value: '1'
+              newvalue: celsius
+            - value: '2'
+              newvalue: rpm
+            - value: '3'
+              newvalue: dV
+            - value: '4'
+              newvalue: dA
+            - value: '5'
+              newvalue: dW
+            - value: '6'
+              newvalue: status
+        - uuid: 97afcb74cf8a4f66b5e9da096353dbf1
+          name: 'MIKROTIK-MIB:BoolValue'
+          mappings:
+            - value: '0'
+              newvalue: 'false'
+            - value: '1'
+              newvalue: 'true'
+  graphs:
+    - uuid: 2c0f3fbe1633455fa0326abd38d50e5e
+      name: 'CPU Load 1min'
+      graph_items:
+        - drawtype: FILLED_REGION
+          color: 00FF00
+          item:
+            host: 'Template RouterOS Health SNMP'
+            key: ssCpuSystem

@@ -1,0 +1,448 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 63e726866c7f494081529e424260b1e2
+      template: 'Template Huawei BGP SNMP'
+      name: 'Template Huawei BGP SNMP'
+      description: |
+        Template Huawei BGP 
+        -AdminStatus
+        -Established Time
+        -OperationStatus
+        -AS Name
+        -Route Limit for peer
+        -Active Prefix
+        -Received Prefix
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        ExternalScript
+        .as.name
+        
+        Base: 
+        HUAWEI-BGP-VPN-MIB.mib
+        BGP4-MIB.mib
+        
+        OBS:
+        External Scripts on GitHub
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: fa1717d360804199a6a7955b9ddf5173
+          name: 'BGPv4 Peers Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.2011.5.25.177.1.1.2.1.4,{#SNMPASN},.1.3.6.1.4.1.2011.5.25.177.1.1.2.1.2,{#SNMPADF},.1.3.6.1.4.1.2011.5.25.177.1.1.1.1.6]'
+          key: 'hwBgpv4PeerRemoteAddr["BGPv4"]'
+          delay: 1d
+          filter:
+            conditions:
+              - macro: '{#SNMPINDEX}'
+                value: (^0.1)
+                formulaid: A
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: 3fb6e65c41db4403920794973c82ac3f
+              name: 'AS Name for IPv4 peer "{#SNMPVALUE}" ASN "{#SNMPASN}" AF "{#SNMPADF}"'
+              type: EXTERNAL
+              key: 'as_name.sh["{#SNMPASN}","{#SNMPVALUE}","{#SNMPADF}"]'
+              delay: 1d
+              history: 30d
+              value_type: TEXT
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+            - uuid: 217bca6e03044e4681d98aa688a1b2e5
+              name: 'Administrative status for peer "{#SNMPVALUE}" ASN "{#SNMPASN}" AF "{#SNMPADF}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.2.1.15.3.1.3.{#SNMPVALUE}'
+              key: 'BgpPeerAdminStatus["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'BGP4-MIB::bgpPeerAdminStatus'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+              trigger_prototypes:
+                - uuid: 7ac815e432784d96825eac21a8546948
+                  expression: 'last(/Template Huawei BGP SNMP/BgpPeerAdminStatus["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"])=1'
+                  name: 'BGP peer Admin Down {#SNMPVALUE} ASN {#SNMPASN}'
+                  priority: WARNING
+            - uuid: db5c301826e64413bb1db721b1722b68
+              name: 'Route Limit for peer "{#SNMPVALUE}" ASN "{#SNMPASN}" AF "{#SNMPADF}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.177.1.1.5.1.1.{#SNMPINDEX}'
+              key: 'hwBgpv4PeerConfigRouteLimitNum["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+            - uuid: e84973a779a8419ab2b0e6a9570d4127
+              name: 'Established time for peer "{#SNMPVALUE}" ASN "{#SNMPASN}" AF "{#SNMPADF}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.177.1.1.2.1.7.{#SNMPINDEX}'
+              key: 'hwBgpv4PeerFsmEstablishedTime["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]'
+              history: 30d
+              trends: '0'
+              units: uptime
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+              trigger_prototypes:
+                - uuid: 0cbe5815ac8244c296102c88b99c48e8
+                  expression: 'last(/Template Huawei BGP SNMP/hwBgpv4PeerFsmEstablishedTime["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"])<{$PEER_LOW_TIME}'
+                  name: 'BGP peer up time low {#SNMPVALUE} ASN {#SNMPASN}'
+                  priority: INFO
+                  dependencies:
+                    - name: 'BGP peer {#SNMPVALUE} ASN {#SNMPASN} is DOWN'
+                      expression: 'last(/Template Huawei BGP SNMP/hwBgpv4PeerState["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"],#3)<>6 and last(/Template Huawei BGP SNMP/BgpPeerAdminStatus["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"])=2'
+            - uuid: 5d6f295cf4da4cd39cc326c698320189
+              name: 'Active prefix for peer "{#SNMPVALUE}" ASN "{#SNMPASN}" AF "{#SNMPADF}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.177.1.1.3.1.2.{#SNMPINDEX}'
+              key: 'hwBgpv4PeerPrefixAtiveCounter["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]'
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+            - uuid: 57f7b759b4b84115aaf9bce79f322f0d
+              name: 'Received prefix for peer "{#SNMPVALUE}" ASN "{#SNMPASN}" AF "{#SNMPADF}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.177.1.1.3.1.1.{#SNMPINDEX}'
+              key: 'hwBgpv4PeerPrefixRcvCounter["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]'
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+            - uuid: cbecb940a5034f36ba571b570a4cd66f
+              name: 'Remote AS for peer "{#SNMPVALUE}" ASN "{#SNMPASN}" AF "{#SNMPADF}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.177.1.1.2.1.2.{#SNMPINDEX}'
+              key: 'hwBgpv4PeerRemoteAs["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+            - uuid: bd983ce222384ac89073341df921d6fd
+              name: 'Operational status for peer "{#SNMPVALUE}" ASN "{#SNMPASN}" AF "{#SNMPADF}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.177.1.1.2.1.5.{#SNMPINDEX}'
+              key: 'hwBgpv4PeerState["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'BGP4-MIB::bgpPeerState'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+          trigger_prototypes:
+            - uuid: bc5bb9529a984a058ccdcf7d937a8c25
+              expression: 'last(/Template Huawei BGP SNMP/hwBgpv4PeerState["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"],#3)<>6 and last(/Template Huawei BGP SNMP/BgpPeerAdminStatus["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"])=2'
+              name: 'BGP peer {#SNMPVALUE} ASN {#SNMPASN} is DOWN'
+              priority: HIGH
+            - uuid: 0c85055ffd554dbf94e331b0edf4fff0
+              expression: 'last(/Template Huawei BGP SNMP/hwBgpv4PeerConfigRouteLimitNum["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]) <> 0 and last(/Template Huawei BGP SNMP/hwBgpv4PeerPrefixRcvCounter["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]) * 100 / last(/Template Huawei BGP SNMP/hwBgpv4PeerConfigRouteLimitNum["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]) > {$MAXIMUM_PREFIX_ALARM}'
+              name: 'BGP Prefix Limit {#SNMPVALUE} ASN {#SNMPASN} near'
+              priority: WARNING
+          graph_prototypes:
+            - uuid: a2650282da2c4e99bc16ff22cb4d8feb
+              name: 'BGPv4 Prefix Receive "{#SNMPVALUE}" ASN "{#SNMPASN}" AF "{#SNMPADF}"'
+              ymin_type_1: FIXED
+              graph_items:
+                - drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei BGP SNMP'
+                    key: 'hwBgpv4PeerConfigRouteLimitNum["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]'
+                - sortorder: '1'
+                  color: 00FF00
+                  item:
+                    host: 'Template Huawei BGP SNMP'
+                    key: 'hwBgpv4PeerPrefixAtiveCounter["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]'
+                - sortorder: '2'
+                  color: 0000FF
+                  item:
+                    host: 'Template Huawei BGP SNMP'
+                    key: 'hwBgpv4PeerPrefixRcvCounter["{#SNMPVALUE}","{#SNMPASN}","{#SNMPADF}"]'
+        - uuid: c5e3bb4c66c84138806a4157ed9e31f9
+          name: 'BGPv6 Peers Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.2011.5.25.177.1.1.2.1.4,{#SNMPASN},.1.3.6.1.4.1.2011.5.25.177.1.1.2.1.2]'
+          key: 'hwBgpv6PeerRemoteAddr["BGPv6"]'
+          delay: 1d
+          filter:
+            conditions:
+              - macro: '{#SNMPINDEX}'
+                value: (^0.2)
+                formulaid: A
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: 35688968f83d46ea9f8144584f546f14
+              name: 'AS Name for IPv6 peer "{#SNMPVALUE}" ASN "{#SNMPASN}"'
+              type: EXTERNAL
+              key: 'as_name.sh["{#SNMPVALUE}","{#SNMPASN}",]'
+              delay: 1d
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+            - uuid: d5e9b44b1a74426f87511277defef464
+              name: 'Route Limit for peer "{#SNMPVALUE}" ASN "{#SNMPASN}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.177.1.1.5.1.1.{#SNMPINDEX}'
+              key: 'hwBgpv6PeerConfigRouteLimitNum["{#SNMPVALUE}","{#SNMPASN}"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+            - uuid: 65e13bd6157e4ca09069787bc93dc112
+              name: 'Established time for peer "{#SNMPVALUE}" ASN "{#SNMPASN}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.177.1.1.2.1.7.{#SNMPINDEX}'
+              key: 'hwBgpv6PeerFsmEstablishedTime["{#SNMPVALUE}","{#SNMPASN}"]'
+              history: 30d
+              trends: '0'
+              units: uptime
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+              trigger_prototypes:
+                - uuid: 0f4ed4dbd39043abbe04851109b29ada
+                  expression: 'last(/Template Huawei BGP SNMP/hwBgpv6PeerFsmEstablishedTime["{#SNMPVALUE}","{#SNMPASN}"])<{$PEER_LOW_TIME}'
+                  name: 'BGP peer up time low {#SNMPVALUE} ASN {#SNMPASN}'
+                  priority: INFO
+                  dependencies:
+                    - name: 'BGP peer {#SNMPVALUE} ASN {#SNMPASN} is DOWN'
+                      expression: 'last(/Template Huawei BGP SNMP/hwBgpv6PeerState["{#SNMPVALUE}" ,"{#SNMPASN}"],#3)<>6'
+            - uuid: 339f470d4abd400682fec8e33f764960
+              name: 'Active prefix for peer "{#SNMPVALUE}" ASN "{#SNMPASN}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.177.1.1.3.1.2.{#SNMPINDEX}'
+              key: 'hwBgpv6PeerPrefixAtiveCounter["{#SNMPVALUE}","{#SNMPASN}"]'
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+            - uuid: 10c3b106e33244ab91153ee821a79e26
+              name: 'Received prefix for peer "{#SNMPVALUE}" ASN "{#SNMPASN}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.177.1.1.3.1.1.{#SNMPINDEX}'
+              key: 'hwBgpv6PeerPrefixRcvCounter["{#SNMPVALUE}","{#SNMPASN}"]'
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+            - uuid: 8d0ee1db5a8642f0b3fcba64bde63874
+              name: 'Remote AS for peer "{#SNMPVALUE}" ASN "{#SNMPASN}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.177.1.1.2.1.2.{#SNMPINDEX}'
+              key: 'hwBgpv6PeerRemoteAs["{#SNMPVALUE}","{#SNMPASN}"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+            - uuid: e6de1d0ee8da48c7b6982b8d6c259ae5
+              name: 'Operational status for peer "{#SNMPVALUE}" ASN "{#SNMPASN}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2011.5.25.177.1.1.2.1.5.{#SNMPINDEX}'
+              key: 'hwBgpv6PeerState["{#SNMPVALUE}" ,"{#SNMPASN}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'BGP4-MIB::bgpPeerState'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPVALUE} ASN {#SNMPASN}'
+              trigger_prototypes:
+                - uuid: 44606f3c56c5454b8e707b3b794ca39a
+                  expression: 'last(/Template Huawei BGP SNMP/hwBgpv6PeerState["{#SNMPVALUE}" ,"{#SNMPASN}"],#3)<>6'
+                  name: 'BGP peer {#SNMPVALUE} ASN {#SNMPASN} is DOWN'
+                  priority: HIGH
+          trigger_prototypes:
+            - uuid: 93e03e003d5d4eef917a76fa0868d194
+              expression: 'last(/Template Huawei BGP SNMP/hwBgpv6PeerConfigRouteLimitNum["{#SNMPVALUE}","{#SNMPASN}"])*({$MAXIMUM_PREFIX_ALARM})/100<last(/Template Huawei BGP SNMP/hwBgpv6PeerPrefixRcvCounter["{#SNMPVALUE}","{#SNMPASN}"])'
+              name: 'BGP Prefix Limit {#SNMPVALUE} ASN {#SNMPASN} near'
+              priority: WARNING
+          graph_prototypes:
+            - uuid: 1544071757dc4c488223bf094ef21f91
+              name: 'BGPv6 Prefix Receive {#SNMPVALUE}'
+              graph_items:
+                - color: 00FF00
+                  item:
+                    host: 'Template Huawei BGP SNMP'
+                    key: 'hwBgpv6PeerConfigRouteLimitNum["{#SNMPVALUE}","{#SNMPASN}"]'
+                - sortorder: '1'
+                  color: FF0000
+                  item:
+                    host: 'Template Huawei BGP SNMP'
+                    key: 'hwBgpv6PeerPrefixAtiveCounter["{#SNMPVALUE}","{#SNMPASN}"]'
+                - sortorder: '2'
+                  color: 0000FF
+                  item:
+                    host: 'Template Huawei BGP SNMP'
+                    key: 'hwBgpv6PeerPrefixRcvCounter["{#SNMPVALUE}","{#SNMPASN}"]'
+      tags:
+        - tag: class
+          value: bgp
+      macros:
+        - macro: '{$MAXIMUM_PREFIX_ALARM}'
+          value: '80'
+          description: '% maximum prefix limit alarm to reach 100%'
+        - macro: '{$PEER_LOW_TIME}'
+          value: '14400'
+          description: 'time in sec alarm for uptime bgp session'
+      dashboards:
+        - uuid: 5ef3b9ba81e642108f360e00f21abda5
+          name: 'Screen BGPv4'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Huawei BGP SNMP'
+                        name: 'BGPv4 Prefix Receive "{#SNMPVALUE}" ASN "{#SNMPASN}" AF "{#SNMPADF}"'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+        - uuid: f38b1e1f442d469ebfefcd47c1f62458
+          name: 'Screen BGPv6'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Template Huawei BGP SNMP'
+                        name: 'BGPv6 Prefix Receive {#SNMPVALUE}'
+                    - type: STRING
+                      name: reference
+                      value: AAAAA
+                    - type: INTEGER
+                      name: rows
+                      value: '1'
+                    - type: INTEGER
+                      name: source_type
+                      value: '2'
+      valuemaps:
+        - uuid: b9fdeb7e7b7348a884d3372f5325b824
+          name: 'BGP4-MIB::bgpPeerAdminStatus'
+          mappings:
+            - value: '1'
+              newvalue: stoped
+            - value: '2'
+              newvalue: started
+        - uuid: fa86607166cb4dba91cb8a6daf4ddf20
+          name: 'BGP4-MIB::bgpPeerState'
+          mappings:
+            - value: '1'
+              newvalue: idle
+            - value: '2'
+              newvalue: connect
+            - value: '3'
+              newvalue: active
+            - value: '4'
+              newvalue: opensent
+            - value: '5'
+              newvalue: openconfirm
+            - value: '6'
+              newvalue: established

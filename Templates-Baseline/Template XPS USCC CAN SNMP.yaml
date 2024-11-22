@@ -1,0 +1,1250 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: a54b54e0aa364fb5971ce72b04c650ea
+      template: 'Template XPS USCC CAN SNMP'
+      name: 'Template XPS USCC CAN SNMP'
+      description: |
+        Monitoria Device XPS USCC CAN
+        -Alarmes
+        -Corrente URs
+        -Status URs (Curto, Fan, Equalização...)
+        -Temperatura URs
+        -Falhas Fusíveis
+        -Corrente Consumidor
+        -Temperatura Sensor 1 e Sensor 2
+        -VCA Fases
+        -VCC Bateria e Retificadora
+        -Irregularidade das URs
+        -Irregularidade das Fases
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        XPS-MIB.mib
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: 35ec6233ed2a4591b517a9189c89cedf
+          name: 'I (A) Consumidor'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.7.0
+          key: uscc_canicons
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+        - uuid: b34a7f0044fc4d5abaf0bdf751e47c10
+          name: 'Corrente de UR1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.1.1.0
+          key: uscc_can_corrente_ur1
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 00a72e6e84034b5ca7b4c864f5da6a18
+          name: 'Corrente de UR2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.1.2.0
+          key: uscc_can_corrente_ur2
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 39e47975102341b7b29770671b1e25ae
+          name: 'Corrente de UR3'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.1.3.0
+          key: uscc_can_corrente_ur3
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 4aed6e56a9aa4d238650bbddddbf2958
+          name: 'Corrente de UR4'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.1.4.0
+          key: uscc_can_corrente_ur4
+          history: 30d
+          value_type: FLOAT
+          units: A
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: application
+              value: power
+        - uuid: b379a1266525450790b0036efc8ceb4c
+          name: 'Curto/Sobrecarga Saída UR1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.6.1.0
+          key: uscc_can_curto_sobrecarga_ur1
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 738c3336013340dca997ea9c09359381
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_curto_sobrecarga_ur1)<>0'
+              name: 'Curto/Sobrecarga Saída UR1'
+              priority: HIGH
+              description: 'Falha curto ou sobrecarga saída da UR1'
+        - uuid: aed01f08b7bb424a92c613c8bd768c4a
+          name: 'Curto/Sobrecarga Saída UR2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.6.2.0
+          key: uscc_can_curto_sobrecarga_ur2
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 93e5e8192fae42789f6ac3fb815edbee
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_curto_sobrecarga_ur2)<>0'
+              name: 'Curto/Sobrecarga Saída UR2'
+              priority: HIGH
+              description: 'Falha curto ou sobrecarga saída da UR2'
+        - uuid: cc6be621aecf4d7fbaea4b2f63b34a2b
+          name: 'Curto/Sobrecarga Saída UR3'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.6.3.0
+          key: uscc_can_curto_sobrecarga_ur3
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: a79e920c8dd342f1836e3f2e62930bec
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_curto_sobrecarga_ur3)<>0'
+              name: 'Curto/Sobrecarga Saída UR3'
+              priority: HIGH
+              description: 'Falha curto ou sobrecarga saída da UR3'
+        - uuid: bd5a80ab76354cfe89bdb2afda9075d0
+          name: 'Curto/Sobrecarga Saída UR4'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.6.4.0
+          key: uscc_can_curto_sobrecarga_ur4
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: ec0e306d84a24c629163203ff611ce8c
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_curto_sobrecarga_ur4)<>0'
+              name: 'Curto/Sobrecarga Saída UR4'
+              priority: HIGH
+              description: 'Falha curto ou sobrecarga saída da UR4'
+        - uuid: 1eedd7cd4a514f51b2d0145701c693c1
+          name: 'Falha UR1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.13.1.0
+          key: uscc_can_falha_can_ur1
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 4700f2ae1ebe4dad88772a1efa7a16d4
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_falha_can_ur1)<>0'
+              name: 'Falha UR1'
+              priority: HIGH
+              description: 'Falha na UR1'
+        - uuid: 662ef14697fc4ca994478c46c5dce7c5
+          name: 'Falha UR2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.13.2.0
+          key: uscc_can_falha_can_ur2
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 9d5b981819a4426eb7ecd7e5e7666cce
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_falha_can_ur2)<>0'
+              name: 'Falha UR2'
+              priority: HIGH
+              description: 'Falha na UR2'
+        - uuid: aef6a82f96714c75b2054a699fa90488
+          name: 'Falha UR3'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.13.3.0
+          key: uscc_can_falha_can_ur3
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 3daf0ae7ea7a4f78ada61683133195ae
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_falha_can_ur3)<>0'
+              name: 'Falha UR3'
+              priority: HIGH
+              description: 'Falha na UR3'
+        - uuid: 8a0ca1b3a0a14c7db8f2ba10f6948a7a
+          name: 'Falha UR4'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.13.4.0
+          key: uscc_can_falha_can_ur4
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: c82cbf9f3078409e822d3c64597100f4
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_falha_can_ur4)<>0'
+              name: 'Falha UR4'
+              priority: HIGH
+              description: 'Falha na UR4'
+        - uuid: 735bf0cea4a24daa83a571a0f890a12b
+          name: 'Falha Equalização de Corrente UR1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.8.1.0
+          key: uscc_can_falha_equalizacao_corrent_ur1
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 5926864cf6054cbaa0f144dd6c0b6138
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_falha_equalizacao_corrent_ur1)<>0'
+              name: 'Falha Equalização de Corrent UR1'
+              priority: HIGH
+              description: 'Falha equalização de corrente da UR1'
+        - uuid: 48a181348fd24a9baccf62e6a06ba08e
+          name: 'Falha Equalização de Corrente UR2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.8.2.0
+          key: uscc_can_falha_equalizacao_corrent_ur2
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 5ef0763d010f40e481c85fd6dfff2ca1
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_falha_equalizacao_corrent_ur2)<>0'
+              name: 'Falha Equalização de Corrent UR2'
+              priority: HIGH
+              description: 'Falha equalização de corrente da UR2'
+        - uuid: 16c69bf270d2491bb3612612ed33857a
+          name: 'Falha Equalização de Corrente UR3'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.8.3.0
+          key: uscc_can_falha_equalizacao_corrent_ur3
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 98e31f1143ef4393a0210892e36bd651
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_falha_equalizacao_corrent_ur3)<>0'
+              name: 'Falha Equalização de Corrent UR3'
+              priority: HIGH
+              description: 'Falha equalização de corrente da UR3'
+        - uuid: b614886866074fab812c06a9ed97b751
+          name: 'Falha Equalização de Corrente UR4'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.8.4.0
+          key: uscc_can_falha_equalizacao_corrent_ur4
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: db53d298f95c4d97b8ce3480ab575aa5
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_falha_equalizacao_corrent_ur4)<>0'
+              name: 'Falha Equalização de Corrent UR4'
+              priority: HIGH
+              description: 'Falha equalização de corrente da UR4'
+        - uuid: 73f5fcbf61ab464aa708d1de003ea6b9
+          name: 'Falha FAN UR1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.4.1.0
+          key: uscc_can_falha_ventilador_ur1
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: bc87ea71ef6e4113924b509c5a44a546
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_falha_ventilador_ur1)<>0'
+              name: 'Falha FAN UR1'
+              priority: HIGH
+              description: 'Falha FAN da UR1'
+        - uuid: d54cd27373d14b61b4287c59358c3724
+          name: 'Falha FAN UR2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.4.2.0
+          key: uscc_can_falha_ventilador_ur2
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: f0eb4639bdb24aa0b0dbb37d1fe98115
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_falha_ventilador_ur2)<>0'
+              name: 'Falha FAN UR2'
+              priority: HIGH
+              description: 'Falha FAN da UR2'
+        - uuid: bd6cb4e6ab6142cc81dc38a2f5f37d18
+          name: 'Falha FAN UR3'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.4.3.0
+          key: uscc_can_falha_ventilador_ur3
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 7bdd89f0a0aa4a1faa6c47fe00d5df9f
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_falha_ventilador_ur3)<>0'
+              name: 'Falha FAN UR3'
+              priority: HIGH
+              description: 'Falha FAN da UR3'
+        - uuid: 5575b5a95c664996953cbe5ec704f9ae
+          name: 'Falha FAN UR4'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.4.4.0
+          key: uscc_can_falha_ventilador_ur4
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: daff053950d94e06b87396f0f3bfaac0
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_falha_ventilador_ur4)<>0'
+              name: 'Falha FAN UR4'
+              priority: HIGH
+              description: 'Falha FAN da UR4'
+        - uuid: 8ed53cd8bd00485992970958a76efa04
+          name: 'Fusível Aberto UR1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.5.1.0
+          key: uscc_can_fisivel_aberto_ur1
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 4c154b83054d4560a743cfea80d410b1
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_fisivel_aberto_ur1)<>0'
+              name: 'Fusível Aberto UR1'
+              priority: HIGH
+              description: 'Fusível aberto da UR1'
+        - uuid: 6ce0403ce1224274880212dce5899410
+          name: 'Fusível Aberto UR2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.5.2.0
+          key: uscc_can_fisivel_aberto_ur2
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 0c2b061b51984bb1884bb05ceed0f90b
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_fisivel_aberto_ur2)<>0'
+              name: 'Fusível Aberto UR2'
+              priority: HIGH
+              description: 'Fusível aberto da UR2'
+        - uuid: 4c74375265c0435c8d1acec1fac73044
+          name: 'Fusível Aberto UR3'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.5.3.0
+          key: uscc_can_fisivel_aberto_ur3
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: c2a74fd2dd964e2a82adf5fd0f9e2086
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_fisivel_aberto_ur3)<>0'
+              name: 'Fusível Aberto UR3'
+              priority: HIGH
+              description: 'Fusível aberto da UR3'
+        - uuid: e0d8f0eedd9243d397b38be2af6a5511
+          name: 'Fusível Aberto UR4'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.5.4.0
+          key: uscc_can_fisivel_aberto_ur4
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: d25e1aa8e83b40969d10afcab211ef36
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_fisivel_aberto_ur4)<>0'
+              name: 'Fusível Aberto UR4'
+              priority: HIGH
+              description: 'Fusível aberto da UR4'
+        - uuid: aceb495c9c6044d4a44db4e975282514
+          name: 'Estado fusível bateria'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.13.5.0
+          key: uscc_can_fus_bat
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS-MIB::XPS-aberto-normal'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 12c493507076433bb50724146147624d
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_fus_bat)<>1'
+              name: 'Fusível Bateria Aberto'
+              priority: HIGH
+              description: 'Estado do fusível bateria aberto'
+        - uuid: b64f391ba2eb4452813a7794ee74d65f
+          name: 'Estado fusível consumidores'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.13.2.0
+          key: uscc_can_fus_cons
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS-MIB::XPS-aberto-normal'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: d6b0a783043d469da7d6e6db706e6cf4
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_fus_cons)<>1'
+              name: 'Fusível Cosumidor Aberto'
+              priority: HIGH
+              description: 'Estado do fusível consumidor aberto'
+        - uuid: bec539433ecc4544805461d66b5efb3f
+          name: 'Alarme de Advertência'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.16.11.0
+          key: uscc_can_led_advertencia
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS ligado-desligado'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 41145204cf174521b8b3fe37b9d30094
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_led_advertencia)<>1'
+              name: 'Alarme de Advertência'
+              priority: WARNING
+              description: 'Lad Alarme de advertência ligado'
+        - uuid: 787f84122f5e436485cd3b176f06a494
+          name: 'Alarme de Não Urgente'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.16.10.0
+          key: uscc_can_led_alarme_nao_urg
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS ligado-desligado'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 9297e30bece94bb6a2a2ea4127b97ab1
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_led_alarme_nao_urg)<>1'
+              name: 'Alarme Não Urgente'
+              priority: INFO
+              description: 'Led Alarme Nãu urgente ligado'
+        - uuid: 74aaeac06a474b308eed6986d5573431
+          name: 'Alarme Urgente'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.16.9.0
+          key: uscc_can_led_alarme_urg
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS ligado-desligado'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 6c31b8646c9142c1ac8c2c970e7afda9
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_led_alarme_urg)<>1'
+              name: 'Alarme Urgente'
+              priority: HIGH
+              description: 'Led Alarme Urgente ligado'
+        - uuid: 8bf9bceff58d430bb9dd8723d1bf153f
+          name: 'Limite de Corrente UR1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.7.1.0
+          key: uscc_can_limite_corrente_ur1
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 6c423424690c4beeb228772d5c4ea0a2
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_limite_corrente_ur1)<>0'
+              name: 'Limite de Corrente UR1'
+              priority: HIGH
+              description: 'UR1 no limite de corrente'
+        - uuid: a2b2ae34df904287be67dc5a5464c208
+          name: 'Limite de Corrente UR2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.7.2.0
+          key: uscc_can_limite_corrente_ur2
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: ac5877b4dc2948c0a1557073367f8009
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_limite_corrente_ur2)<>0'
+              name: 'Limite de Corrente UR2'
+              priority: HIGH
+              description: 'UR2 no limite de corrente'
+        - uuid: 020e8d05e4fe428b869a08d2e5bea623
+          name: 'Limite de Corrente UR3'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.7.3.0
+          key: uscc_can_limite_corrente_ur3
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: df49c08024134a3592cafa1d3db29b8e
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_limite_corrente_ur3)<>0'
+              name: 'Limite de Corrente UR3'
+              priority: HIGH
+              description: 'UR3 no limite de corrente'
+        - uuid: 51b347db8c8b44b694cb97e2085d12fb
+          name: 'Limite de Corrente UR4'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.7.4.0
+          key: uscc_can_limite_corrente_ur4
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 9edc72a517424b6c956de243cbb31301
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_limite_corrente_ur4)<>0'
+              name: 'Limite de Corrente UR4'
+              priority: HIGH
+              description: 'UR4 no limite de corrente'
+        - uuid: e805450dcd734be6a2119ae9f495366a
+          name: 'Sobre Tensão de Saída UR1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.9.1.0
+          key: uscc_can_sobre_tensao_saida_ur1
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 67d7b00f044c4892aa81ee5bb142c025
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_sobre_tensao_saida_ur1)<>0'
+              name: 'Sobre Tensão de Saída UR1'
+              priority: HIGH
+              description: 'Sobre tensão na saída da UR1'
+        - uuid: f51b960c4ec2452e87cf4dc6618bf3b5
+          name: 'Sobre Tensão de Saída UR2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.9.2.0
+          key: uscc_can_sobre_tensao_saida_ur2
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: c01431832d71441e91eac5c6c33636dc
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_sobre_tensao_saida_ur2)<>0'
+              name: 'Sobre Tensão de Saída UR2'
+              priority: HIGH
+              description: 'Sobre tensão na saída da UR2'
+        - uuid: 2b055a4d7dff452c9382a789de1729b2
+          name: 'Sobre Tensão de Saída UR3'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.9.3.0
+          key: uscc_can_sobre_tensao_saida_ur3
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 5d2d5904cdb44ad3ba9874ef47ed8d56
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_sobre_tensao_saida_ur3)<>0'
+              name: 'Sobre Tensão de Saída UR3'
+              priority: HIGH
+              description: 'Sobre tensão na saída da UR3'
+        - uuid: 2e872b6a339545b2823853880513b3fa
+          name: 'Sobre Tensão de Saída UR4'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.9.4.0
+          key: uscc_can_sobre_tensao_saida_ur4
+          history: 30d
+          trends: '0'
+          valuemap:
+            name: 'XPS nao-sim'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: aaf00e7da672420fb085decf53c1dd33
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_sobre_tensao_saida_ur4)<>0'
+              name: 'Sobre Tensão de Saída UR4'
+              priority: HIGH
+              description: 'Sobre tensão na saída da UR4'
+        - uuid: 9104f9357ca247b79700dfc95bceccec
+          name: 'Temperatura Bateria (Sensor 1)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.10.0
+          key: uscc_can_temp1
+          history: 30d
+          value_type: FLOAT
+          units: ºC
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: 8887a514bb86483ba86bf7282dae2162
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_temp1)<{$TEMP_LOW_ALARM_SENSOR1}'
+              name: 'Temperatura Baterias Baixa (Sensor 1)'
+              priority: HIGH
+              description: 'Temperatura baterias baixa ( Sensor 1 )'
+            - uuid: aa3ebb15aaca41b2b1ff15b0eaf3f511
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_temp1)>{$TEMP_HIGH_ALARM_SENSOR1}'
+              name: 'Temperatura Baterias Elevada (Sensor 1)'
+              priority: HIGH
+              description: 'Temperatura baterias elevada ( Sensor 1 )'
+        - uuid: 4c8f43c386f6485a926c028d0fea353a
+          name: 'Temperatura Ambiente (Sensor 2)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.11.0
+          key: uscc_can_temp2
+          history: 30d
+          value_type: FLOAT
+          units: ºC
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: faf40cb95b254bec8b55f2ae9b6b9b1b
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_temp2)<{$TEMP_LOW_ALARM_SENSOR2}'
+              name: 'Temperatura Ambiente Baixa (Sensor 2)'
+              priority: HIGH
+              description: 'Temperatura ambiente baixa ( Sensor 2 )'
+            - uuid: 52c5c4c8d90048d6af5bc2c6bfeba207
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_temp2)>{$TEMP_HIGH_ALARM_SENSOR2}'
+              name: 'Temperatura Ambiente Elevada (Sensor 2)'
+              priority: HIGH
+              description: 'Temperatura ambiente elevada ( Sensor 2 )'
+        - uuid: 5ea5e961d09f4556bc83d2d158103c84
+          name: 'Temperatura UR1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.3.1.0
+          key: uscc_can_temperatura_ur1
+          history: 30d
+          value_type: FLOAT
+          units: ºC
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: cc43e2f176d4434e845348f416555fc6
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_temperatura_ur1)<{$TEMP_LOW_ALARM_URS}'
+              name: 'Temperatura UR1 Baixa'
+              priority: HIGH
+              description: 'Temperatura baixa UR1'
+            - uuid: 8c3ad2f3a3454f2982b54c936c376182
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_temperatura_ur1)>{$TEMP_HIGH_ALARM_URS}'
+              name: 'Temperatura UR1 Elevada'
+              priority: HIGH
+              description: 'Temperatura elevada UR1'
+        - uuid: d3a802e71f6247659089841becf9c758
+          name: 'Temperatura UR2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.3.2.0
+          key: uscc_can_temperatura_ur2
+          history: 30d
+          value_type: FLOAT
+          units: ºC
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: fa8e06bf4e50438cb052324fdb332c47
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_temperatura_ur2)<{$TEMP_LOW_ALARM_URS}'
+              name: 'Temperatura UR2 Baixa'
+              priority: HIGH
+              description: 'Temperatura baixa UR2'
+            - uuid: 03ea446b565e4f6591fd954f862beb86
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_temperatura_ur2)>{$TEMP_HIGH_ALARM_URS}'
+              name: 'Temperatura UR2 Elevada'
+              priority: HIGH
+              description: 'Temperatura elevada UR2'
+        - uuid: d80d613978c044a68ca4c85065a78ee6
+          name: 'Temperatura UR3'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.3.3.0
+          key: uscc_can_temperatura_ur3
+          history: 30d
+          value_type: FLOAT
+          units: ºC
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: b12a0ad3a33b4c5aacc08294271be4ab
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_temperatura_ur3)<{$TEMP_LOW_ALARM_URS}'
+              name: 'Temperatura UR3 Baixa'
+              priority: HIGH
+              description: 'Temperatura baixa UR3'
+            - uuid: 15db16b8d55a4240af87540c55e75861
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_temperatura_ur3)>{$TEMP_HIGH_ALARM_URS}'
+              name: 'Temperatura UR3 Elevada'
+              priority: HIGH
+              description: 'Temperatura elevada UR3'
+        - uuid: b84a14aff2ac4c44a6d2a913e5f5c80c
+          name: 'Temperatura UR4'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.3.4.0
+          key: uscc_can_temperatura_ur4
+          history: 30d
+          value_type: FLOAT
+          units: ºC
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+          triggers:
+            - uuid: a4cba012e2cd4ba69f653c670358591a
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_temperatura_ur4)<{$TEMP_LOW_ALARM_URS}'
+              name: 'Temperatura UR4 Baixa'
+              priority: HIGH
+              description: 'Temperatura baixa UR4'
+            - uuid: ccb3a10e0960427bad68355625532673
+              expression: 'last(/Template XPS USCC CAN SNMP/uscc_can_temperatura_ur4)>{$TEMP_HIGH_ALARM_URS}'
+              name: 'Temperatura UR4 Elevada'
+              priority: HIGH
+              description: 'Temperatura elevada UR4'
+        - uuid: 0b2a674b448b4c8a954b7ee48332e7c0
+          name: 'Tensão de UR1'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.2.1.0
+          key: uscc_can_tensao_ur1
+          history: 30d
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 9059130c2b3c452297cb239bdf844d7d
+          name: 'Tensão de UR2'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.2.2.0
+          key: uscc_can_tensao_ur2
+          history: 30d
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 1706352a2c724a1f93a36cb26ec2bcca
+          name: 'Tensão de UR3'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.2.3.0
+          key: uscc_can_tensao_ur3
+          history: 30d
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 9184be31d16d4c58b9488498e160eea9
+          name: 'Tensão de UR4'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.1.2.4.0
+          key: uscc_can_tensao_ur4
+          history: 30d
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 2dda1eb594564300bc32e34afee358f3
+          name: 'VCC - Bateria'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.6.0
+          key: uss_canvbate
+          history: 30d
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 9911a8e0055a4e81af0a7c2eb3e01425
+          name: 'VCA1 - AC Fase R'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.2.0
+          key: uss_can_vca1
+          history: 30d
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+        - uuid: abb9558bff0d434c9eb646e44d6c9d99
+          name: 'VCA2 - AC Fase S'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.3.0
+          key: uss_can_vca2
+          history: 30d
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 80139a0f23ef4e10abd86ea3e2a333bd
+          name: 'VCA3 - AC Fase T'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.4.0
+          key: uss_can_vca3
+          history: 30d
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.1'
+          tags:
+            - tag: application
+              value: power
+        - uuid: 9edc9fb35ad74a248be31258b733f20f
+          name: 'VCC - Retificador'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.34252.4.1.5.0
+          key: uss_can_vcc
+          history: 30d
+          value_type: FLOAT
+          units: V
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: application
+              value: power
+      macros:
+        - macro: '{$NUMBER_FASES}'
+          value: '3'
+          description: 'quantidade de fases instaladas'
+        - macro: '{$NUMBER_URS}'
+          value: '4'
+          description: 'quantidade de URs instaladas'
+        - macro: '{$TEMP_HIGH_ALARM_SENSOR1}'
+          value: '40'
+          description: 'alarm ºC high temperatura sensor1'
+        - macro: '{$TEMP_HIGH_ALARM_SENSOR2}'
+          value: '40'
+          description: 'alarm ºC high temperatura sensor2'
+        - macro: '{$TEMP_HIGH_ALARM_URS}'
+          value: '50'
+          description: 'alarm ºC high temperatura urs'
+        - macro: '{$TEMP_LOW_ALARM_SENSOR1}'
+          value: '15'
+          description: 'alarm ºC low temperature sensor 1'
+        - macro: '{$TEMP_LOW_ALARM_SENSOR2}'
+          value: '15'
+          description: 'alarm ºC low temperature sensor 2'
+        - macro: '{$TEMP_LOW_ALARM_URS}'
+          value: '15'
+          description: 'alarm ºC low temperatura urs'
+      valuemaps:
+        - uuid: ea308a9b70f443d78bec3335a99fd2a8
+          name: 'XPS-MIB::XPS-aberto-normal'
+          mappings:
+            - value: '0'
+              newvalue: aberto
+            - value: '1'
+              newvalue: normal
+        - uuid: 8464d31f36fe4be292e194442bff70e3
+          name: 'XPS ligado-desligado'
+          mappings:
+            - value: '0'
+              newvalue: ligado
+            - value: '1'
+              newvalue: desligado
+        - uuid: 02e5731bcc914c5ba786ca8a57a85c8e
+          name: 'XPS nao-sim'
+          mappings:
+            - value: '0'
+              newvalue: nao
+            - value: '1'
+              newvalue: sim
+  triggers:
+    - uuid: 5d3e424aa5024242af260e5558d35454
+      expression: |
+        last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur1)>((last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur2)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur3)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur4))/({$NUMBER_URS}-1))*1.2
+        or
+        last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur1)<((last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur2)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur3)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur4))/({$NUMBER_URS}-1))*0.8
+      name: 'Corrente Irregular UR1'
+      priority: HIGH
+      description: 'Corrent irregular UR1'
+    - uuid: 9e90881f58b94914a0c8e4208e838667
+      expression: |
+        last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur2)>((last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur1)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur3)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur4))/({$NUMBER_URS}-1))*1.2
+        or
+        last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur2)<((last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur1)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur3)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur4))/({$NUMBER_URS}-1))*0.8
+      name: 'Corrente Irregular UR2'
+      priority: HIGH
+      description: 'Corrente irregular UR2'
+    - uuid: a8567fb5eb9b4b6583dd081c913e068a
+      expression: |
+        last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur3)>((last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur2)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur1)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur4))/({$NUMBER_URS}-1))*1.2
+        or
+        last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur3)<((last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur2)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur1)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur4))/({$NUMBER_URS}-1))*0.8
+      name: 'Corrente Irregular UR3'
+      priority: HIGH
+      description: 'Corrente irregular UR3'
+    - uuid: f61f54b64fc64d0fbb40de3af00b9f77
+      expression: |
+        last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur4)>((last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur2)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur3)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur1))/({$NUMBER_URS}-1))*1.2
+        or
+        last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur4)<((last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur2)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur3)+last(/Template XPS USCC CAN SNMP/uscc_can_corrente_ur1))/({$NUMBER_URS}-1))*0.8
+      name: 'Corrente Irregular UR4'
+      priority: HIGH
+      description: 'Corrente irregular UR4'
+    - uuid: 533adeecd0314d04a41d66d22c526e5b
+      expression: |
+        last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur1)>((last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur2)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur3)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur4))/({$NUMBER_URS}-1))*1.2
+        or
+        last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur1)<((last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur2)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur3)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur4))/({$NUMBER_URS}-1))*0.8
+      name: 'Tensão Irregular UR1'
+      priority: HIGH
+      description: 'Tensão irregular UR1'
+    - uuid: 1fc7f66d406645f4b40e04cb7cea33d7
+      expression: |
+        last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur2)>((last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur1)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur3)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur4))/({$NUMBER_URS}-1))*1.2
+        or
+        last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur2)<((last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur1)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur3)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur4))/({$NUMBER_URS}-1))*0.8
+      name: 'Tensão Irregular UR2'
+      priority: HIGH
+      description: 'Tensão irregular UR2'
+    - uuid: b49dcfaf57e84b36ade96df8750c93fe
+      expression: |
+        last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur3)>((last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur2)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur1)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur4))/({$NUMBER_URS}-1))*1.2
+        or
+        last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur3)<((last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur2)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur1)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur4))/({$NUMBER_URS}-1))*0.8
+      name: 'Tensão Irregular UR3'
+      priority: HIGH
+      description: 'Tensão irregular UR3'
+    - uuid: 5886610ea2ea4df4a010c7839d8c0bef
+      expression: |
+        last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur4)>((last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur2)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur3)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur1))/({$NUMBER_URS}-1))*1.2
+        or
+        last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur4)<((last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur2)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur3)+last(/Template XPS USCC CAN SNMP/uscc_can_tensao_ur1))/({$NUMBER_URS}-1))*0.8
+      name: 'Tensão Irregular UR4'
+      priority: HIGH
+      description: 'Tensão irregular UR4'
+    - uuid: 6f0edeab092543cbbd3e0e4b12ddd994
+      expression: |
+        last(/Template XPS USCC CAN SNMP/uss_can_vca1)>((last(/Template XPS USCC CAN SNMP/uss_can_vca2)+last(/Template XPS USCC CAN SNMP/uss_can_vca3))/({$NUMBER_FASES}-1))*1.2
+        or
+        last(/Template XPS USCC CAN SNMP/uss_can_vca1)<((last(/Template XPS USCC CAN SNMP/uss_can_vca2)+last(/Template XPS USCC CAN SNMP/uss_can_vca3))/({$NUMBER_FASES}-1))*0.8
+      name: 'VCA AC Fase R Irregular'
+      priority: HIGH
+      description: 'Tensão fase AC R irregular'
+    - uuid: ebeaa8e39a22421bb2fef79efaf98875
+      expression: |
+        last(/Template XPS USCC CAN SNMP/uss_can_vca2)>((last(/Template XPS USCC CAN SNMP/uss_can_vca1)+last(/Template XPS USCC CAN SNMP/uss_can_vca3))/({$NUMBER_FASES}-1))*1.2
+        or
+        last(/Template XPS USCC CAN SNMP/uss_can_vca2)<((last(/Template XPS USCC CAN SNMP/uss_can_vca1)+last(/Template XPS USCC CAN SNMP/uss_can_vca3))/({$NUMBER_FASES}-1))*0.8
+      name: 'VCA AC Fase S Irregular'
+      priority: HIGH
+      description: 'Tensão fase AC S irregular.'
+    - uuid: 61b74716ed644787ab8cf243e72d9ee2
+      expression: |
+        last(/Template XPS USCC CAN SNMP/uss_can_vca3)>((last(/Template XPS USCC CAN SNMP/uss_can_vca2)+last(/Template XPS USCC CAN SNMP/uss_can_vca1))/({$NUMBER_FASES}-1))*1.2
+        or
+        last(/Template XPS USCC CAN SNMP/uss_can_vca3)<((last(/Template XPS USCC CAN SNMP/uss_can_vca2)+last(/Template XPS USCC CAN SNMP/uss_can_vca1))/({$NUMBER_FASES}-1))*0.8
+      name: 'VCA AC Fase T Irregular'
+      priority: HIGH
+      description: 'Tensão fase AC T irregular.'
+    - uuid: 190c7b2c37604ac280c76f7c989afa95
+      expression: |
+        last(/Template XPS USCC CAN SNMP/uss_canvbate)>(last(/Template XPS USCC CAN SNMP/uss_can_vcc))*1.2
+        or
+        last(/Template XPS USCC CAN SNMP/uss_canvbate)<(last(/Template XPS USCC CAN SNMP/uss_can_vcc))*0.8
+      name: 'VCC Bateria/Retificadora Irregular'
+      priority: HIGH
+      description: 'VCC  da bateria ou da retificadora Irregular.'
+  graphs:
+    - uuid: cddc1ffd9ea64422b7f16cb187d02fa6
+      name: 'Corrente Consumidor I (A)'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_canicons
+    - uuid: 7e89a77d02d74ae498bd88c6131d2474
+      name: 'Corrente nas URs'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_corrente_ur1
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_corrente_ur2
+        - sortorder: '2'
+          color: 2774A4
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_corrente_ur3
+        - sortorder: '3'
+          color: F7941D
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_corrente_ur4
+    - uuid: a191c3b8253b4cc7ba0053303c6c628a
+      name: 'Temperatura Ambiente/Bateria'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_temp2
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_temp1
+    - uuid: 3a582a6d4e304baeb870c7d34c8fa8b6
+      name: 'Temperatura URs'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_temperatura_ur1
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_temperatura_ur2
+        - sortorder: '2'
+          color: FC6EA3
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_temperatura_ur3
+        - sortorder: '3'
+          color: 6C59DC
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_temperatura_ur4
+    - uuid: 1c2164f45aa3470bb6c0f13ccb47cf34
+      name: 'Tensão nas URs'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_tensao_ur1
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_tensao_ur2
+        - sortorder: '2'
+          color: F7941D
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_tensao_ur3
+        - sortorder: '3'
+          color: FC6EA3
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uscc_can_tensao_ur4
+    - uuid: bb928d37a51e4abb93348f4c15d74689
+      name: 'VCA AC Fases'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uss_can_vca1
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uss_can_vca2
+        - sortorder: '2'
+          color: 2774A4
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uss_can_vca3
+    - uuid: 9ef52a852ac940e4b427d892772ec128
+      name: 'VCC Bateria/Retificador'
+      graph_items:
+        - color: 199C0D
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uss_canvbate
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: 'Template XPS USCC CAN SNMP'
+            key: uss_can_vcc

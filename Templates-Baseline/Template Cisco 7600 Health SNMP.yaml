@@ -1,0 +1,573 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: ba177caf3249408cb041549f68d07eae
+      template: 'Template Cisco 7600 Health SNMP'
+      name: 'Template Cisco 7600 Health SNMP'
+      description: |
+        Template Cisco 7600 Health 
+        -CPU
+        -Memory
+        -PowerSupply
+        -PowerConsumption
+        -Temperature
+        -FAN
+        -CEF
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        CISCO-ENVMON-MIB.mib 
+        CISCO-MEMORY-POOL-MIB.mib
+        CISCO-PROCESS-MIB.mib
+        ENTITY-MIB.mib
+        CISCO-ENTITY-SENSOR-MIB.mib
+        CISCO-ENTITY-FRU-CONTROL-MIB.mib
+        CISCO-CEF-MIB.mib
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: 98a561464f7147e589d75a1918369537
+          name: 'Power Comsumption Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.117.1.8.2.1.1]'
+          key: 'cefcConnectorRating["Power Consumption"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'CISCO-ENTITY-FRU-CONTROL-MIB::cefcConnectorRating'
+          item_prototypes:
+            - uuid: 9690f81fbcdb479ebb909a3554010fdd
+              name: 'Module "{#SNMPINDEX}" Voltage (V)'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.117.1.8.1.1.1.{#SNMPINDEX}'
+              key: 'cefcConnectorRating["{#SNMPINDEX}"]'
+              history: 30d
+              value_type: FLOAT
+              units: V
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+            - uuid: 2e3fd01f364d445b8f29fd768940a81d
+              name: 'Module "{#SNMPINDEX}" Current (A)'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.117.1.8.2.1.1.{#SNMPINDEX}'
+              key: 'cefcModulePowerConsumptionTable["{#SNMPINDEX}"]'
+              history: 30d
+              value_type: FLOAT
+              units: A
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.01'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+            - uuid: d042a5c947f34e2e9fe9b4de62235841
+              name: 'Module "{#SNMPINDEX}" Power (W)'
+              type: CALCULATED
+              key: 'moduleComsumption["{#SNMPINDEX}"]'
+              history: 30d
+              units: W
+              params: 'last(//cefcModulePowerConsumptionTable["{#SNMPINDEX}"]) * last(//cefcConnectorRating["{#SNMPINDEX}"])'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+          graph_prototypes:
+            - uuid: 36402337ff8b4e39bf8b095169b5b51c
+              name: 'Module "{#SNMPINDEX}" Power (W)'
+              graph_items:
+                - drawtype: GRADIENT_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Cisco 7600 Health SNMP'
+                    key: 'moduleComsumption["{#SNMPINDEX}"]'
+                - sortorder: '1'
+                  color: FFFF00
+                  item:
+                    host: 'Template Cisco 7600 Health SNMP'
+                    key: 'cefcModulePowerConsumptionTable["{#SNMPINDEX}"]'
+                - sortorder: '2'
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco 7600 Health SNMP'
+                    key: 'cefcConnectorRating["{#SNMPINDEX}"]'
+        - uuid: d2580c14c94c46deb0a5e1fbfed175a8
+          name: 'CEF Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.492.1.4.2.1.2]'
+          key: 'cefResourceFailureReason["CEF"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'CISCO-CEF-MIB::cefResourceFailureReason'
+          item_prototypes:
+            - uuid: 0fd049efc37a439ebc3943a37e841054
+              name: 'CEF Failure Reason "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.492.1.4.2.1.2.{#SNMPINDEX}'
+              key: 'cefResourceFailureReason["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              units: cefResourceFailureReason
+              valuemap:
+                name: 'CISCO-CEF-TC-MIB::CefFailureReason'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cef
+              trigger_prototypes:
+                - uuid: 1a96748f3ec44ffb8b4e88d18d79feea
+                  expression: 'last(/Template Cisco 7600 Health SNMP/cefResourceFailureReason["{#SNMPINDEX}"])<>1'
+                  name: 'CEF Failure'
+                  priority: DISASTER
+            - uuid: b8a0fd1c961a41438409236e2b217545
+              name: 'CEF Memory Used "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.492.1.4.2.1.1.{#SNMPINDEX}'
+              key: 'cefResourceMemoryUsed["{#SNMPINDEX}"]'
+              history: 30d
+              units: B
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cef
+          graph_prototypes:
+            - uuid: 7812716c4746410a86f6103c785a07af
+              name: 'CEF Memory Used "{#SNMPINDEX}"'
+              graph_items:
+                - drawtype: GRADIENT_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco 7600 Health SNMP'
+                    key: 'cefResourceMemoryUsed["{#SNMPINDEX}"]'
+        - uuid: b504e0f7ef0f42d1991f6dc7b39a7c85
+          name: 'FAN Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.13.1.4.1.2]'
+          key: 'ciscoEnvMonFanStatusDescr["FAN"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'CISCO-ENVMON-MIB::ciscoEnvMonFanStatusDescr'
+          item_prototypes:
+            - uuid: 0312f51e307842da847ee523702722ea
+              name: '"{#SNMPVALUE}": FAN status'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.13.1.4.1.3.{#SNMPINDEX}'
+              key: 'ciscoEnvMonFanState["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'CISCO-ENVMON-MIB::CiscoEnvMonState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: fan
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 860a0295946d4efeb50fa840592ff21e
+                  expression: 'last(/Template Cisco 7600 Health SNMP/ciscoEnvMonFanState["{#SNMPINDEX}"])=3'
+                  name: '"{#SNMPVALUE}": FAN is critical'
+                  priority: HIGH
+                - uuid: a06e1056369a493384da89a1ee7c7ce8
+                  expression: 'last(/Template Cisco 7600 Health SNMP/ciscoEnvMonFanState["{#SNMPINDEX}"])=6'
+                  name: '"{#SNMPVALUE}": FAN is notFunctioning'
+                  priority: AVERAGE
+                - uuid: 01b7360ffe0b47a9a4a3aae544a48e15
+                  expression: 'last(/Template Cisco 7600 Health SNMP/ciscoEnvMonFanState["{#SNMPINDEX}"])=5'
+                  name: '"{#SNMPVALUE}": FAN is notPresent'
+                  priority: INFO
+                - uuid: 27ce607a883948359b915d11784121ba
+                  expression: 'last(/Template Cisco 7600 Health SNMP/ciscoEnvMonFanState["{#SNMPINDEX}"])=4'
+                  name: '"{#SNMPVALUE}": Fan is shutdown'
+                  priority: INFO
+                - uuid: c59f73bb3a0e489c9c153c121c4afed9
+                  expression: 'last(/Template Cisco 7600 Health SNMP/ciscoEnvMonFanState["{#SNMPINDEX}"])=2'
+                  name: '"{#SNMPVALUE}": FAN is warning'
+                  priority: WARNING
+        - uuid: d083a14359ab4b15850cc84b38a4abff
+          name: 'Power Supply Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.13.1.5.1.2]'
+          key: 'ciscoEnvMonSupplyStatusDescr["Power Supply"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'CISCO-ENVMON-MIB::ciscoEnvMonSupplyStatusDescr'
+          item_prototypes:
+            - uuid: 236d87f0be194df4aee6a0c186382bb8
+              name: 'Status "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.13.1.5.1.3.{#SNMPINDEX}'
+              key: 'ciscoEnvMonSupplyState["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'CISCO-ENVMON-MIB::CiscoEnvMonState'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: 'power supply'
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 03bb53dafe7e4271b9af1339c6ba30c8
+                  expression: 'last(/Template Cisco 7600 Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=3'
+                  name: '"{#SNMPVALUE}" is critical'
+                  priority: HIGH
+                - uuid: 9e6d3d166f024981bc15ff0a30456551
+                  expression: 'last(/Template Cisco 7600 Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=6'
+                  name: '"{#SNMPVALUE}" is notFunctioning'
+                  priority: AVERAGE
+                - uuid: 29498269d0f74b9098a5bbf40fa24084
+                  expression: 'last(/Template Cisco 7600 Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=5'
+                  name: '"{#SNMPVALUE}" is notPresent'
+                  priority: INFO
+                - uuid: 9612859b0d814d93a847f053c7a1691d
+                  expression: 'last(/Template Cisco 7600 Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=4'
+                  name: '"{#SNMPVALUE}" is shutdown'
+                  priority: INFO
+                - uuid: b0d1ffb5ebeb4193a024564dd721d71c
+                  expression: 'last(/Template Cisco 7600 Health SNMP/ciscoEnvMonSupplyState["{#SNMPVALUE}"])=2'
+                  name: '"{#SNMPVALUE}" is warning'
+                  priority: WARNING
+        - uuid: e6fb7089f51342a4aeb5cd765455bbe4
+          name: 'Memory Pool Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.48.1.1.1.2]'
+          key: 'ciscoMemoryPoolName["Memory"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'CISCO-MEMORY-POOL-MIB::ciscoMemoryPoolName'
+          item_prototypes:
+            - uuid: 5364e85a9c7e4c699e1147e79a6b9fa8
+              name: 'Free memory on Memory Pool "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.48.1.1.1.6.{#SNMPINDEX}'
+              key: 'ciscoMemoryPoolFree["{#SNMPVALUE}"]'
+              history: 30d
+              units: B
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 88eb94d6e8bf4c1ab3d664d59bc6ed41
+              name: 'Total Memory Pool "{#SNMPVALUE}"'
+              type: CALCULATED
+              key: 'ciscoMemoryPoolTotal["{#SNMPVALUE}"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              units: B
+              params: 'last(//ciscoMemoryPoolFree["{#SNMPVALUE}"]) + last(//ciscoMemoryPoolUsed["{#SNMPVALUE}"])'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 44a7e7c2a7ae4c049eb536d9837fe3f7
+              name: 'Used memory on Memory Pool "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.48.1.1.1.5.{#SNMPINDEX}'
+              key: 'ciscoMemoryPoolUsed["{#SNMPVALUE}"]'
+              history: 30d
+              units: B
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: memory
+                - tag: element
+                  value: '{#SNMPVALUE}'
+          trigger_prototypes:
+            - uuid: 15faadd2b9414908bac2eedc40878da0
+              expression: 'last(/Template Cisco 7600 Health SNMP/ciscoMemoryPoolUsed["{#SNMPVALUE}"]) * 100 /last(/Template Cisco 7600 Health SNMP/ciscoMemoryPoolTotal["{#SNMPVALUE}"]) > {$MEMORY_HIGH_ALARM}'
+              name: 'High memory utilizarion alarm on Pool "{#SNMPVALUE}"'
+              priority: HIGH
+            - uuid: c91fad89734f4a84b66a89bc18f9a2e6
+              expression: 'last(/Template Cisco 7600 Health SNMP/ciscoMemoryPoolUsed["{#SNMPVALUE}"]) * 100 /last(/Template Cisco 7600 Health SNMP/ciscoMemoryPoolTotal["{#SNMPVALUE}"]) > {$MEMORY_HIGH_WARNING}'
+              name: 'High memory utilizarion warning on Pool "{#SNMPVALUE}"'
+              priority: AVERAGE
+              dependencies:
+                - name: 'High memory utilizarion alarm on Pool "{#SNMPVALUE}"'
+                  expression: 'last(/Template Cisco 7600 Health SNMP/ciscoMemoryPoolUsed["{#SNMPVALUE}"]) * 100 /last(/Template Cisco 7600 Health SNMP/ciscoMemoryPoolTotal["{#SNMPVALUE}"]) > {$MEMORY_HIGH_ALARM}'
+        - uuid: 9c3b943810c34f32bf63302e75e2e396
+          name: 'CPU Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.109.1.1.1.1.2]'
+          key: 'cpmCPUTotalPhysicalIndex["CPU"]'
+          delay: 1h
+          lifetime: 30d
+          description: |
+            CISCO-PROCESS-MIB::cpmCPUTotalPhysicalIndex
+            
+            The entPhysicalIndex of the physical entity for which the CPU statistics in this entry are maintained. The physical entity can be a CPU chip, a group of CPUs, a CPU card etc. The exact type of this entity is described by its entPhysicalVendorType value. If the CPU statistics in this entry correspond to more than one physical entity (or to no physical entity), or if the entPhysicalTable is not supported on the SNMP agent, the value of this object must be zero.
+          item_prototypes:
+            - uuid: 84116326722848879b1da930cf337bfd
+              name: 'CPU #"{#SNMPINDEX}" Usage 1min Rev'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.109.1.1.1.1.7.{#SNMPINDEX}'
+              key: 'cpmCPUTotal1minRev["{#SNMPINDEX}"]'
+              history: 30d
+              units: '%'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+              trigger_prototypes:
+                - uuid: 7c64cf1f345d411a9ba4778021805f64
+                  expression: 'last(/Template Cisco 7600 Health SNMP/cpmCPUTotal1minRev["{#SNMPINDEX}"])>{$CPU_HIGH_ALARM}'
+                  name: 'High CPU Alarm #"{#SNMPINDEX}" 1min Usage'
+                  priority: HIGH
+                - uuid: c7d21534819a420ebfb6a2abbbea3381
+                  expression: 'last(/Template Cisco 7600 Health SNMP/cpmCPUTotal1minRev["{#SNMPINDEX}"])>{$CPU_HIGH_WARNING}'
+                  name: 'High CPU Warning #"{#SNMPINDEX}" 1min Usage'
+                  priority: AVERAGE
+                  dependencies:
+                    - name: 'High CPU Alarm #"{#SNMPINDEX}" 1min Usage'
+                      expression: 'last(/Template Cisco 7600 Health SNMP/cpmCPUTotal1minRev["{#SNMPINDEX}"])>{$CPU_HIGH_ALARM}'
+            - uuid: e1c1cd528d9c4935969e9cca18c0a252
+              name: 'CPU #"{#SNMPINDEX}" Usage 5min Rev'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.109.1.1.1.1.8.{#SNMPINDEX}'
+              key: 'cpmCPUTotal5minRev["{#SNMPINDEX}"]'
+              delay: 5m
+              history: 30d
+              units: '%'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: cpu
+              trigger_prototypes:
+                - uuid: 1ffca41b121e4b41b5a5b70670d121eb
+                  expression: 'last(/Template Cisco 7600 Health SNMP/cpmCPUTotal5minRev["{#SNMPINDEX}"])>{$CPU_HIGH_ALARM}'
+                  name: 'High CPU Alarm #"{#SNMPINDEX}" 5min Usage'
+                  priority: HIGH
+                - uuid: c06e8548675843dd952b58ee8ccd06e3
+                  expression: 'last(/Template Cisco 7600 Health SNMP/cpmCPUTotal5minRev["{#SNMPINDEX}"])>{$CPU_HIGH_WARNING}'
+                  name: 'High CPU Warning #"{#SNMPINDEX}" 5min Usage'
+                  priority: AVERAGE
+                  dependencies:
+                    - name: 'High CPU Alarm #"{#SNMPINDEX}" 5min Usage'
+                      expression: 'last(/Template Cisco 7600 Health SNMP/cpmCPUTotal5minRev["{#SNMPINDEX}"])>{$CPU_HIGH_ALARM}'
+          graph_prototypes:
+            - uuid: 0ce2f054c8cd4ec7916fe3b28c39c6de
+              name: 'CPU #"{#SNMPINDEX}" 1min Usage'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 80FF00
+                  item:
+                    host: 'Template Cisco 7600 Health SNMP'
+                    key: 'cpmCPUTotal1minRev["{#SNMPINDEX}"]'
+            - uuid: 2f3f93f07baf477181d875f44a1d3ddf
+              name: 'CPU #"{#SNMPINDEX}" 5min Usage'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco 7600 Health SNMP'
+                    key: 'cpmCPUTotal5minRev["{#SNMPINDEX}"]'
+        - uuid: 4f2417d93df346d7aa7607b439637baa
+          name: 'Temperature Sensors Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.2.1.47.1.1.1.1.7]'
+          key: 'entPhysicalName["Temperature"]'
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#SNMPVALUE}'
+                value: temperature
+                formulaid: A
+              - macro: '{#SNMPVALUE}'
+                value: device
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+          lifetime: 30d
+          description: 'ENTITY-MIB::entPhysicalName'
+          item_prototypes:
+            - uuid: 80090442390147ba916aca7a34024404
+              name: 'Status Temperature Sensor "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.1.1.1.5.{#SNMPINDEX}'
+              key: 'entSensorStatus["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'CISCO-ENTITY-SENSOR-MIB::SensorStatus'
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 0e319949e83e47379d32bbf3ae9b2ee6
+                  expression: 'last(/Template Cisco 7600 Health SNMP/entSensorStatus["{#SNMPVALUE}"])=3'
+                  name: 'Temperature Sensor "{#SNMPVALUE}" is nonoperational'
+                  priority: HIGH
+                - uuid: 6d35b06ec40e4414ae80212e7b93e8e5
+                  expression: 'last(/Template Cisco 7600 Health SNMP/entSensorStatus["{#SNMPVALUE}"])=2'
+                  name: 'Temperature Sensor "{#SNMPVALUE}" is unavailable'
+                  priority: INFO
+            - uuid: 2b1eca8f8ed64dd0961ee4cff72126bb
+              name: 'Thresholds "{#SNMPVALUE}" | Temperature Alarm'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.2'
+              key: 'entSensorThresholdValue["{#SNMPVALUE}","Alarm"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: ºC
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 277c9923515e44688090d9c09d4b0381
+              name: 'Thresholds "{#SNMPVALUE}" | Temperature Warning'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.2.1.1.4.{#SNMPINDEX}.1'
+              key: 'entSensorThresholdValue["{#SNMPVALUE}","Warning"]'
+              delay: 30m
+              history: 30d
+              value_type: FLOAT
+              trends: '0'
+              units: ºC
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 2e30c3fb8d4a43b4808c9ff93be76748
+              name: 'Temperature on Sensor "{#SNMPVALUE}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.91.1.1.1.1.4.{#SNMPINDEX}'
+              key: 'entSensorValue["{#SNMPVALUE}"]'
+              history: 30d
+              value_type: FLOAT
+              units: ºC
+              tags:
+                - tag: application
+                  value: health
+                - tag: component
+                  value: temperature
+                - tag: element
+                  value: '{#SNMPVALUE}'
+          trigger_prototypes:
+            - uuid: 7f930c12f5014e65b4aea3d5f93821f5
+              expression: 'last(/Template Cisco 7600 Health SNMP/entSensorValue["{#SNMPVALUE}"]) > last(/Template Cisco 7600 Health SNMP/entSensorThresholdValue["{#SNMPVALUE}","Alarm"])'
+              name: 'High Temperature Alarm "{#SNMPVALUE}"'
+              priority: DISASTER
+            - uuid: 8960bfa5c7f240419202da618f348af5
+              expression: 'last(/Template Cisco 7600 Health SNMP/entSensorValue["{#SNMPVALUE}"]) > last(/Template Cisco 7600 Health SNMP/entSensorThresholdValue["{#SNMPVALUE}","Warning"])'
+              name: 'High Temperature Warning "{#SNMPVALUE}"'
+              priority: HIGH
+          graph_prototypes:
+            - uuid: bd7a514263ce4d42a46d0bd4991e2f6b
+              name: 'Temperature "{#SNMPVALUE}"'
+              graph_items:
+                - drawtype: GRADIENT_LINE
+                  color: 00FF00
+                  item:
+                    host: 'Template Cisco 7600 Health SNMP'
+                    key: 'entSensorValue["{#SNMPVALUE}"]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: FF0000
+                  item:
+                    host: 'Template Cisco 7600 Health SNMP'
+                    key: 'entSensorThresholdValue["{#SNMPVALUE}","Alarm"]'
+                - sortorder: '2'
+                  drawtype: BOLD_LINE
+                  color: FFFF00
+                  item:
+                    host: 'Template Cisco 7600 Health SNMP'
+                    key: 'entSensorThresholdValue["{#SNMPVALUE}","Warning"]'
+      tags:
+        - tag: class
+          value: health
+      macros:
+        - macro: '{$CPU_HIGH_ALARM}'
+          value: '90'
+          description: '% cpu alarm'
+        - macro: '{$CPU_HIGH_WARNING}'
+          value: '80'
+          description: '% cpu warning'
+        - macro: '{$MEMORY_HIGH_ALARM}'
+          value: '80'
+          description: '% memory alarm'
+        - macro: '{$MEMORY_HIGH_WARNING}'
+          value: '70'
+          description: '% memoty warning'
+      valuemaps:
+        - uuid: 4c252298f49a4ec093c52eb640a3003e
+          name: 'CISCO-CEF-TC-MIB::CefFailureReason'
+          mappings:
+            - value: '1'
+              newvalue: none
+            - value: '2'
+              newvalue: mallocFailure
+            - value: '3'
+              newvalue: mallocFailure
+            - value: '4'
+              newvalue: keepaliveFailure
+            - value: '5'
+              newvalue: noMsgBuffer
+            - value: '6'
+              newvalue: invalidMsgSize
+            - value: '7'
+              newvalue: internalError
+        - uuid: 6ba2f72085ea4780ac7647a1146f88e7
+          name: 'CISCO-ENTITY-SENSOR-MIB::SensorStatus'
+          mappings:
+            - value: '1'
+              newvalue: ok
+            - value: '2'
+              newvalue: unavailable
+            - value: '3'
+              newvalue: nonoperational
+        - uuid: cb2da2725f4148edb7eeee82e5686165
+          name: 'CISCO-ENVMON-MIB::CiscoEnvMonState'
+          mappings:
+            - value: '1'
+              newvalue: normal
+            - value: '2'
+              newvalue: warning
+            - value: '3'
+              newvalue: critical
+            - value: '4'
+              newvalue: shutdown
+            - value: '5'
+              newvalue: notPresent
+            - value: '6'
+              newvalue: notFunctioning

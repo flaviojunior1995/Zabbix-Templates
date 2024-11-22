@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# DEPENDENCY sipcalc
 declare -a data=($(echo $1 | tr '.' ' '))
 
 ipv6=$(printf "%02x" "${data[@]}" | sed 's/.\{4\}/&:/g' | cut -d':' -f-8)

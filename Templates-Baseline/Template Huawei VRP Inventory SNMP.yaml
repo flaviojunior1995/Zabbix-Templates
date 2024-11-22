@@ -1,0 +1,82 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: e6c9115a44a34be7962007bec0ec3da2
+      template: 'Template Huawei VRP Inventory SNMP'
+      name: 'Template Huawei VRP Inventory SNMP'
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: 2a4e8971284843baaa67d78767c170d4
+          name: 'Serial Number A'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.47.1.1.1.1.11.67108873
+          key: 'entPhysicalTable["entPhysicalSerialNum","MPU Board 0"]'
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          description: ENTITY-MIB
+          inventory_link: SERIALNO_A
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 88b8cbd9e686426ab7816d37ac841ac1
+          name: 'Serial Number B'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.47.1.1.1.1.11.68157449
+          key: 'entPhysicalTable["entPhysicalSerialNum","MPU Board 1"]'
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          description: ENTITY-MIB
+          inventory_link: SERIALNO_B
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 5cec137e3d1c436b96f2738b46d3dcf8
+          name: 'Software Version'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2011.5.25.19.1.4.2.1.5.1
+          key: hwSysImageVersion
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          inventory_link: SOFTWARE
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: f6a8a7ff31b04442814f56e8b6c371f9
+          name: OS
+          type: SCRIPT
+          key: scriptOS
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "Versalite Routing Platform VRP";'
+          inventory_link: OS
+          tags:
+            - tag: application
+              value: inventory
+        - uuid: 7091aa6f9afd4d27b1723a64e66c9c90
+          name: Vendor
+          type: SCRIPT
+          key: scriptVendor
+          delay: 1d
+          history: 30d
+          value_type: CHAR
+          trends: '0'
+          params: 'return "Huawei";'
+          inventory_link: VENDOR
+          tags:
+            - tag: application
+              value: inventory
+      tags:
+        - tag: class
+          value: inventory

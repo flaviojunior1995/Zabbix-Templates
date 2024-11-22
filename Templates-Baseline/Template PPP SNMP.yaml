@@ -1,0 +1,60 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: f091b21e8893495fbbfa61c5b8f13f5f
+      template: 'Template PPP SNMP'
+      name: 'Template PPP SNMP'
+      description: |
+        Template PPP
+        -PPP Active
+        -Alarm XX% Down 1h
+        -Alarm Maximum number PPP
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        CISCO-AAA-SESSION-MIB.mib
+      groups:
+        - name: Template/Baseline
+      items:
+        - uuid: ad8672e5003a437a86a49f2010f9be12
+          name: 'PPP Count'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.9.9.150.1.1.1.0
+          key: casnActiveTableEntries
+          history: 30d
+          tags:
+            - tag: application
+              value: ppp
+          triggers:
+            - uuid: 775cf1563ef845a7a24fc9966226179b
+              expression: 'last(/Template PPP SNMP/casnActiveTableEntries)>{$LIMITPPP}'
+              name: 'Near Limit PPP Sessions'
+              priority: HIGH
+            - uuid: 5b17e79627a3430c89b8c6315d6e71e8
+              expression: '100 - last(/Template PPP SNMP/casnActiveTableEntries) * 100 / avg(/Template PPP SNMP/casnActiveTableEntries,1h) > {$PERCENTDOWN}'
+              name: 'Too many PPP DOWN'
+              priority: WARNING
+      tags:
+        - tag: class
+          value: ppp
+      macros:
+        - macro: '{$LIMITPPP}'
+          value: '10000'
+          description: 'maximum PPP sessions alarm'
+        - macro: '{$PERCENTDOWN}'
+          value: '10'
+          description: '% of sessions down to alarm'
+  graphs:
+    - uuid: 97302277c2d74cd2b3cd0b63bcfb96a9
+      name: 'PPP Count'
+      graph_items:
+        - drawtype: FILLED_REGION
+          color: 00FF00
+          item:
+            host: 'Template PPP SNMP'
+            key: casnActiveTableEntries

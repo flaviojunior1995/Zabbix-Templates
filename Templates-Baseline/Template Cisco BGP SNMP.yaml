@@ -1,0 +1,309 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 889a2919342449ba9af32b8f85eb13dd
+      template: 'Template Cisco BGP SNMP'
+      name: 'Template Cisco BGP SNMP'
+      description: |
+        Template Cisco BGP
+        -AdminStatus
+        -Established Time
+        -OperationStatus
+        -AS Name
+        -Maximum Prefix
+        -Accepted Prefix
+        -BGP last Error
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        ExternalScript
+        .as.name
+        .oid_to_ipv6
+        
+        Base: 
+        CISCO-BGP4-MIB.mib
+        
+        OBS:
+        External Scripts on GitHub
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: d74b3357952b4c5c8b7ba646c8fb3470
+          name: 'BGPv6 Peers Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.9.9.187.1.2.5.1.6.2.16,{#SNMPASN},.1.3.6.1.4.1.9.9.187.1.2.5.1.11.2.16]'
+          key: 'cbgpPeer2LocalAddr["BGPv6"]'
+          delay: 1h
+          description: 'CISCO-BGP4-MIB::cbgpPeer2LocalAddr'
+          item_prototypes:
+            - uuid: c3510d2a8af84f8ab60c0d007263f710
+              name: 'AS Name for IPv6 peer "{#SNMPINDEX}" ASN "{#SNMPASN}"'
+              type: EXTERNAL
+              key: 'as_name["{#SNMPASN}","{#SNMPINDEX}","BGPv6"]'
+              delay: 1d
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPINDEX}'
+            - uuid: c63b78e65d874f629372d8d266d36ed5
+              name: 'Administrative status for peer "{#SNMPINDEX}" ASN "{#SNMPASN}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.187.1.2.5.1.4.2.16.{#SNMPINDEX}'
+              key: 'cbgp6Peer2AdminStatus["{#SNMPINDEX}","{#SNMPASN}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'BGP4-MIB::bgpPeerAdminStatus'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPINDEX}'
+            - uuid: 578b1d9f410849c0ba64ea4f396289a3
+              name: 'Established time for peer "{#SNMPINDEX}" ASN "{#SNMPASN}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.187.1.2.5.1.19.2.16.{#SNMPINDEX}'
+              key: 'cbgp6Peer2FsmEstablishedTime["{#SNMPINDEX}","{#SNMPASN}"]'
+              history: 30d
+              trends: '0'
+              units: uptime
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPINDEX}'
+              trigger_prototypes:
+                - uuid: a3959e8fdc3f46af94cde747fd1f7cc3
+                  expression: 'last(/Template Cisco BGP SNMP/cbgp6Peer2FsmEstablishedTime["{#SNMPINDEX}","{#SNMPASN}"])<{$PEER_LOW_TIME}'
+                  name: 'BGPv6 peer up time low "{#SNMPINDEX}" ASN "{#SNMPASN}"'
+                  priority: INFO
+                  dependencies:
+                    - name: 'BGPv6 peer "{#SNMPINDEX}" ASN "{#SNMPASN}" is DOWN'
+                      expression: 'last(/Template Cisco BGP SNMP/cbgp6Peer2State["{#SNMPINDEX}","{#SNMPASN}"])<>6 and last(/Template Cisco BGP SNMP/cbgp6Peer2AdminStatus["{#SNMPINDEX}","{#SNMPASN}"])=2'
+            - uuid: 34e1070bd88a48b2afa82b72b03f03f5
+              name: 'Remote AS for peer "{#SNMPINDEX}" ASN "{#SNMPASN}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.187.1.2.5.1.11.2.16.{#SNMPINDEX}'
+              key: 'cbgp6Peer2RemoteAs["{#SNMPINDEX}","{#SNMPASN}"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPINDEX}'
+            - uuid: 62566a7a082541218a23b4419588caf7
+              name: 'Operational status for peer "{#SNMPINDEX}" ASN "{#SNMPASN}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.187.1.2.5.1.3.2.16.{#SNMPINDEX}'
+              key: 'cbgp6Peer2State["{#SNMPINDEX}","{#SNMPASN}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'BGP4-MIB::bgpPeerState'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPINDEX}'
+            - uuid: 8941f014231047cb8fe467198fb5ce92
+              name: 'BGP peer last error "{#SNMPINDEX}" ASN "{#SNMPASN}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.187.1.2.5.1.17.2.16.{#SNMPINDEX}'
+              key: 'cbgpPeer2LastError["{#SNMPINDEX}","{#SNMPASN}"]'
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPINDEX}'
+            - uuid: c4b6c4e1d24c407dbcfe0c18d9b5b504
+              name: 'Remote IPv6 Peer "{#SNMPINDEX}"'
+              type: EXTERNAL
+              key: 'oid_to_ipv6.sh["{#SNMPINDEX}"]'
+              delay: 1d
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv6
+                - tag: element
+                  value: '{#SNMPINDEX}'
+          trigger_prototypes:
+            - uuid: 03d86be353bf4389aa2a5e17dae8cb13
+              expression: 'last(/Template Cisco BGP SNMP/cbgp6Peer2State["{#SNMPINDEX}","{#SNMPASN}"])<>6 and last(/Template Cisco BGP SNMP/cbgp6Peer2AdminStatus["{#SNMPINDEX}","{#SNMPASN}"])=2'
+              name: 'BGPv6 peer "{#SNMPINDEX}" ASN "{#SNMPASN}" is DOWN'
+              priority: HIGH
+        - uuid: f6b7add970d44f4a9a752c2f0797dabc
+          name: 'BGPv4 Peers Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPASN},.1.3.6.1.4.1.9.9.187.1.2.5.1.11.1.4]'
+          key: 'cbgpPeer2RemoteAs["BGPv4"]'
+          delay: 1h
+          lifetime: 30d
+          description: 'CISCO-BGP4-MIB::cbgpPeer2RemoteAs'
+          item_prototypes:
+            - uuid: fee5417d533f4744a4db9d9b9ac5f040
+              name: 'AS Name for IPv4 peer "{#SNMPINDEX}"'
+              type: EXTERNAL
+              key: 'as_name.sh["{#SNMPASN}","{#SNMPINDEX}"]'
+              delay: 1d
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPINDEX}'
+            - uuid: 1e5704a3930a4caf90123f89a137d523
+              name: 'Administrative status for peer "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.187.1.2.5.1.4.1.4.{#SNMPINDEX}'
+              key: 'cbgpPeer2AdminStatus["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'BGP4-MIB::bgpPeerAdminStatus'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPINDEX}'
+            - uuid: 0e1f071ce99a446485310a0fbac7c1bb
+              name: 'Established time for peer "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.187.1.2.5.1.19.1.4.{#SNMPINDEX}'
+              key: 'cbgpPeer2FsmEstablishedTime["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              units: uptime
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPINDEX}'
+              trigger_prototypes:
+                - uuid: d28f346dc7cf43f4a9bcf53670998b3e
+                  expression: 'last(/Template Cisco BGP SNMP/cbgpPeer2FsmEstablishedTime["{#SNMPINDEX}"])<{$PEER_LOW_TIME}'
+                  name: 'BGPv4 peer up time low "{#SNMPINDEX}" ASN "{#SNMPASN}"'
+                  priority: INFO
+                  dependencies:
+                    - name: 'BGPv4 peer "{#SNMPINDEX}" ASN "{#SNMPASN}" is DOWN'
+                      expression: 'last(/Template Cisco BGP SNMP/cbgpPeer2State["{#SNMPINDEX}"])<>6 and last(/Template Cisco BGP SNMP/cbgpPeer2AdminStatus["{#SNMPINDEX}"])=2'
+            - uuid: 1619015184284549861014bc39e7faf2
+              name: 'Remote AS for peer "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.187.1.2.5.1.11.1.4.{#SNMPINDEX}'
+              key: 'cbgpPeer2RemoteAs["{#SNMPINDEX}"]'
+              delay: 1d
+              history: 30d
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPINDEX}'
+            - uuid: 718070e048534bcdb92b270460758a84
+              name: 'Operational status for peer "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.187.1.2.5.1.3.1.4.{#SNMPINDEX}'
+              key: 'cbgpPeer2State["{#SNMPINDEX}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'BGP4-MIB::bgpPeerState'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPINDEX}'
+            - uuid: 2bfa14780d2247169a33dcd418384222
+              name: 'BGP peer last error "{#SNMPINDEX}"'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.9.9.187.1.2.1.1.7.{#SNMPINDEX}'
+              key: 'cbgpPeerLastErrorTxt["{#SNMPINDEX}"]'
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              tags:
+                - tag: application
+                  value: bgp
+                - tag: component
+                  value: bgpv4
+                - tag: element
+                  value: '{#SNMPINDEX}'
+          trigger_prototypes:
+            - uuid: 66917a53a4914adb803321b7e889e6f9
+              expression: 'last(/Template Cisco BGP SNMP/cbgpPeer2State["{#SNMPINDEX}"])<>6 and last(/Template Cisco BGP SNMP/cbgpPeer2AdminStatus["{#SNMPINDEX}"])=2'
+              name: 'BGPv4 peer "{#SNMPINDEX}" ASN "{#SNMPASN}" is DOWN'
+              priority: HIGH
+      tags:
+        - tag: class
+          value: bgp
+      macros:
+        - macro: '{$MAXIMUM_PREFIX_ALARM}'
+          value: '90'
+          description: '% maximum prefix limit alarm to reach 100%'
+        - macro: '{$PEER_LOW_TIME}'
+          value: '14400'
+          description: 'time in sec alarm for uptime bgp session'
+      valuemaps:
+        - uuid: bca5bfac4a134e12bd05a738bda99d9d
+          name: 'BGP4-MIB::bgpPeerAdminStatus'
+          mappings:
+            - value: '1'
+              newvalue: stopped
+            - value: '2'
+              newvalue: started
+        - uuid: 2bca48c7a7b4466bb3f427a00ad7f58c
+          name: 'BGP4-MIB::bgpPeerState'
+          mappings:
+            - value: '1'
+              newvalue: idle
+            - value: '2'
+              newvalue: connect
+            - value: '3'
+              newvalue: active
+            - value: '4'
+              newvalue: opensent
+            - value: '5'
+              newvalue: openconfirm
+            - value: '6'
+              newvalue: established

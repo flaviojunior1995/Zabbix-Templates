@@ -1,0 +1,254 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 67b69c90299f4fe6bc9d69b6dde3ce7f
+      name: Template/Baseline
+  templates:
+    - uuid: 00ae4d594f764cada2ecef1902c9980a
+      template: 'Template RouterOS Optical Monitor SNMP'
+      name: 'Template RouterOS Optical Monitor SNMP'
+      description: |
+        Template RouterOS Optical Monitor
+        -RX Receive
+        -TX Transmit
+        -RX Lost
+        -TX Fault
+        -Signal Change -3db
+        -Tranceiver Vendor Name
+        -Tranceiver Vendor Serial
+        
+        By: Flavio Gomes Figueira Camacho Junior
+        GitHub: https://github.com/flaviojunior1995/Zabbix-Templates
+        
+        Base:
+        MIKROTIK-MIB.mib
+      groups:
+        - name: Template/Baseline
+      discovery_rules:
+        - uuid: e4e654b7aa2e47ab875daa7f5b7e0f84
+          name: 'Optical Sensor Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},.1.3.6.1.4.1.14988.1.1.19.1.1.2]'
+          key: mtxrOpticalName
+          delay: 1h
+          lifetime: 30d
+          description: 'MIKROTIK-MIB::mtxrOpticalName'
+          item_prototypes:
+            - uuid: 84e935bec9a341c4a86aa673b4acc5ea
+              name: 'Optical "{#SNMPVALUE}" Tranceiver Rx lost'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.19.1.1.3.{#SNMPINDEX}'
+              key: 'mtxrOpticalRxLoss["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'MIKROTIK-MIB:BoolValue'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: tranceiver
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 1bd0802fa5e5480e844bd2e57b0c916a
+                  expression: 'last(/Template RouterOS Optical Monitor SNMP/mtxrOpticalRxLoss["{#SNMPVALUE}"])=1'
+                  name: 'Optical "{#SNMPVALUE}" Rx lost'
+                  priority: HIGH
+            - uuid: 9a00572929d149bc9073708d265b0dc3
+              name: 'Optical "{#SNMPVALUE}" Tranceiver Rx'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.19.1.1.10.{#SNMPINDEX}'
+              key: 'mtxrOpticalRxPower["{#SNMPVALUE}"]'
+              history: 30d
+              value_type: FLOAT
+              units: dBm
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: tranceiver
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 648c280b1b294d9794f164defeede343
+              name: 'Optical "{#SNMPVALUE}" Tranceiver Temperature'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.19.1.1.6.{#SNMPINDEX}'
+              key: 'mtxrOpticalTemperature["{#SNMPVALUE}"]'
+              history: 30d
+              value_type: FLOAT
+              units: ºC
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: tranceiver
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: e8ca6e0f06eb44e4b44ff9602f6af8e6
+                  expression: 'last(/Template RouterOS Optical Monitor SNMP/mtxrOpticalTemperature["{#SNMPVALUE}"]) > 60'
+                  name: 'Optical "{#SNMPVALUE}" High Temperature'
+                  priority: AVERAGE
+                  dependencies:
+                    - name: 'Optical "{#SNMPVALUE}" Very High Temperature'
+                      expression: 'last(/Template RouterOS Optical Monitor SNMP/mtxrOpticalTemperature["{#SNMPVALUE}"]) > 65'
+                - uuid: 05ba67ea6a90433dba9d0f02215f85cd
+                  expression: 'last(/Template RouterOS Optical Monitor SNMP/mtxrOpticalTemperature["{#SNMPVALUE}"]) > 65'
+                  name: 'Optical "{#SNMPVALUE}" Very High Temperature'
+                  priority: HIGH
+            - uuid: 564da1a4e3ff43119e3b88899fbda13c
+              name: 'Optical "{#SNMPVALUE}" Tranceiver Tx fault'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.19.1.1.4.{#SNMPINDEX}'
+              key: 'mtxrOpticalTxFault["{#SNMPVALUE}"]'
+              history: 30d
+              trends: '0'
+              valuemap:
+                name: 'MIKROTIK-MIB:BoolValue'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: tranceiver
+                - tag: element
+                  value: '{#SNMPVALUE}'
+              trigger_prototypes:
+                - uuid: 20b1da4b2ae24877b7e63f6f36856e6e
+                  expression: 'last(/Template RouterOS Optical Monitor SNMP/mtxrOpticalTxFault["{#SNMPVALUE}"])=1'
+                  name: 'Optical "{#SNMPVALUE}" Tx fault'
+                  priority: AVERAGE
+            - uuid: a15a933130b64707a0051f3e4ce96f59
+              name: 'Optical "{#SNMPVALUE}" Tranceiver Tx'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.19.1.1.9.{#SNMPINDEX}'
+              key: 'mtxrOpticalTxPower["{#SNMPVALUE}"]'
+              history: 30d
+              value_type: FLOAT
+              units: dBm
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: tranceiver
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: 3f8c19d4604446949f4901d057f7ec5c
+              name: 'Optical "{#SNMPVALUE}" Vendor Name'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.19.1.1.11.{#SNMPINDEX}'
+              key: 'mtxrOpticalVendorName["{#SNMPVALUE}"]'
+              delay: 1d
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: tranceiver
+                - tag: element
+                  value: '{#SNMPVALUE}'
+            - uuid: abc166a6279345d7b93e142fb7a5bfb9
+              name: 'Optical "{#SNMPVALUE}" Vendor Serial'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.14988.1.1.19.1.1.12.{#SNMPINDEX}'
+              key: 'mtxrOpticalVendorSerial["{#SNMPVALUE}"]'
+              delay: 1d
+              history: 30d
+              value_type: CHAR
+              trends: '0'
+              tags:
+                - tag: application
+                  value: optical
+                - tag: component
+                  value: tranceiver
+                - tag: element
+                  value: '{#SNMPVALUE}'
+          graph_prototypes:
+            - uuid: 3707734a5a8e42c09a3b691ee06221de
+              name: 'Optical "{#SNMPVALUE}" Rx'
+              graph_items:
+                - color: FF0000
+                  item:
+                    host: 'Template RouterOS Optical Monitor SNMP'
+                    key: 'mtxrOpticalRxPower["{#SNMPVALUE}"]'
+            - uuid: 639e242b0d264960b94bd19ba70611ba
+              name: 'Optical "{#SNMPVALUE}" Temperature'
+              graph_items:
+                - drawtype: FILLED_REGION
+                  color: FF0000
+                  item:
+                    host: 'Template RouterOS Optical Monitor SNMP'
+                    key: 'mtxrOpticalTemperature["{#SNMPVALUE}"]'
+            - uuid: 71c4541a7cac417eb220767ed691a2a9
+              name: 'Optical "{#SNMPVALUE}" Tx'
+              graph_items:
+                - color: 00FF00
+                  item:
+                    host: 'Template RouterOS Optical Monitor SNMP'
+                    key: 'mtxrOpticalTxPower["{#SNMPVALUE}"]'
+      tags:
+        - tag: class
+          value: optical
+      dashboards:
+        - uuid: a8875499ebce43cca241e8f6406a7510
+          name: Optical
+          pages:
+            - widgets:
+                - type: graphprototype
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Template RouterOS Optical Monitor SNMP'
+                        name: 'Optical "{#SNMPVALUE}" Rx'
+                    - type: STRING
+                      name: reference
+                      value: XOCEC
+                - type: graphprototype
+                  'y': '5'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Template RouterOS Optical Monitor SNMP'
+                        name: 'Optical "{#SNMPVALUE}" Tx'
+                    - type: STRING
+                      name: reference
+                      value: OTPZK
+                - type: graphprototype
+                  x: '36'
+                  'y': '5'
+                  width: '36'
+                  height: '5'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid.0
+                      value:
+                        host: 'Template RouterOS Optical Monitor SNMP'
+                        name: 'Optical "{#SNMPVALUE}" Temperature'
+                    - type: STRING
+                      name: reference
+                      value: BRGJR
+      valuemaps:
+        - uuid: 15ce6852c244406c9cd3b24529d92a09
+          name: 'MIKROTIK-MIB:BoolValue'
+          mappings:
+            - value: '0'
+              newvalue: 'false'
+            - value: '1'
+              newvalue: 'true'
